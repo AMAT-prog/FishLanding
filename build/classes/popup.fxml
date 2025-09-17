@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
+   
+<BorderPane 
+           
+            prefWidth="680" prefHeight="460"
+            stylesheets="@add-landing.css">
+
+    <!-- HEADER -->
+    <top>
+        <HBox spacing="12" styleClass="header">
+            <children>
+                <Label text="➕ Add New Landing" styleClass="title"/>
+                <Label text="Record a new fish landing entry" styleClass="subtitle"/>
+            </children>
+            <padding><Insets top="16" right="20" bottom="12" left="20"/></padding>
+        </HBox>
+    </top>
+
+    <!-- CONTENT -->
+    <center>
+        <GridPane hgap="14" vgap="12">
+            <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50"/>
+                <ColumnConstraints percentWidth="50"/>
+            </columnConstraints>
+
+            <!-- ROW 1 -->
+            <Label text="Fisherfolk" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="cbFisherfolk" promptText="Select fisherfolk"
+                      GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <Label fx:id="errFisherfolk" text="Please select a fisherfolk"
+                   visible="false" styleClass="error"
+                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+
+            <Label text="Species" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <ComboBox fx:id="cbSpecies" promptText="Select species"
+                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label fx:id="errSpecies" text="Please select a species"
+                   visible="false" styleClass="error"
+                   GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <!-- ROW 2 -->
+            <Label text="Quantity (kg)" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="tfQuantity" promptText="e.g., 25.50"
+                       GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <Label fx:id="errQuantity" text="Enter a quantity > 0"
+                   visible="false" styleClass="error"
+                   GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+
+            <Label text="Price per kilo (₱)" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <TextField fx:id="tfPricePerKilo" promptText="e.g., 150.00"
+                       GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            <Label fx:id="errPrice" text="Enter a price > 0"
+                   visible="false" styleClass="error"
+                   GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+            <!-- ROW 3 -->
+            <Label text="Catch Date" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpCatchDate"
+                        GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+
+            <Label text="Docking Time" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+            <!-- JavaFX has no native TimePicker; use HH:mm or HH:mm:ss -->
+            <TextField fx:id="tfDockingTime" promptText="HH:mm"
+                       GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+            <Label fx:id="errDockingTime" text="Use 24h format, e.g., 06:45"
+                   visible="false" styleClass="error"
+                   GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+            <!-- ROW 4 (REMARKS all columns) -->
+            <Label text="Remarks" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+            <TextArea fx:id="taRemarks" promptText="Optional notes..."
+                      prefRowCount="3" wrapText="true"
+                      GridPane.rowIndex="10" GridPane.columnIndex="0"
+                      GridPane.columnSpan="2"/>
+
+            <!-- TOTAL (RIGHT, READ-ONLY) -->
+            <HBox spacing="8" GridPane.rowIndex="11" GridPane.columnIndex="1"
+                  alignment="CENTER_RIGHT">
+                <children>
+                    <Label text="Total Value:" styleClass="totalLabel"/>
+                    <Label fx:id="lblTotalValue" text="₱ 0.00" styleClass="totalValue"/>
+                </children>
+            </HBox>
+        </GridPane>
+    </center>
+
+    <!-- FOOTER -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="footer">
+            <children>
+                <Button fx:id="btnCancel" text="Cancel" />
+                <Button fx:id="btnClear" text="Clear" />
+                <Button fx:id="btnSave"  text="Save"   defaultButton="true" styleClass="primary"/>
+            </children>
+            <padding><Insets top="12" right="20" bottom="16" left="20"/></padding>
+        </HBox>
+    </bottom>
+</BorderPane>
+
+</AnchorPane>
