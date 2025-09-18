@@ -120,3 +120,46 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-color: #0B0F14;
 }
 
+
+/* make the ToggleButton itself transparent; we draw our own switch */
+.toggle-button.switch {
+  -fx-background-color: transparent;
+  -fx-padding: 0;
+}
+
+/* track (gray when off) */
+.switch-track {
+  -fx-background-color: #6b7280;           /* gray-500 (OFF) */
+  -fx-background-radius: 12;
+  -fx-min-width: 44;
+  -fx-min-height: 24;
+  -fx-max-width: 44;
+  -fx-max-height: 24;
+}
+
+/* track when ON (blue) */
+.toggle-button.switch.on .switch-track {
+  -fx-background-color: #1976d2;           /* blue-700 (ON) */
+}
+
+/* thumb */
+.switch-thumb {
+  -fx-background-color: white;
+  -fx-background-radius: 100;
+  -fx-min-width: 18;
+  -fx-min-height: 18;
+  -fx-max-width: 18;
+  -fx-max-height: 18;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 3, 0.2, 0, 1);
+}
+
+/* label for Active/Inactive text */
+.status-label {
+  -fx-font-size: 11px;
+  -fx-text-fill: #6b7280;                   /* gray-500 default */
+}
+.status-label.on {
+  -fx-text-fill: #1976d2;                   /* blue when ON */
+}
+
+

@@ -10,6 +10,8 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -30,7 +32,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1261.0" style="-fx-background-color: #21252C;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="DashboardflController">
    <children>
-      <VBox layoutX="-1.0" prefHeight="655.0" prefWidth="220.0" style="-fx-background-color: black;" AnchorPane.leftAnchor="-1.0">
+      <VBox fx:id="sideNavigation_vbox" layoutX="-1.0" prefHeight="655.0" prefWidth="220.0" style="-fx-background-color: black;" AnchorPane.leftAnchor="-1.0">
          <children>
             <HBox prefHeight="0.0" prefWidth="207.0">
                <VBox.margin>
@@ -221,7 +223,7 @@
                </font>
             </Label>
          </children></Pane>
-      <ScrollPane fx:id="dashboard_pane" layoutX="224.0" layoutY="118.0" prefHeight="575.0" prefWidth="1057.0" style="-fx-background-color: transparent;">
+      <ScrollPane fx:id="dashboard_pane" layoutX="224.0" layoutY="118.0" prefHeight="575.0" prefWidth="1057.0" style="-fx-background-color: transparent;" visible="false">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="911.0" prefWidth="1035.0" style="-fx-background-color: black;">
                <children>
@@ -557,9 +559,9 @@
             </AnchorPane>
         </content>
       </ScrollPane>
-      <ScrollPane fx:id="landings_pane" layoutX="226.0" layoutY="119.0" prefHeight="575.0" prefWidth="1057.0" style="-fx-background-color: transparent;">
+      <ScrollPane fx:id="landings_pane" layoutX="226.0" layoutY="119.0" prefHeight="575.0" prefWidth="1057.0" style="-fx-background-color: transparent;" visible="false">
          <content>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="911.0" prefWidth="1035.0" style="-fx-background-color: black;">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
                <children>
                   <HBox prefHeight="149.0" prefWidth="1037.0">
                      <children>
@@ -931,6 +933,281 @@
                   <Button onAction="#btnCancel_onAddLanding" text="Cancel" />
                   <Button onAction="#btnClear_onAddLanding" text="Clear" />
                   <Button defaultButton="true" onAction="#btnSave_onAddLanding" styleClass="primary" text="Save" />
+               </children>
+               <padding>
+                  <Insets bottom="16" left="20" right="20" top="12" />
+               </padding>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+            </HBox>
+         </bottom>
+      </BorderPane>
+      <AnchorPane fx:id="fishermen_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="532.0" prefWidth="1035.0" style="-fx-background-color: black;">
+         <children>
+            <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
+               <children>
+                  <Pane prefHeight="343.0" prefWidth="966.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                     <HBox.margin>
+                        <Insets bottom="20.0" left="15.0" top="10.0" />
+                     </HBox.margin>
+                     <children>
+                        <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="139.0" text="Fisherfolk List" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" layoutX="173.0" layoutY="23.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="612.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                           <children>
+                              <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/search.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets bottom="5.0" left="10.0" top="5.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <TextField fx:id="filterField_fishermen" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="570.0" promptText="Search fisherman / boat / license" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </TextField>
+                           </children>
+                        </HBox>
+                        <TableView fx:id="fishermen_tv" layoutX="26.0" layoutY="68.0" prefHeight="425.0" prefWidth="761.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                           <columns>
+                              <TableColumn fx:id="name_col" prefWidth="142.88889122009277" text="NAME" />
+                              <TableColumn fx:id="age_col" prefWidth="74.44439697265625" text="AGE " />
+                              <TableColumn fx:id="gender_col" prefWidth="81.55552673339844" text="GENDER" />
+                              <TableColumn fx:id="contact_col" prefWidth="89.11114501953125" text="CONTACT" />
+                              <TableColumn fx:id="address_col" prefWidth="101.77780151367188" text="ADDRESS" />
+                              <TableColumn fx:id="boat_col" prefWidth="85.111083984375" text="BOAT" />
+                              <TableColumn fx:id="license_col" prefWidth="85.111083984375" text="LICENSE #" />
+                              <TableColumn fx:id="status_col" prefWidth="106.888916015625" text="STATUS" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="512.0" prefWidth="382.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                     <HBox.margin>
+                        <Insets bottom="20.0" left="10.0" right="8.0" top="10.0" />
+                     </HBox.margin>
+                     <children>
+                        <Label alignment="CENTER" layoutX="9.0" layoutY="15.0" prefHeight="34.0" prefWidth="195.0" text="Quick Actions" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                           <padding>
+                              <Insets top="25.0" />
+                           </padding>
+                        </Label>
+                        <VBox layoutX="19.0" layoutY="72.0" prefHeight="393.0" prefWidth="173.0">
+                           <children>
+                              <HBox prefHeight="3.0" prefWidth="173.0">
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <Button mnemonicParsing="false" onAction="#deleteFisherfolk" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #7b0606; -fx-background-radius: 8px;" text="Delete" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="15.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#updateFisherfolk" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0e6902; -fx-background-radius: 8px;" text="Update" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#addFisherfolk" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 8px;" text="Add Fisherfolk" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#viewTransaction" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW TRANSACTION" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="30.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#viewCatches" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW CATCHES" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#viewDockLogs" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW DOCK LOGS" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#export_fisherfolk_list" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: #0F74C7; -fx-border-radius: 5px; -fx-border-width: 2;" text="Export Fisherfolk List" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="30.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+      <BorderPane fx:id="viewFisherHistory_popup" layoutX="202.0" layoutY="96.0" prefHeight="501.0" prefWidth="923.0" visible="false">
+         <center>
+            <TabPane fx:id="history_tabpane">
+               <tabs>
+                  <Tab text="Catches">
+                     <content>
+                        <TableView fx:id="catch_tv1">
+                           <columns>
+                              <TableColumn fx:id="catchDate_col" prefWidth="160.6667022705078" text="Date" />
+                              <TableColumn fx:id="species_col" prefWidth="161.33322143554688" text="Species" />
+                              <TableColumn fx:id="quantity_col1" prefWidth="87.3333740234375" text="Quantity" />
+                              <TableColumn fx:id="price_col1" prefWidth="96.6666259765625" text="Price/kg" />
+                              <TableColumn fx:id="total_col1" prefWidth="56.0" text="Total" />
+                           </columns>
+                        </TableView>
+                     </content>
+                  </Tab>
+                  <Tab text="Transactions">
+                     <content>
+                        <TableView fx:id="txn_tv">
+                           <columns>
+                              <TableColumn fx:id="buyer_col" prefWidth="186.6667022705078" text="Buyer" />
+                              <TableColumn fx:id="qtySold_col" prefWidth="82.66659545898438" text="Qty Sold" />
+                              <TableColumn fx:id="unitPrice_col" prefWidth="118.6666259765625" text="Unit Price" />
+                              <TableColumn fx:id="totalPrice_col" prefWidth="121.333251953125" text="Total Price" />
+                              <TableColumn fx:id="status_col1" prefWidth="100.0" text="Status" />
+                           </columns>
+                        </TableView>
+                     </content>
+                  </Tab>
+                  <Tab text="Dock Logs">
+                     <content>
+                        <TableView fx:id="dock_tv">
+                           <columns>
+                              <TableColumn fx:id="dockDate_col1" prefWidth="140.0000762939453" text="Date" />
+                              <TableColumn fx:id="arrival_col" prefWidth="121.33322143554688" text="Arrival" />
+                              <TableColumn fx:id="departure_col" prefWidth="101.33334350585938" text="Departure" />
+                              <TableColumn fx:id="remarks_col1" prefWidth="276.0" text="Remarks" />
+                           </columns>
+                        </TableView>
+                     </content>
+                  </Tab>
+               </tabs>
+            </TabPane>
+         </center>
+         <top>
+            <HBox prefHeight="17.0" prefWidth="939.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#EXIT_fisherHistory" style="-fx-background-color: transparent;" text="X" textFill="RED">
+                     <HBox.margin>
+                        <Insets left="900.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+         </top>
+      </BorderPane>
+      <BorderPane fx:id="addNewFisherfolk_popup" layoutX="300.0" layoutY="106.0" prefHeight="449.0" prefWidth="851.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
+         <top>
+            <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
+               <children>
+                  <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Fisherfolk" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="12" left="20" right="20" top="16" />
+               </padding>
+            </HBox>
+         </top>
+         <center>
+            <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="376.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10" left="20" right="20" top="10" />
+               </padding>
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="50" />
+                  <ColumnConstraints percentWidth="50" />
+               </columnConstraints>
+               <children>
+                  <Label text="Fisherfolk" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <Label fx:id="Fisherfolk_err" styleClass="error" text="Enter name of fisherfolk" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="License Number" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                  <ComboBox fx:id="gender_cb" promptText="Select gender" GridPane.rowIndex="4" />
+                  <Label text="Gender" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                  <TextField fx:id="age_tf" prefHeight="25.0" prefWidth="279.0" promptText="e.g., 40" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <GridPane.margin>
+                        <Insets right="250.0" />
+                     </GridPane.margin>
+                  </TextField>
+                  <Label fx:id="gender_err" styleClass="error" text="Please select gender" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Age" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="Boat_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="11" />
+                  <Label text="Address" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                  <Label text="Contact Number" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <TextField fx:id="contact_tf" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <Label text="Boat Name" textFill="WHITE" GridPane.rowIndex="9" />
+                  <TextField fx:id="fisherfolk_tf" prefHeight="25.0" prefWidth="392.0" GridPane.rowIndex="1" />
+                  <TextField fx:id="LicenseNumber_tf" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                  <TextField fx:id="address_tf" GridPane.rowIndex="7" />
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+            </GridPane>
+         </center>
+         <bottom>
+            <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="817.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
+               <children>
+                  <Button onAction="#btnCancel_onAddFisherfolk" text="Cancel" />
+                  <Button onAction="#btnClear_onAddFisherfolk" text="Clear" />
+                  <Button defaultButton="true" onAction="#btnSave_onAddFisherfolk" styleClass="primary" text="Save" />
                </children>
                <padding>
                   <Insets bottom="16" left="20" right="20" top="12" />

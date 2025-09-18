@@ -79,214 +79,162 @@ public static ObservableList<Catch> getCatch() {
     return list;
 }
 
+        //FISHERMEN RECORDS
+    public static javafx.collections.ObservableList<FisherfolkRecord> loadFisherfolk() {
+        var list = javafx.collections.FXCollections.<FisherfolkRecord>observableArrayList();
+        String sql = "SELECT fisherfolk_id, name, age, gender, contact_number, address, " +
+                     "boat_name, license_number, is_active " +
+                     "FROM fisherfolk ORDER BY name ASC";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
 
-    
-//    ////GET RESERVED RECORD
-//    public static ObservableList<savelists> getSavelists(){
-//     Connection conn = ConnectDb();
-//     ObservableList<savelists> list = FXCollections.observableArrayList();
-////     String try2= "21b - 6626"; //di tinatanggap pag walang space
-//
-//        System.out.println("mysql: "+MAINkioskController.passValue);
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from reserved1 WHERE BORROWER_ID='"+MAINkioskController.passValue+"'");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new savelists (Integer.parseInt(rs.getString("RESERVATION_ID")),rs.getString("BORROWER_ID"),rs.getString("BOOK_ID"),rs.getString("RESERVE_DATE"),rs.getString("EXPIRATION_DATE"),
-//                  rs.getString("STATUS"),rs.getString("BORROWER_TYPE"),rs.getString("REMARKS"),rs.getString("BOOK_TITLE")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//    public static ObservableList<savelists> getSavelistsADMIN(){
-//     Connection conn = ConnectDb();
-//     ObservableList<savelists> list = FXCollections.observableArrayList();
-////     String try2= "21b - 6626"; //di tinatanggap pag walang space
-//      try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from reserved1 ORDER BY RESERVATION_ID DESC");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new savelists (Integer.parseInt(rs.getString("RESERVATION_ID")),rs.getString("BORROWER_ID"),rs.getString("BOOK_ID"),rs.getString("RESERVE_DATE"),rs.getString("EXPIRATION_DATE"),
-//                  rs.getString("STATUS"),rs.getString("BORROWER_TYPE"),rs.getString("REMARKS"),rs.getString("BOOK_TITLE")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//    
-//     ////GET BORROWED RECORD
-//    public static ObservableList<borrowedlists> getBorrowedlists(){
-//     Connection conn = ConnectDb();
-//     ObservableList<borrowedlists> list = FXCollections.observableArrayList();
-//
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from borrowed1 WHERE BORROWER_ID='"+MAINkioskController.passValue+"'");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new borrowedlists (Integer.parseInt(rs.getString("TRANSACTION_ID")),
-//                  rs.getString("BORROWER_ID"),
-//                  rs.getString("BOOK_ID"),
-//                  rs.getString("BORROW_TYPE"),
-//                  rs.getString("BORROW_DATE"),
-//                  rs.getString("DUE_DATE"),
-//                  rs.getString("RETURN_DATE"),
-//                  rs.getString("STATUS"),
-//                  rs.getInt("PENALTY"),
-//                  rs.getString("BORROWER_TYPE"),
-//                  rs.getString("REMARKS"),
-//                  rs.getString("BOOK_TITLE")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//    ////GET BORROWED RECORD
-//    public static ObservableList<borrowedlists> getBorrowedlistsADMIN(){
-//     Connection conn = ConnectDb();
-//     ObservableList<borrowedlists> list = FXCollections.observableArrayList();
-//
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from borrowed1 ORDER BY TRANSACTION_ID DESC");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new borrowedlists (Integer.parseInt(rs.getString("TRANSACTION_ID")),
-//                  rs.getString("BORROWER_ID"),
-//                  rs.getString("BOOK_ID"),
-//                  rs.getString("BORROW_TYPE"),
-//                  rs.getString("BORROW_DATE"),
-//                  rs.getString("DUE_DATE"),
-//                  rs.getString("RETURN_DATE"),
-//                  rs.getString("STATUS"),
-//                  rs.getInt("PENALTY"),
-//                  rs.getString("BORROWER_TYPE"),
-//                  rs.getString("REMARKS"),
-//                  rs.getString("BOOK_TITLE")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//    
-//    ////GET 
-//    public static ObservableList<logrecordsuser> getlogrecordsuser(){
-//     Connection conn = ConnectDb();
-//     ObservableList<logrecordsuser> list = FXCollections.observableArrayList();
-//
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from logrecordsuser WHERE ID_NUMBER='"+MAINkioskController.passValue+"'");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new logrecordsuser (rs.getString("NAME"), rs.getString("ID_NUMBER"),
-//                  rs.getString("TIME_IN"),
-//                  rs.getString("TIME_OUT")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//     ////GET 
-//    public static ObservableList<logrecordsuser> getlogrecordsuserADMIN(){
-//     Connection conn = ConnectDb();
-//     ObservableList<logrecordsuser> list = FXCollections.observableArrayList();
-//
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from logrecordsuser ORDER BY TIME_IN DESC");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new logrecordsuser (rs.getString("NAME"), rs.getString("ID_NUMBER"),
-//                  rs.getString("TIME_IN"),
-//                  rs.getString("TIME_OUT")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//     ////GET 
-//    public static ObservableList<logrecordsadmin> getlogrecordsadmin(){
-//     Connection conn = ConnectDb();
-//     ObservableList<logrecordsadmin> list = FXCollections.observableArrayList();
-//
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from logrecordsadmin ORDER BY TIME_IN DESC");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new logrecordsadmin (rs.getString("NAME"), 
-//                  rs.getString("TIME_IN"),
-//                  rs.getString("TIME_OUT")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//    
-//    
-//    ////////FOR CATEGORY
-//     public static ObservableList<category> getCATEGORY(){
-//    
-//    Connection conn = ConnectDb();
-//     ObservableList<category> list = FXCollections.observableArrayList();
-//      
-//     
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from books");  // where ID=?, ITEMS=?, PRICE=?, STOCKS=?
-//      // ps.setString(1, (String)TableView.getSelectionModel().getSelectedItem());
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new category (rs.getString("CATEGORY")));
-//            
-//        }
-//     }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-//     
-//     
-//      ////GET users 
-//    public static ObservableList<users> getUsers(){
-//     Connection conn = ConnectDb();
-//     ObservableList<users> list = FXCollections.observableArrayList();
-//
-//     try{
-//         PreparedStatement ps = conn.prepareStatement("Select * from users");  
-//         ResultSet rs = ps.executeQuery();
-//       
-//        while (rs.next()){
-//          list.add(new users (rs.getInt("ID"),
-//                  rs.getString("NAME"),
-//                  rs.getString("GENDER"),
-//                  rs.getString("EMAIL"),
-//                  rs.getString("DEPARTMENT"),
-//                  rs.getString("TYPE"),
-//                  rs.getString("IDNUMBER"),
-//                  rs.getString("PASSWORD")));  
-//        }
-//      }
-//     catch (Exception e){
-//    } 
-//     return list;
-//    }
-     
+            while (rs.next()) {
+                list.add(new FisherfolkRecord(
+                    rs.getInt("fisherfolk_id"),
+                    rs.getString("name"),
+                    (Integer) (rs.getObject("age") == null ? null : rs.getInt("age")),
+                    rs.getString("gender"),
+                    rs.getString("contact_number"),
+                    rs.getString("address"),
+                    rs.getString("boat_name"),
+                    rs.getString("license_number"),
+                    rs.getBoolean("is_active")
+                ));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return list;
+    }
+
+    public static boolean updateFisherfolkActive(int id, boolean active) {
+        String sql = "UPDATE fisherfolk SET is_active=? WHERE fisherfolk_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, active);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public static int countCatchByFisher(int id) {
+        String sql = "SELECT COUNT(*) FROM catch WHERE fisherfolk_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (var rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
+        } catch (Exception ex) { ex.printStackTrace(); return -1; }
+    }
+
+    public static int countTransactionsByFisher(int id) {
+        String sql = "SELECT COUNT(*) FROM transactions WHERE fisherfolk_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (var rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
+        } catch (Exception ex) { ex.printStackTrace(); return -1; }
+    }
+
+    public static boolean deleteFisherById(int id) {
+        String sql = "DELETE FROM fisherfolk WHERE fisherfolk_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    //fishermen catches, dock logs, transactions each (HISTORY PER FISHERMAN)
+    public static ObservableList<CatchRecord> getCatchesByFisher(int fisherId) {
+        var list = FXCollections.<CatchRecord>observableArrayList();
+        String sql = """
+            SELECT c.catch_id, s.species_name, c.quantity, c.price_per_kilo,
+                   (c.quantity * c.price_per_kilo) AS total_value, c.catch_date
+            FROM catch c
+            JOIN species s ON c.species_id = s.species_id
+            WHERE c.fisherfolk_id = ?
+            ORDER BY c.catch_date DESC
+            """;
+        try (Connection conn = ConnectDb();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, fisherId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new CatchRecord(
+                    rs.getInt("catch_id"),
+                    fisherId,
+                    0, rs.getString("species_name"), // speciesId optional
+                    rs.getDouble("quantity"),
+                    rs.getDouble("price_per_kilo"),
+                    rs.getDouble("total_value"),
+                    rs.getDate("catch_date").toLocalDate(),
+                    null, // dockingTime optional
+                    null  // remarks optional
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static ObservableList<TransactionRecord> getTransactionsByFisher(int fisherId) {
+        var list = FXCollections.<TransactionRecord>observableArrayList();
+        String sql = """
+            SELECT t.transaction_id, t.buyer_name, t.quantity_sold, t.unit_price,
+                   t.total_price, t.payment_status
+            FROM transactions t
+            WHERE t.fisherfolk_id = ?
+            ORDER BY t.transaction_date DESC
+            """;
+        try (Connection conn = ConnectDb();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, fisherId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new TransactionRecord(
+                    rs.getInt("transaction_id"),
+                    fisherId,
+                    rs.getString("buyer_name"),
+                    rs.getDouble("quantity_sold"),
+                    rs.getDouble("unit_price"),
+                    rs.getDouble("total_price"),
+                    rs.getString("payment_status")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static ObservableList<DockLogRecord> getDockLogsByFisher(int fisherId) {
+        var list = FXCollections.<DockLogRecord>observableArrayList();
+        String sql = """
+            SELECT log_id, docking_date, arrival_time, departure_time, remarks
+            FROM docking_logs
+            WHERE fisherfolk_id = ?
+            ORDER BY docking_date DESC
+            """;
+        try (Connection conn = ConnectDb();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, fisherId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new DockLogRecord(
+                    rs.getInt("log_id"),
+                    fisherId,
+                    rs.getDate("docking_date").toLocalDate(),
+                    rs.getTime("arrival_time").toLocalTime(),
+                    rs.getTime("departure_time") != null ? rs.getTime("departure_time").toLocalTime() : null,
+                    rs.getString("remarks")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
 }
