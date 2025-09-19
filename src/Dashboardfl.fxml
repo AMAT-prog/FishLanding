@@ -1218,5 +1218,408 @@
             </HBox>
          </bottom>
       </BorderPane>
+      <ScrollPane fx:id="transactionANDsales_pane" layoutX="224.0" layoutY="121.0" prefHeight="542.0" prefWidth="1038.0" style="-fx-background-color: transparent;">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+               <children>
+                  <HBox prefHeight="114.0" prefWidth="769.0">
+                     <children>
+                        <Pane prefHeight="73.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="18.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label fx:id="totalRevenueToday_transacLabel" alignment="CENTER" layoutY="35.0" prefHeight="40.0" prefWidth="238.0" text="15,000" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="24.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" layoutX="46.0" layoutY="15.0" prefHeight="21.0" prefWidth="173.0" text="Total Revenue Today" textFill="WHITE">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="39.0" fitWidth="35.0" layoutX="17.0" layoutY="28.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/SALES.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </Pane>
+                        <Pane prefHeight="109.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                           <children>
+                              <Label fx:id="totalPendingAmount_transacLabel" alignment="CENTER" layoutX="68.0" layoutY="28.0" prefHeight="22.0" prefWidth="122.0" text="8,500" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="22.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" layoutX="36.0" layoutY="10.0" prefHeight="21.0" prefWidth="185.0" text="Pending Payments" textFill="WHITE">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="39.0" fitWidth="42.0" layoutX="17.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/PENDING.png" />
+                                 </image>
+                              </ImageView>
+                              <Label fx:id="TotalPartialUnpaidOrders_transacLabel" alignment="CENTER" layoutX="63.0" layoutY="57.0" prefHeight="25.0" prefWidth="131.0" text="(4 Orders)" textFill="WHITE">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                        </Pane>
+                        <Pane prefHeight="109.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                           <children>
+                              <Label fx:id="totalPaidAmount_transacLabel" alignment="CENTER" layoutX="77.0" layoutY="26.0" prefHeight="38.0" prefWidth="105.0" text="833" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="22.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" layoutX="52.0" layoutY="10.0" prefHeight="21.0" prefWidth="156.0" text="Fully Paid Sales" textFill="WHITE">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="39.0" fitWidth="38.0" layoutX="23.0" layoutY="25.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/CHECK.png" />
+                                 </image>
+                              </ImageView>
+                              <Label fx:id="TotalPaidOrders_transacLabel" alignment="CENTER" layoutX="77.0" layoutY="51.0" prefHeight="38.0" prefWidth="105.0" text="(30 Orders)" textFill="WHITE">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                        </Pane>
+                     </children>
+                  </HBox>
+                  <HBox layoutY="109.0" prefHeight="432.0" prefWidth="1035.0">
+                     <children>
+                        <Pane prefHeight="402.0" prefWidth="752.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="183.0" text="Recent Transactions" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" layoutX="201.0" layoutY="29.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="257.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                                 <children>
+                                    <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/search.png" />
+                                       </image>
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" left="10.0" top="5.0" />
+                                       </HBox.margin>
+                                    </ImageView>
+                                    <TextField fx:id="filterField_transactions" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search Buyer / Fisherfolk" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="transaction_tv" layoutX="26.0" layoutY="68.0" prefHeight="274.0" prefWidth="693.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                 <columns>
+                                    <TableColumn fx:id="transacBuyer_col" prefWidth="69.77776527404785" text="BUYER" />
+                                    <TableColumn fx:id="transacFisherfolk_col" prefWidth="104.44444274902344" text="FISHERFOLK" />
+                                    <TableColumn fx:id="transacFishType_col" prefWidth="77.99993896484375" text="FISH TYPE" />
+                                    <TableColumn fx:id="transacQuantity_col" prefWidth="73.1112060546875" text="QUANTITY (KG)" />
+                                    <TableColumn fx:id="transacPricePerUnit_col" prefWidth="65.77777099609375" text="PRICE/KG" />
+                                    <TableColumn fx:id="transacTotalValue_col" prefWidth="90.66677856445312" text="TOTAL VALUE" />
+                                    <TableColumn fx:id="transacPaymentMethod_col" prefWidth="83.99990844726562" text="PAYMENT METHOD" />
+                                    <TableColumn fx:id="transacStatus_col" prefWidth="67.77777099609375" text="STATUS" />
+                                    <TableColumn fx:id="transacDate_col" prefWidth="58.88885498046875" text="DATE" />
+                                 </columns>
+                              </TableView>
+                              <HBox layoutX="467.0" layoutY="28.0" prefHeight="27.0" prefWidth="270.0">
+                                 <children>
+                                    <ToggleButton fx:id="all_transacStatus" mnemonicParsing="false" prefHeight="25.0" prefWidth="54.0" selected="true" styleClass="transaction_toggle" stylesheets="@FishLandingDesign.css" text="ALL">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="transaction_toggle" />
+                                       </toggleGroup>
+                                    </ToggleButton>
+                                    <ToggleButton fx:id="paid_transacStatus" mnemonicParsing="false" prefHeight="25.0" prefWidth="54.0" styleClass="transaction_toggle" stylesheets="@FishLandingDesign.css" text="Paid" toggleGroup="$transaction_toggle">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </ToggleButton>
+                                    <ToggleButton fx:id="unpaid_transacStatus" mnemonicParsing="false" prefHeight="25.0" prefWidth="76.0" styleClass="transaction_toggle" stylesheets="@FishLandingDesign.css" text="Unpaid" toggleGroup="$transaction_toggle">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </ToggleButton>
+                                    <ToggleButton fx:id="partial_transacStatus" mnemonicParsing="false" prefHeight="25.0" prefWidth="86.0" styleClass="transaction_toggle" stylesheets="@FishLandingDesign.css" text="Partial" toggleGroup="$transaction_toggle">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </ToggleButton>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </Pane>
+                     </children>
+                  </HBox>
+                  <Pane layoutX="781.0" layoutY="10.0" prefHeight="508.0" prefWidth="243.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                     <children>
+                        <Label alignment="CENTER" layoutX="25.0" layoutY="6.0" prefHeight="34.0" prefWidth="195.0" text="Quick Actions" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <VBox layoutX="35.0" layoutY="43.0" prefHeight="457.0" prefWidth="176.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#transaction_generateReport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="Generate Report" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="15.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#addTransaction" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 5px;" text="Add Transaction" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#updatePaymentStatus" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0e6902; -fx-background-radius: 5px;" text="Update Payment " textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#deleteTransaction" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #7b0606; -fx-background-radius: 5px;" text="Delete" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Label alignment="CENTER" prefHeight="17.0" prefWidth="217.0" text="Filter by Date Range:" textFill="WHITE">
+                                 <VBox.margin>
+                                    <Insets top="40.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox prefHeight="31.0" prefWidth="173.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="36.0" text="From:" textFill="WHITE">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="dpStartDate_transac" prefHeight="31.0" prefWidth="137.0">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </DatePicker>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox prefHeight="32.0" prefWidth="173.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="35.0" text="To:" textFill="WHITE">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="dpEndDate_transac" prefHeight="31.0" prefWidth="137.0">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </DatePicker>
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="3.0" prefWidth="173.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#onClearFilterDate_transac" prefHeight="20.0" prefWidth="85.0" style="-fx-background-color: transparent; -fx-border-color: #e85760; -fx-border-radius: 5px;" text="CLEAR" textFill="#e85760">
+                                       <font>
+                                          <Font name="System Bold" size="8.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets left="55.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
+      <BorderPane fx:id="addNewTransaction_popup" layoutX="310.0" layoutY="77.0" prefHeight="523.0" prefWidth="851.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
+         <top>
+            <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
+               <children>
+                  <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Transaction" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="12" left="20" right="20" top="16" />
+               </padding>
+            </HBox>
+         </top>
+         <center>
+            <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="465.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10" left="20" right="20" top="10" />
+               </padding>
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="50.0" />
+                  <ColumnConstraints percentWidth="50.0" />
+               </columnConstraints>
+               <children>
+                  <Label text="Seller Name (Fisherfolk)" textFill="WHITE" />
+                  <ComboBox fx:id="transacSeller_cb" prefHeight="25.0" prefWidth="373.0" promptText="Select Seller" GridPane.rowIndex="1" />
+                  <Label fx:id="Seller_err" styleClass="error" text="Please select seller" textFill="#ff7e7e" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Fish Catch Entry" textFill="WHITE" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="transacFishType_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Fish Type" GridPane.rowIndex="4" />
+                  <Label fx:id="FishType_err" styleClass="error" text="Please select fish type" textFill="#ff7e7e" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="95.0" text="Quantity" textFill="WHITE" />
+                        <Label prefHeight="17.0" prefWidth="115.0" text="Remaining Quantity" textFill="WHITE">
+                           <HBox.margin>
+                              <Insets left="74.0" />
+                           </HBox.margin>
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
+                     <children>
+                        <TextField fx:id="transacQuantity_tf" prefHeight="25.0" prefWidth="131.0" />
+                        <Label fx:id="transacRemainingQuantity_label" alignment="CENTER" prefHeight="25.0" prefWidth="106.0" style="-fx-background-color: white;" text="Label">
+                           <HBox.margin>
+                              <Insets left="35.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Label fx:id="Quantity_err" styleClass="error" text="Please enter quantity" textFill="#ff7e7e" GridPane.rowIndex="8">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Unit Price" textFill="WHITE" GridPane.rowIndex="10" />
+                  <Label text="Remarks" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                  <TextField fx:id="transacUnitPrice_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="13" />
+                  <Label text="Payment Method" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Payment Status" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <TextField fx:id="transacBuyer_tf" prefHeight="25.0" prefWidth="392.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Buyer Name" textFill="WHITE" GridPane.columnIndex="1" />
+                  <Label text="Total Amount" textFill="WHITE" GridPane.rowIndex="16" />
+                  <ComboBox fx:id="transacPaymentMethod_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Payment Method" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <ComboBox fx:id="transacPaymentStatus_cb" prefHeight="25.0" prefWidth="394.0" promptText="Select Payment Status" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <TextArea fx:id="transacRemarks_ta" prefHeight="50.0" prefWidth="363.0" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+                  <Label fx:id="Buyer_err" styleClass="error" text="Please enter buyer name" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="PMethod_err" styleClass="error" text="Please select payment method" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="PStatus_err" styleClass="error" text="Please select payment status" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="transacTotalAmount_label" alignment="CENTER" prefHeight="31.0" prefWidth="361.0" style="-fx-background-color: white;" text="300" GridPane.rowIndex="17">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="price_err" prefHeight="17.0" prefWidth="204.0" text="Please enter a valid price" textFill="#ff7e7e" GridPane.rowIndex="15">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                  <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                  <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                  <RowConstraints maxHeight="80.0" minHeight="40.0" prefHeight="64.888916015625" />
+                  <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" />
+               </rowConstraints>
+            </GridPane>
+         </center>
+         <bottom>
+            <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
+               <children>
+                  <Button onAction="#btnCancel_onAddTransaction" text="Cancel">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+                  <Button onAction="#btnClear_onAddTransaction" text="Clear" />
+                  <Button defaultButton="true" onAction="#btnSave_onAddTransaction" styleClass="primary" text="Save" />
+               </children>
+               <padding>
+                  <Insets bottom="16" left="20" right="20" top="12" />
+               </padding>
+               <BorderPane.margin>
+                  <Insets right="30.0" />
+               </BorderPane.margin>
+            </HBox>
+         </bottom>
+      </BorderPane>
    </children>
 </AnchorPane>

@@ -162,4 +162,22 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
   -fx-text-fill: #1976d2;                   /* blue when ON */
 }
 
+/*toggle button for payment status*/
+.transaction_toggle {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;        /* Dark text */
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+    /*-fx-padding: 5 15 5 15;      some spacing */
+}
+/* Selected (clicked) state */
+.transaction_toggle:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent white transparent; /* bottom border only */
+    -fx-border-width: 0 0 2px 0;  /* only bottom border visible */
+    -fx-font-size: 12px;          /* bigger font when active */
+    -fx-font-weight: bold;
+}
+
 

@@ -199,6 +199,24 @@ public class DashboardflController implements Initializable {
     //for philippine currency (peso)
     private static final java.util.Locale LOCALE_PH = java.util.Locale.forLanguageTag("en-PH");
     // or: new java.util.Locale("en","PH")
+    
+    //TRANSACTION & SALES
+    private javafx.collections.ObservableList<TransactionViewRow> transData;
+    private javafx.collections.transformation.FilteredList<TransactionViewRow> transFiltered;
+    private javafx.collections.transformation.SortedList<TransactionViewRow> transSorted;
+    private static final java.time.format.DateTimeFormatter TS_FMT =
+        java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+
+    //for adding/updating transaction
+    private javafx.collections.ObservableList<FisherfolkItem> allSellers;
+    // mode flags
+    private boolean transactionUpdateMode = false;
+    private Integer editingTransactionId = null;
+    private CatchOption currentCatchOpt = null;
+    // peso formatter
+    private static final java.text.NumberFormat PHP = java.text.NumberFormat.getCurrencyInstance(LOCALE_PH);
+    static { PHP.setCurrency(java.util.Currency.getInstance("PHP")); }
+    private Integer updateCatchId = null; // set when entering update mode
 
     
     @FXML
@@ -239,6 +257,87 @@ public class DashboardflController implements Initializable {
     private TableColumn<DockLogRecord, LocalTime> departure_col;
     @FXML
     private TableColumn<DockLogRecord, String> remarks_col1;
+    
+    @FXML
+    private ScrollPane transactionANDsales_pane;
+    @FXML
+    private Label totalRevenueToday_transacLabel;
+    @FXML
+    private Label totalPendingAmount_transacLabel;
+    @FXML
+    private Label TotalPartialUnpaidOrders_transacLabel;
+    @FXML
+    private Label totalPaidAmount_transacLabel;
+    @FXML
+    private Label TotalPaidOrders_transacLabel;
+    @FXML
+    private TextField filterField_transactions;
+    @FXML
+    private TableView<TransactionViewRow> transaction_tv;
+    @FXML
+    private TableColumn<TransactionViewRow, String> transacBuyer_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> transacFisherfolk_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> transacFishType_col;
+    @FXML
+    private TableColumn<TransactionViewRow, Number> transacQuantity_col;
+    @FXML
+    private TableColumn<TransactionViewRow, Number> transacPricePerUnit_col;
+    @FXML
+    private TableColumn<TransactionViewRow, Number> transacTotalValue_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> transacPaymentMethod_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> transacStatus_col;
+    @FXML
+    private TableColumn<TransactionViewRow, java.time.LocalDateTime> transacDate_col;
+    @FXML
+    private ToggleButton all_transacStatus;
+    @FXML
+    private ToggleGroup transaction_toggle;
+    @FXML
+    private ToggleButton paid_transacStatus;
+    @FXML
+    private ToggleButton unpaid_transacStatus;
+    @FXML
+    private ToggleButton partial_transacStatus;
+    @FXML
+    private DatePicker dpStartDate_transac;
+    @FXML
+    private DatePicker dpEndDate_transac;
+    
+    @FXML private BorderPane               addNewTransaction_popup;
+    @FXML private ComboBox<FisherfolkItem> transacSeller_cb;
+    @FXML private ComboBox<CatchOption>    transacFishType_cb;
+    @FXML private ComboBox<String>         transacPaymentMethod_cb;
+    @FXML private ComboBox<String>         transacPaymentStatus_cb;
+    @FXML
+    private TextField transacQuantity_tf;
+    @FXML
+    private TextField transacUnitPrice_tf;
+    @FXML
+    private TextField transacBuyer_tf;
+    @FXML
+    private TextArea transacRemarks_ta;
+    @FXML
+    private Label Seller_err;
+    @FXML
+    private Label FishType_err;
+    @FXML
+    private Label Buyer_err;
+    @FXML
+    private Label PMethod_err;
+    @FXML
+    private Label Quantity_err;
+    @FXML
+    private Label PStatus_err;
+    @FXML
+    private Label transacTotalAmount_label;
+    @FXML
+    private Label transacRemainingQuantity_label;
+    @FXML
+    private Label price_err;
 
     
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -248,6 +347,7 @@ public class DashboardflController implements Initializable {
          
         landings_pane.setVisible(false);
         fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
     }
 
     @FXML
@@ -256,6 +356,7 @@ public class DashboardflController implements Initializable {
        
         dashboard_pane.setVisible(false);
         fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
     }
 
     @FXML
@@ -264,10 +365,16 @@ public class DashboardflController implements Initializable {
         
         dashboard_pane.setVisible(false);
         landings_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
     }
 
     @FXML
     private void transactionSales_btn(ActionEvent event) {
+        transactionANDsales_pane.setVisible(true);
+        
+        dashboard_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        landings_pane.setVisible(false);
     }
 
     @FXML
@@ -297,6 +404,7 @@ public class DashboardflController implements Initializable {
         dashboard_pane.setVisible(true);
         landings_pane.setVisible(false);
         fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
         // LANDINGS or CATCHES
         LANDINGS_SEARCH();
         hideAllErrors();
@@ -463,6 +571,110 @@ public class DashboardflController implements Initializable {
         catch_tv1.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         txn_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         dock_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        ////TRANSACTION & SALES
+        // column factories
+        transacBuyer_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBuyerName()));
+        transacFisherfolk_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFisherfolkName()));
+        transacFishType_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
+        transacQuantity_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQtySold()));
+        transacPricePerUnit_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getUnitPrice()));
+        transacTotalValue_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getTotalPrice()));
+        transacPaymentMethod_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPaymentMethod()));
+        transacStatus_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPaymentStatus()));
+        transacDate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getTxnDate()));
+
+        // formatting
+        setNumeric2dp(transacQuantity_col);
+        setCurrencyPeso(transacPricePerUnit_col);
+        setCurrencyPeso(transacTotalValue_col);
+        setDateTimeFormat(transacDate_col, "yyyy-MM-dd HH:mm");
+
+        // data
+        transData = mysqlconnect.loadTransactionsView();
+
+        // filter chain
+        transFiltered = new javafx.collections.transformation.FilteredList<>(transData, r -> true);
+        transSorted = new javafx.collections.transformation.SortedList<>(transFiltered);
+        transSorted.comparatorProperty().bind(transaction_tv.comparatorProperty());
+        transaction_tv.setItems(transSorted);
+
+        // search
+        filterField_transactions.textProperty().addListener((o, ov, nv) -> applyTransFilters());
+
+        // status toggles (put them in one ToggleGroup in FXML or code)
+        transaction_toggle.selectedToggleProperty().addListener((o, ov, nv) -> applyTransFilters());
+
+        // date filters
+        dpStartDate_transac.valueProperty().addListener((o, ov, nv) -> applyTransFilters());
+        dpEndDate_transac.valueProperty().addListener((o, ov, nv) -> applyTransFilters());
+
+        // initial selection for status = ALL
+        all_transacStatus.setSelected(true);
+
+        // optional: resize policy
+        transaction_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // compute header KPI labels initially
+        updateTransHeaderKpis();
+        
+        //adding or updating TRANSACTIONS
+        // fill static combos
+        transacPaymentMethod_cb.getItems().setAll("Cash","Credit","Bank Transfer","Other");
+        transacPaymentStatus_cb.getItems().setAll("Paid","Partial","Unpaid");
+
+        // seller list
+        transacSeller_cb.setItems(mysqlconnect.loadActiveFisherfolkItems());
+        transacSeller_cb.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(FisherfolkItem f) { return f == null ? "" : f.getName(); }
+            @Override public FisherfolkItem fromString(String s) { return null; }
+        });
+
+        // when seller changes -> reload catch options for that seller
+        transacSeller_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
+            if (sel != null) {
+                var opts = mysqlconnect.loadCatchOptionsByFisher(sel.getId());
+                transacFishType_cb.setItems(opts);
+            } else {
+                transacFishType_cb.getItems().clear();
+            }
+            transacFishType_cb.getSelectionModel().clearSelection();
+            currentCatchOpt = null;
+            transacRemainingQuantity_label.setText("");
+            if (!transactionUpdateMode) transacUnitPrice_tf.clear();
+            updateTotalLabel();
+            hideErrors();
+        });
+
+        // nice label in fish type combo is provided by CatchOption.toString()
+
+        // when fish type (catch) changes -> set unit price & remaining
+        transacFishType_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
+            currentCatchOpt = sel;
+            if (sel != null) {
+                transacUnitPrice_tf.setText(String.format("%.2f", sel.getPricePerKilo()));
+                transacRemainingQuantity_label.setText(String.format("%.2f kg available", sel.getRemainingQty()));
+            } else {
+                transacUnitPrice_tf.clear();
+                transacRemainingQuantity_label.setText("");
+            }
+            updateTotalLabel();
+            hideErrors();
+        });
+
+        // live total computation
+        transacQuantity_tf.textProperty().addListener((o,ov,nv) -> updateTotalLabel());
+        transacUnitPrice_tf.textProperty().addListener((o,ov,nv) -> updateTotalLabel());
+
+        // numeric filters (optional)
+        makeNumeric(transacQuantity_tf);
+        makeNumeric(transacUnitPrice_tf);
+
+        // start hidden
+        addNewTransaction_popup.setVisible(false);
+        
+        allSellers = mysqlconnect.loadActiveFisherfolkItems();
+        transacSeller_cb.setItems(allSellers);
 
     }
         
@@ -908,54 +1120,7 @@ public class DashboardflController implements Initializable {
         ex.printStackTrace();
         showInfo("Error: " + ex.getMessage());
     }
-//    // 7) INSERT into MySQL
-//    final String sql = "INSERT INTO catch " +
-//            "(fisherfolk_id, species_id, quantity, price_per_kilo, catch_date, docking_time, remarks) " +
-//            "VALUES (?,?,?,?,?,?,?)";
-//
-//    try (Connection conn = mysqlconnect.ConnectDb();
-//         PreparedStatement ps = conn.prepareStatement(sql)) {
-//
-//        ps.setInt(1, fisher.getId());
-//        ps.setInt(2, species.getId());
-//        ps.setBigDecimal(3, java.math.BigDecimal.valueOf(quantity));
-//        ps.setBigDecimal(4, java.math.BigDecimal.valueOf(pricePerKilo));
-//        ps.setDate(5, java.sql.Date.valueOf(catchDate));
-//
-//        if (dockingTime != null) {
-//            ps.setTime(6, Time.valueOf(dockingTime));
-//        } else {
-//            ps.setNull(6, Types.TIME);
-//        }
-//
-//        if (remarks != null) {
-//            ps.setString(7, remarks);
-//        } else {
-//            ps.setNull(7, Types.VARCHAR);
-//        }
-//
-//        int rows = ps.executeUpdate();
-//        if (rows > 0) {
-//            showInfo("Catch record saved successfully.");
-//            //clear landing form
-//                cbFisherfolk2.getSelectionModel().clearSelection();
-//                cbSpecies2.getSelectionModel().clearSelection();
-//                tfQuantity2.clear();
-//                tfPricePerKilo2.clear();
-//                tfDockingTime2.clear();  // optional
-//                dpCatchDate2.setValue(null);
-//                taRemarks2.clear();
-//                hideAllErrors();
-//            // TableView, refresh/reload:
-//                LANDINGS_SEARCH();
-//            // tableView.setItems(mysql.getCatchRecords());
-//        } else {
-//            showInfo("Nothing was saved. Please try again.");
-//        }
-//    } catch (Exception ex) {
-//        ex.printStackTrace();
-//        showInfo("Error while saving: " + ex.getMessage());
-//    }
+    
         addNewLanding_popup.setVisible(false);
         landings_pane.setDisable(false);
         sideNavigation_vbox.setDisable(false);
@@ -1291,8 +1456,7 @@ public class DashboardflController implements Initializable {
         sideNavigation_vbox.setDisable(true);
         
     }
-
-    
+  
     @FXML
     private void viewTransaction(ActionEvent event) {
         FisherfolkRecord sel = fishermen_tv.getSelectionModel().getSelectedItem();
@@ -1389,6 +1553,7 @@ public class DashboardflController implements Initializable {
 
     }
 
+    //ALSO USED IN TRANSACTION & SALES (for generate sales report)
     private String csv(String s) {
         if (s == null) return "";
         String v = s.replace("\"","\"\"");
@@ -1421,16 +1586,17 @@ public class DashboardflController implements Initializable {
             }
         });
     }
-
+    //USED BY TRANSACTION & SALES ALSO
     private <T> void setNumeric2dp(TableColumn<T, Number> col) {
         col.setCellFactory(tc -> new javafx.scene.control.TableCell<>() {
             @Override protected void updateItem(Number item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : String.format("%.2f", item.doubleValue()));
+                setAlignment(javafx.geometry.Pos.CENTER_RIGHT);//added (transactions)
             }
         });
     }
-
+    //USED BY TRANSACTION & SALES ALSO
     private <T> void setCurrencyPeso(TableColumn<T, Number> col) {
         col.setCellFactory(tc -> new javafx.scene.control.TableCell<>() {
             final java.text.NumberFormat fmt;
@@ -1456,9 +1622,467 @@ public class DashboardflController implements Initializable {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////end of fishermen
+    
+    ////////////////////////////////////////////////////////////////////////////TRANSACTION AND SALES
+    @FXML
+    private void transaction_generateReport(ActionEvent event) {
+        final String statusFilter =
+            paid_transacStatus.isSelected() ? "Paid" :
+            unpaid_transacStatus.isSelected() ? "Unpaid" :
+            partial_transacStatus.isSelected() ? "Partial" : "All";
+        final java.time.LocalDate start = dpStartDate_transac.getValue();
+        final java.time.LocalDate end   = dpEndDate_transac.getValue();
+
+        String datePart =
+            (start == null && end == null) ? "AllDates" :
+            (start != null && end != null) ? (start + "_to_" + end) :
+            (start != null ? ("From_" + start) : ("Until_" + end));
+
+        String suggested = String.format("sales_%s_%s_%s.csv",
+                statusFilter, datePart, java.time.LocalDateTime.now().format(TS_FMT));
+
+        javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+        fc.setTitle("Save Sales Report");
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
+        fc.setInitialFileName(suggested);
+        // optional: choose a default directory
+        // fc.setInitialDirectory(new java.io.File(System.getProperty("user.home"), "Documents"));
+
+        java.io.File file = fc.showSaveDialog(transactionANDsales_pane.getScene().getWindow());
+        if (file == null) return; // user cancelled
+
+        // ensure .csv extension
+        if (!file.getName().toLowerCase().endsWith(".csv")) {
+            file = new java.io.File(file.getParentFile(), file.getName() + ".csv");
+        }
+        exportTransactionsCsv(file);
+    }
+    
+    private void exportTransactionsCsv(java.io.File file) {
+        try (var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+            pw.println("ID,DateTime,Buyer,Fisherfolk,Fish Type,Qty,Unit Price,Total,Payment Method,Status");
+            for (var r : transSorted) { // current filtered+sorted rows
+                pw.printf("%d,%s,%s,%s,%s,%.2f,%.2f,%.2f,%s,%s%n",
+                    r.getTransactionId(),
+                    r.getTxnDate() == null ? "" : r.getTxnDate().toString(),
+                    csv(r.getBuyerName()),
+                    csv(r.getFisherfolkName()),
+                    csv(r.getSpeciesName()),
+                    r.getQtySold(),
+                    r.getUnitPrice(),
+                    r.getTotalPrice(),
+                    csv(r.getPaymentMethod()),
+                    csv(r.getPaymentStatus())
+                );
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("Export failed: " + ex.getMessage());
+            return;
+        }
+        showInfoWide("Report saved: " + file.getAbsolutePath());
+    }
+
+    @FXML
+    private void addTransaction(ActionEvent event) {
+        Quantity_err.setText("Please enter quantity");
+        
+        transactionUpdateMode = false;
+        editingTransactionId = null;
+
+        // clear fields
+        hideErrors();
+        transacBuyer_tf.clear();
+        transacUnitPrice_tf.clear();
+        transacQuantity_tf.clear();
+        transacRemarks_ta.clear();
+        transacRemainingQuantity_label.setText("");
+        transacTotalAmount_label.setText(PHP.format(0));
+
+        // combos fresh
+        transacSeller_cb.getSelectionModel().clearSelection();
+        transacFishType_cb.getItems().clear();
+        transacPaymentMethod_cb.getSelectionModel().clearSelection();
+        transacPaymentStatus_cb.getSelectionModel().clearSelection();
+
+        // editable everything
+        transacSeller_cb.setDisable(false);
+        transacFishType_cb.setDisable(false);
+        transacUnitPrice_tf.setEditable(true);
+
+        addNewTransaction_popup.setVisible(true);
+        // disable background panes 
+        sideNavigation_vbox.setDisable(true);
+        transactionANDsales_pane.setDisable(true);
+    }
 
 
-  
+    @FXML
+    private void updatePaymentStatus(ActionEvent event) {
+        Quantity_err.setText("Please enter quantity");
+       
+        var sel = transaction_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showInfoWide("Please select a transaction to update.");
+            return;
+        }
+
+        transactionUpdateMode = true;
+        editingTransactionId = sel.getTransactionId();
+        updateCatchId = sel.getCatchId();  // <-- keep the catch id for validation
+        hideErrors();
+
+        // Pre-fill fields
+        transacBuyer_tf.setText(sel.getBuyerName());
+        transacQuantity_tf.setText(String.format("%.2f", sel.getQtySold()));
+        transacUnitPrice_tf.setText(String.format("%.2f", sel.getUnitPrice()));
+        transacRemarks_ta.setText(""); // you can load actual remarks if your view includes it
+        transacPaymentMethod_cb.getSelectionModel().select(sel.getPaymentMethod());
+        transacPaymentStatus_cb.getSelectionModel().select(sel.getPaymentStatus());
+
+        // Seller + FishType (lock them; show current)
+        // We need to put the single item into combos so user sees them.
+        transacSeller_cb.getItems().setAll(new FisherfolkItem(0, sel.getFisherfolkName())); // id not used while locked
+        transacSeller_cb.getSelectionModel().select(0);
+        transacSeller_cb.setDisable(true);
+
+        transacFishType_cb.getItems().setAll(
+            new CatchOption(0, 0, 0, sel.getSpeciesName(), sel.getUnitPrice(), 0, 
+                            sel.getTxnDate() != null ? sel.getTxnDate().toLocalDate() : null));
+        transacFishType_cb.getSelectionModel().select(0);
+        transacFishType_cb.setDisable(true);
+
+        // Remaining label is informational only in update mode
+        transacRemainingQuantity_label.setText("");
+
+        updateTotalLabel();
+        
+        addNewTransaction_popup.setVisible(true);
+        sideNavigation_vbox.setDisable(true);
+        transactionANDsales_pane.setDisable(true);
+    }
+
+
+    @FXML
+    private void deleteTransaction(ActionEvent event) {
+        var sel = transaction_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showInfoWide("Please select a transaction to delete.");
+            return;
+        }
+
+        var confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                "Delete this transaction? This cannot be undone.",
+                javafx.scene.control.ButtonType.YES, javafx.scene.control.ButtonType.NO);
+        confirm.setHeaderText("Confirm delete");
+        confirm.getDialogPane().setMinWidth(520);
+        confirm.showAndWait();
+
+        if (confirm.getResult() == javafx.scene.control.ButtonType.YES) {
+            boolean ok = mysqlconnect.deleteTransactionById(sel.getTransactionId());
+            if (ok) {
+                // remove from the source list (not the Sorted/Filtered wrapper)
+                transData.remove(sel);
+                updateTransHeaderKpis();
+                showInfoWide("Transaction deleted.");
+            } else {
+                showInfoWide("Failed to delete. Please try again.");
+            }
+        }
+    }
+
+    @FXML
+    private void onClearFilterDate_transac(ActionEvent event) {
+        dpStartDate_transac.setValue(null);
+        dpEndDate_transac.setValue(null);
+        applyTransFilters();
+    }
+
+    private <S> void setDateTimeFormat(TableColumn<S, java.time.LocalDateTime> col, String pattern) {
+        var fmt = java.time.format.DateTimeFormatter.ofPattern(pattern);
+        col.setCellFactory(tc -> new javafx.scene.control.TableCell<>() {
+            @Override protected void updateItem(java.time.LocalDateTime item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.format(fmt));
+            }
+        });
+    }
+
+    //KPI FILTERS
+    private void applyTransFilters() {
+        // snapshot everything the lambda will use
+        final String query = (filterField_transactions.getText() == null)
+                ? "" : filterField_transactions.getText().trim().toLowerCase();
+
+        final String statusFilter;
+        if (paid_transacStatus.isSelected())       statusFilter = "Paid";
+        else if (unpaid_transacStatus.isSelected()) statusFilter = "Unpaid";
+        else if (partial_transacStatus.isSelected())statusFilter = "Partial";
+        else                                        statusFilter = null;  // ALL
+
+        final java.time.LocalDate startDate = dpStartDate_transac.getValue();
+        final java.time.LocalDate endDate   = dpEndDate_transac.getValue();
+
+        transFiltered.setPredicate(row -> {
+            if (row == null) return false;
+
+            // search buyer/fisherfolk
+            if (!query.isEmpty()) {
+                String buyer  = row.getBuyerName() == null ? "" : row.getBuyerName().toLowerCase();
+                String fisher = row.getFisherfolkName() == null ? "" : row.getFisherfolkName().toLowerCase();
+                if (!(buyer.contains(query) || fisher.contains(query))) return false;
+            }
+
+            // status filter
+            if (statusFilter != null) {
+                String ps = row.getPaymentStatus();
+                if (ps == null || !ps.equalsIgnoreCase(statusFilter)) return false;
+            }
+
+            // date range (use LocalDate part of timestamp)
+            if (startDate != null || endDate != null) {
+                if (row.getTxnDate() == null) return false;
+                var d = row.getTxnDate().toLocalDate();
+                if (startDate != null && d.isBefore(startDate)) return false;
+                if (endDate   != null && d.isAfter(endDate))     return false;
+            }
+
+            return true;
+        });
+
+        updateTransHeaderKpis(); // recalc totals after filtering
+    }
+
+    private void updateTransHeaderKpis() {
+        double totalPaid = 0, totalPendingAmount = 0, revenueToday = 0;
+        int countPaid = 0, countPending = 0;
+
+        var today = java.time.LocalDate.now();
+
+        for (var r : transFiltered) {
+            if ("Paid".equalsIgnoreCase(r.getPaymentStatus())) {
+                totalPaid += r.getTotalPrice();
+                countPaid++;
+                if (r.getTxnDate() != null && r.getTxnDate().toLocalDate().equals(today)) {
+                    revenueToday += r.getTotalPrice();
+                }
+            } else if ("Partial".equalsIgnoreCase(r.getPaymentStatus()) ||
+                       "Unpaid".equalsIgnoreCase(r.getPaymentStatus())) {
+                totalPendingAmount += r.getTotalPrice();
+                countPending++;
+            }
+        }
+
+        var peso = java.text.NumberFormat.getCurrencyInstance(LOCALE_PH);
+        peso.setCurrency(java.util.Currency.getInstance("PHP"));
+
+        totalPaidAmount_transacLabel.setText(peso.format(totalPaid));
+        totalPendingAmount_transacLabel.setText(peso.format(totalPendingAmount));
+        totalRevenueToday_transacLabel.setText(peso.format(revenueToday));
+        TotalPaidOrders_transacLabel.setText("Order: "+String.valueOf(countPaid));
+        TotalPartialUnpaidOrders_transacLabel.setText("Order: "+String.valueOf(countPending));
+    }
+    
+    //HELPERS
+    private void makeNumeric(TextField tf) {
+        tf.textProperty().addListener((obs, oldV, newV) -> {
+            if (newV == null || newV.isEmpty()) return;
+            if (!newV.matches("\\d*(\\.\\d{0,2})?")) tf.setText(oldV); // up to 2 decimals
+        });
+    }
+
+    private double d(TextField tf) {
+        try { return Double.parseDouble(tf.getText()); } catch (Exception e) { return 0.0; }
+    }
+
+    private void updateTotalLabel() {
+        double qty = d(transacQuantity_tf);
+        double unit = d(transacUnitPrice_tf);
+        transacTotalAmount_label.setText(PHP.format(qty * unit));
+    }
+
+    private void hideErrors() {
+        Seller_err.setVisible(false);
+        FishType_err.setVisible(false);
+        Buyer_err.setVisible(false);
+        PMethod_err.setVisible(false);
+        Quantity_err.setVisible(false);
+        PStatus_err.setVisible(false);
+        price_err.setVisible(false);
+    }
+    
+    private void refreshTransactionsTable() {
+        var fresh = mysqlconnect.loadTransactionsView();
+        // If you use Filtered/Sorted lists, update the source list:
+         transData.setAll(fresh);
+        // Otherwise:
+//        transaction_tv.setItems(fresh);
+        // Re-apply filters if you have them, then recompute header KPIs:
+         applyTransFilters();
+    }
+    
+    private void restoreAddModeCombos() {
+        // restore full sellers list
+        allSellers = mysqlconnect.loadActiveFisherfolkItems();
+        transacSeller_cb.setItems(allSellers);
+        transacSeller_cb.setDisable(false);
+        transacSeller_cb.getSelectionModel().clearSelection();
+
+        // fish types list is empty until a seller is chosen
+        transacFishType_cb.getItems().clear();
+        transacFishType_cb.setDisable(false);
+        transacFishType_cb.getSelectionModel().clearSelection();
+    }
+    
+    private void exitTransactionPopup() {
+        addNewTransaction_popup.setVisible(false);
+        transactionANDsales_pane.setDisable(false);
+        sideNavigation_vbox.setDisable(false);
+        
+        // unlock
+        transacSeller_cb.setDisable(false);
+        transacFishType_cb.setDisable(false);
+
+        // clear selections/fields for next Add
+        transacSeller_cb.getSelectionModel().clearSelection();
+        transacFishType_cb.getItems().clear();       // will repopulate after seller is picked
+        transacBuyer_tf.clear();
+        transacQuantity_tf.clear();
+        transacUnitPrice_tf.clear();
+        transacRemarks_ta.clear();
+        transacPaymentMethod_cb.getSelectionModel().clearSelection();
+        transacPaymentStatus_cb.getSelectionModel().clearSelection();
+        transacRemainingQuantity_label.setText("");
+        transacTotalAmount_label.setText("₱0.00");
+
+        transactionUpdateMode = false;
+        editingTransactionId = null;
+        currentCatchOpt = null;
+    }
+
+
+
+   @FXML
+    private void btnCancel_onAddTransaction(ActionEvent event) {
+        restoreAddModeCombos();
+        exitTransactionPopup();
+    }
+
+    @FXML
+    private void btnClear_onAddTransaction(ActionEvent event) {
+        if (transactionUpdateMode) {
+            // In update, maybe keep combos locked but clear editable fields
+            transacBuyer_tf.clear();
+            transacQuantity_tf.clear();
+            transacUnitPrice_tf.clear();
+            transacRemarks_ta.clear();
+            transacPaymentMethod_cb.getSelectionModel().clearSelection();
+            transacPaymentStatus_cb.getSelectionModel().clearSelection();
+        } else {
+            addTransaction(null); // reuse add-mode init
+        }
+    }
+
+ 
+    @FXML
+    private void btnSave_onAddTransaction(ActionEvent event) {
+        hideErrors();
+
+        // validate common fields
+        String buyer = transacBuyer_tf.getText() == null ? "" : transacBuyer_tf.getText().trim();
+        if (buyer.isEmpty()) { Buyer_err.setVisible(true); return; }
+
+        String pm = transacPaymentMethod_cb.getValue();
+        if (pm == null || pm.isBlank()) { PMethod_err.setVisible(true); return; }
+
+        String ps = transacPaymentStatus_cb.getValue();
+        if (ps == null || ps.isBlank()) { PStatus_err.setVisible(true); return; }
+
+        double qty = d(transacQuantity_tf);
+        if (qty <= 0) { Quantity_err.setVisible(true); return; }
+
+        double unit = d(transacUnitPrice_tf);
+        if (unit <= 0) { price_err.setVisible(true); return; }
+
+        String remarks = transacRemarks_ta.getText();
+
+        boolean ok;
+
+        if (!transactionUpdateMode) {
+            // ADD: need valid seller + catch
+            FisherfolkItem seller = transacSeller_cb.getValue();
+            if (seller == null) { Seller_err.setVisible(true); return; }
+
+            CatchOption co = transacFishType_cb.getValue();
+            if (co == null) { FishType_err.setVisible(true); return; }
+
+            // client-side oversell check
+            if (qty > co.getRemainingQty() + 1e-6) {
+                Quantity_err.setText("Quantity exceeds remaining.");
+                Quantity_err.setVisible(true);
+                return;
+            }
+
+            ok = mysqlconnect.insertTransaction(
+                    buyer, seller.getId(), co.getCatchId(),
+                    qty, unit, pm, ps, remarks
+                    
+            );
+                
+                restoreAddModeCombos();
+                exitTransactionPopup();
+                
+        } else {
+            // UPDATE: keep catch the same (locked)
+            if (editingTransactionId == null || updateCatchId == null) {
+                showInfoWide("No transaction selected.");
+                return;
+            }
+
+            // validate against remaining (excluding this transaction)
+            int txnId   = editingTransactionId;
+            int catchId = updateCatchId;
+
+            double newQty = d(transacQuantity_tf);
+
+            double catchQty     = mysqlconnect.getCatchQuantity(catchId);
+            double soldElse     = mysqlconnect.sumSoldForCatchExcluding(txnId, catchId);
+            double remaining    = catchQty - soldElse; // what the user may still take
+
+            if (newQty > remaining + 1e-9) {
+                Quantity_err.setText("Exceeds remaining (" + String.format("%.2f", remaining) + " kg left).");
+                Quantity_err.setVisible(true);
+                return;
+            }
+
+            ok = mysqlconnect.updateTransaction(
+                    editingTransactionId, buyer, newQty, unit, pm, ps, remarks
+            );
+        }
+        
+        if (ok) {
+            showInfoWide(transactionUpdateMode ? "Transaction updated." : "Transaction added.");
+            // reset error label back to default text for next time
+            Quantity_err.setText("Please enter quantity");
+
+            addNewTransaction_popup.setVisible(false);
+            refreshTransactionsTable();
+
+            // reset flags and UI state
+            transactionUpdateMode = false;
+            editingTransactionId = null;
+            updateCatchId = null;
+
+            restoreAddModeCombos();
+            exitTransactionPopup();
+        } else {
+            showInfoWide("Save failed. Please check your inputs.");
+        }
+        refreshTransactionsTable();
+    }
+
+
 
     
     

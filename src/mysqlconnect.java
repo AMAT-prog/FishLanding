@@ -237,4 +237,189 @@ public static ObservableList<Catch> getCatch() {
         return list;
     }
 
+    //TRANSACTION AND SALES
+    public static javafx.collections.ObservableList<TransactionViewRow> loadTransactionsView() {
+        var list = javafx.collections.FXCollections.<TransactionViewRow>observableArrayList();
+
+        String sql = """
+            SELECT t.transaction_id,
+                   t.fisherfolk_id,
+                   t.catch_id,
+                   t.buyer_name,
+                   f.name AS fisherfolk_name,
+                   s.species_name,
+                   t.quantity_sold,
+                   t.unit_price,
+                   t.total_price,
+                   t.payment_method,
+                   t.payment_status,
+                   t.transaction_date
+            FROM transactions t
+            JOIN fisherfolk f ON t.fisherfolk_id = f.fisherfolk_id
+            JOIN catch c ON t.catch_id = c.catch_id
+            JOIN species s ON c.species_id = s.species_id
+            ORDER BY t.transaction_date DESC
+            """;
+
+        try (java.sql.Connection conn = ConnectDb();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                java.sql.Timestamp ts = rs.getTimestamp("transaction_date");
+                java.time.LocalDateTime ldt = ts != null ? ts.toLocalDateTime() : null;
+
+                list.add(new TransactionViewRow(
+                rs.getInt("transaction_id"),
+                rs.getInt("fisherfolk_id"),
+                rs.getInt("catch_id"),
+                rs.getString("buyer_name"),
+                rs.getString("fisherfolk_name"),
+                rs.getString("species_name"),
+                rs.getDouble("quantity_sold"),
+                rs.getDouble("unit_price"),
+                rs.getDouble("total_price"),
+                rs.getString("payment_method"),
+                rs.getString("payment_status"),
+                rs.getTimestamp("transaction_date") != null ? rs.getTimestamp("transaction_date").toLocalDateTime() : null
+            ));
+
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static boolean deleteTransactionById(int id) {
+        String sql = "DELETE FROM transactions WHERE transaction_id=?";
+        try (java.sql.Connection conn = ConnectDb();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+    
+    //on adding/updating transactions
+    // 1) Load active fisherfolk for the Seller combo
+    public static javafx.collections.ObservableList<FisherfolkItem> loadActiveFisherfolkItems() {
+        var list = javafx.collections.FXCollections.<FisherfolkItem>observableArrayList();
+        String sql = "SELECT fisherfolk_id, name FROM fisherfolk WHERE is_active=1 ORDER BY name";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new FisherfolkItem(rs.getInt("fisherfolk_id"), rs.getString("name")));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // 2) Load catch options by fisher (remaining > 0) from the view v_catch_available
+    public static javafx.collections.ObservableList<CatchOption> loadCatchOptionsByFisher(int fisherId) {
+        var list = javafx.collections.FXCollections.<CatchOption>observableArrayList();
+        String sql = """
+            SELECT catch_id, fisherfolk_id, species_id, species_name, price_per_kilo,
+                   remaining_qty, catch_date
+            FROM v_catch_available
+            WHERE fisherfolk_id = ? AND remaining_qty > 0
+            ORDER BY catch_date DESC, species_name
+            """;
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, fisherId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new CatchOption(
+                        rs.getInt("catch_id"),
+                        rs.getInt("fisherfolk_id"),
+                        rs.getInt("species_id"),
+                        rs.getString("species_name"),
+                        rs.getDouble("price_per_kilo"),
+                        rs.getDouble("remaining_qty"),
+                        rs.getDate("catch_date").toLocalDate()
+                    ));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // 3) INSERT transaction (total_price is generated; do NOT insert it)
+    public static boolean insertTransaction(String buyer, int fisherId, int catchId,
+                                            double qty, double unitPrice,
+                                            String payMethod, String payStatus, String remarks) {
+        String sql = """
+            INSERT INTO transactions
+                (buyer_name, fisherfolk_id, catch_id,
+                 quantity_sold, unit_price, payment_method, payment_status, remarks)
+            VALUES (?,?,?,?,?,?,?,?)
+            """;
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, buyer);
+            ps.setInt(2, fisherId);
+            ps.setInt(3, catchId);
+            ps.setBigDecimal(4, java.math.BigDecimal.valueOf(qty));
+            ps.setBigDecimal(5, java.math.BigDecimal.valueOf(unitPrice));
+            ps.setString(6, payMethod);
+            ps.setString(7, payStatus);
+            ps.setString(8, remarks);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // 4) UPDATE transaction (do not allow changing catch_id here to keep it simple)
+    public static boolean updateTransaction(int txnId, String buyer,
+                                            double qty, double unitPrice,
+                                            String payMethod, String payStatus, String remarks) {
+        String sql = """
+            UPDATE transactions
+               SET buyer_name=?, quantity_sold=?, unit_price=?,
+                   payment_method=?, payment_status=?, remarks=?
+             WHERE transaction_id=?
+            """;
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, buyer);
+            ps.setBigDecimal(2, java.math.BigDecimal.valueOf(qty));
+            ps.setBigDecimal(3, java.math.BigDecimal.valueOf(unitPrice));
+            ps.setString(4, payMethod);
+            ps.setString(5, payStatus);
+            ps.setString(6, remarks);
+            ps.setInt(7, txnId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+    
+    public static double sumSoldForCatchExcluding(int txnId, int catchId) {
+        String sql = "SELECT IFNULL(SUM(quantity_sold),0) AS sold_qty " +
+                     "FROM transactions WHERE catch_id=? AND transaction_id<>?";
+        try (Connection c = ConnectDb();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, catchId); 
+            ps.setInt(2, txnId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getDouble("sold_qty");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+    
+    // total landed quantity for a catch
+    public static double getCatchQuantity(int catchId) {
+        String sql = "SELECT quantity FROM catch WHERE catch_id=?";
+        try (Connection c = ConnectDb();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, catchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getDouble(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+
+
+
+
 }
