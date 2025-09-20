@@ -300,18 +300,24 @@ public static ObservableList<Catch> getCatch() {
     
     //on adding/updating transactions
     // 1) Load active fisherfolk for the Seller combo
+    // ALSO USED ON DOCKING LOGS (for getting boatname)
     public static javafx.collections.ObservableList<FisherfolkItem> loadActiveFisherfolkItems() {
         var list = javafx.collections.FXCollections.<FisherfolkItem>observableArrayList();
-        String sql = "SELECT fisherfolk_id, name FROM fisherfolk WHERE is_active=1 ORDER BY name";
+        String sql = "SELECT fisherfolk_id, name, boat_name FROM fisherfolk WHERE is_active=1 ORDER BY name";
         try (java.sql.Connection c = ConnectDb();
              java.sql.PreparedStatement ps = c.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(new FisherfolkItem(rs.getInt("fisherfolk_id"), rs.getString("name")));
+                list.add(new FisherfolkItem(
+                    rs.getInt("fisherfolk_id"),
+                    rs.getString("name"),
+                    rs.getString("boat_name")
+                ));
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+
 
     // 2) Load catch options by fisher (remaining > 0) from the view v_catch_available
     public static javafx.collections.ObservableList<CatchOption> loadCatchOptionsByFisher(int fisherId) {
@@ -419,7 +425,105 @@ public static ObservableList<Catch> getCatch() {
         return 0.0;
     }
 
+    //DOCKING LOGS
+    // Load logs with fisher name + boat (for the table)
+    public static javafx.collections.ObservableList<DockLogViewRow> loadDockLogsView() {
+        var list = javafx.collections.FXCollections.<DockLogViewRow>observableArrayList();
+        String sql = """
+            SELECT dl.log_id, dl.fisherfolk_id, f.name AS fisher_name, f.boat_name,
+                   dl.docking_date, dl.arrival_time, dl.departure_time, dl.remarks
+            FROM docking_logs dl
+            JOIN fisherfolk f ON dl.fisherfolk_id = f.fisherfolk_id
+            ORDER BY dl.docking_date DESC, dl.arrival_time ASC
+            """;
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new DockLogViewRow(
+                    rs.getInt("log_id"),
+                    rs.getInt("fisherfolk_id"),
+                    rs.getString("fisher_name"),
+                    rs.getString("boat_name"),
+                    rs.getDate("docking_date").toLocalDate(),
+                    rs.getTime("arrival_time").toLocalTime(),
+                    rs.getTime("departure_time") == null ? null : rs.getTime("departure_time").toLocalTime(),
+                    rs.getString("remarks")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 
+    // Delete one log
+    public static boolean deleteDockLogById(int logId) {
+        String sql = "DELETE FROM docking_logs WHERE log_id=?";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, logId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    // Count dockings today
+    public static int countDockingsToday() {
+        String sql = "SELECT COUNT(*) FROM docking_logs WHERE docking_date = CURDATE()";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // Most active fisher in last 7 days (name + count)
+    public static String mostActiveFisherLast7Days() {
+        String sql = """
+            SELECT f.name, COUNT(*) AS cnt
+            FROM docking_logs dl
+            JOIN fisherfolk f ON f.fisherfolk_id = dl.fisherfolk_id
+            WHERE dl.docking_date >= (CURDATE() - INTERVAL 7 DAY)
+            GROUP BY dl.fisherfolk_id
+            ORDER BY cnt DESC, f.name ASC
+            LIMIT 1
+            """;
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString(1) + " (" + rs.getInt(2) + ")";
+        } catch (Exception e) { e.printStackTrace(); }
+        return "—";
+    }
+
+    // add/updating dock logs
+    public static boolean insertDockLog(int fisherId, java.time.LocalDate date,
+                                        java.time.LocalTime arrival, java.time.LocalTime departure,
+                                        String remarks) {
+        String sql = "INSERT INTO docking_logs (fisherfolk_id, docking_date, arrival_time, departure_time, remarks) " +
+                     "VALUES (?,?,?,?,?)";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, fisherId);
+            ps.setDate(2, java.sql.Date.valueOf(date));
+            ps.setTime(3, java.sql.Time.valueOf(arrival));
+            if (departure == null) ps.setNull(4, java.sql.Types.TIME);
+            else ps.setTime(4, java.sql.Time.valueOf(departure));
+            if (remarks == null || remarks.isBlank()) ps.setNull(5, java.sql.Types.VARCHAR);
+            else ps.setString(5, remarks);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public static boolean updateDockLogDeparture(int logId, java.time.LocalTime departure, String remarks) {
+        String sql = "UPDATE docking_logs SET departure_time = ?, remarks = ? WHERE log_id = ?";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setTime(1, java.sql.Time.valueOf(departure));
+            if (remarks == null || remarks.isBlank()) ps.setNull(2, java.sql.Types.VARCHAR);
+            else ps.setString(2, remarks);
+            ps.setInt(3, logId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
 
 
 }

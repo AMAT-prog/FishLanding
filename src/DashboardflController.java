@@ -218,6 +218,15 @@ public class DashboardflController implements Initializable {
     static { PHP.setCurrency(java.util.Currency.getInstance("PHP")); }
     private Integer updateCatchId = null; // set when entering update mode
 
+    //DOCKING LOGS
+    private javafx.collections.ObservableList<DockLogViewRow> dockData;
+    private javafx.collections.transformation.FilteredList<DockLogViewRow> dockFiltered;
+    private javafx.collections.transformation.SortedList<DockLogViewRow> dockSorted;
+    // --- Dock Log Add/Update state ---
+    private boolean dockUpdateMode = false;     // false = Add, true = Update-Departure
+    private Integer editingDockLogId = null;    // set in update mode
+
+
     
     @FXML
     private BorderPane viewFisherHistory_popup;
@@ -338,6 +347,53 @@ public class DashboardflController implements Initializable {
     private Label transacRemainingQuantity_label;
     @FXML
     private Label price_err;
+    
+    @FXML
+    private ScrollPane dockingLogs_pane;
+    @FXML
+    private Label totalDockToday_label;
+    @FXML
+    private Label mostActiveLast7days_label;
+    @FXML
+    private TextField filterField_dockLogs;
+    @FXML
+    private TableView<DockLogViewRow> dockLogs_tv;
+    @FXML
+    private TableColumn<DockLogViewRow, String> dockLogFisherfolk_col;
+    @FXML
+    private TableColumn<DockLogViewRow, String> dockLogBoat_col;
+    @FXML
+    private TableColumn<DockLogViewRow, java.time.LocalDate> dockLogDate_col;
+    @FXML
+    private TableColumn<DockLogViewRow, java.time.LocalTime> dockLogArrival_col;
+    @FXML
+    private TableColumn<DockLogViewRow, java.time.LocalTime> dockLogDeparture_col;
+    @FXML
+    private TableColumn<DockLogViewRow, String> dockLogRemarks_col;
+    @FXML
+    private DatePicker dpStartDate_dockLog;
+    @FXML
+    private DatePicker dpEndDate_dockLog;
+    @FXML
+    private BorderPane addNewDockLog_popup;
+    @FXML
+    private ComboBox<FisherfolkItem> dockLogFisherfolk_cb;
+    @FXML
+    private Label dockLogFisherfolk_err;
+    @FXML
+    private Label dockLogDockDate_err;
+    @FXML
+    private Label dockLogArrivalTime_err;
+    @FXML
+    private Label dockLogBoatName_label;
+    @FXML
+    private DatePicker dockLogDate_dp;
+    @FXML
+    private TextField dockLogArrivalTime_tf;
+    @FXML
+    private TextField dockLogDepartureTime_tf;
+    @FXML
+    private TextArea dockLogRemarks_ta;
 
     
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -348,6 +404,7 @@ public class DashboardflController implements Initializable {
         landings_pane.setVisible(false);
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
     }
 
     @FXML
@@ -357,6 +414,7 @@ public class DashboardflController implements Initializable {
         dashboard_pane.setVisible(false);
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
     }
 
     @FXML
@@ -366,6 +424,7 @@ public class DashboardflController implements Initializable {
         dashboard_pane.setVisible(false);
         landings_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
     }
 
     @FXML
@@ -375,10 +434,18 @@ public class DashboardflController implements Initializable {
         dashboard_pane.setVisible(false);
         fishermen_pane.setVisible(false);
         landings_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
     }
 
     @FXML
     private void dockingLogs_btn(ActionEvent event) {
+        dockingLogs_pane.setVisible(true);
+        
+        dashboard_pane.setVisible(false);
+        landings_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
+        
     }
 
     @FXML
@@ -405,6 +472,7 @@ public class DashboardflController implements Initializable {
         landings_pane.setVisible(false);
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
         // LANDINGS or CATCHES
         LANDINGS_SEARCH();
         hideAllErrors();
@@ -676,6 +744,46 @@ public class DashboardflController implements Initializable {
         allSellers = mysqlconnect.loadActiveFisherfolkItems();
         transacSeller_cb.setItems(allSellers);
 
+        //DOCKING LOGS
+        // columns
+        dockLogFisherfolk_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFisherfolkName()));
+        dockLogBoat_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBoatName()));
+        dockLogDate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getDockingDate()));
+        dockLogArrival_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getArrivalTime()));
+        dockLogDeparture_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getDepartureTime()));
+        dockLogRemarks_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getRemarks()));
+
+        // pretty formatters (optional)
+        setDateFormat(dockLogDate_col, "yyyy-MM-dd");
+        setTimeFormat(dockLogArrival_col, "HH:mm");
+        setTimeFormat(dockLogDeparture_col, "HH:mm");
+
+        // load data
+        dockData = mysqlconnect.loadDockLogsView();
+
+        dockFiltered = new javafx.collections.transformation.FilteredList<>(dockData, r -> true);
+        dockSorted = new javafx.collections.transformation.SortedList<>(dockFiltered);
+        dockSorted.comparatorProperty().bind(dockLogs_tv.comparatorProperty());
+        dockLogs_tv.setItems(dockSorted);
+
+        // search filter
+        filterField_dockLogs.textProperty().addListener((obs, old, val) -> applyDockFilters());
+
+        // date filters
+        dpStartDate_dockLog.valueProperty().addListener((o, a, b) -> applyDockFilters());
+        dpEndDate_dockLog.valueProperty().addListener((o, a, b) -> applyDockFilters());
+
+        // initial stats
+        refreshDockStats();
+        
+        //adding/update dock logs
+        //show boat name when choosing fisherfolk in cb
+        dockLogFisherfolk_cb.getSelectionModel().selectedItemProperty().addListener((o, a, b) -> {
+            var fi = (FisherfolkItem) b;
+            dockLogBoatName_label.setText(fi == null || fi.getBoatName() == null ? "—" : fi.getBoatName());
+        });
+
+        
     }
         
     ////////////////////////////////////////////////////////////////////////////end of initialization
@@ -2081,6 +2189,313 @@ public class DashboardflController implements Initializable {
         }
         refreshTransactionsTable();
     }
+    ////////////////////////////////////////////////////////////////////////////end of transaction & sales
+    
+    ////////////////////////////////////////////////////////////////////////////DOCK LOGS
+   @FXML
+    private void dockLog_generateReport(ActionEvent e) {
+        // Export the CURRENTLY FILTERED rows
+        java.util.List<DockLogViewRow> rows = new java.util.ArrayList<>(dockFiltered);
+
+        if (rows.isEmpty()) {
+            showInfoWide("Nothing to export.");
+            return;
+        }
+
+        String ts = java.time.LocalDateTime.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String defaultName = "dock_logs_" + ts + ".csv";
+
+        // optional: let user choose location
+        javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+        fc.setTitle("Save Dock Logs Report");
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fc.setInitialFileName(defaultName);
+        java.io.File file = fc.showSaveDialog(dockLogs_tv.getScene().getWindow());
+        if (file == null) return;
+
+        try (var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+            pw.println("LogID,Fisherfolk,Boat,DockingDate,Arrival,Departure,Remarks");
+            for (var r : rows) {
+                pw.printf("%d,%s,%s,%s,%s,%s,%s%n",
+                        r.getLogId(),
+                        csv(r.getFisherfolkName()),
+                        csv(r.getBoatName()),
+                        r.getDockingDate(),
+                        r.getArrivalTime() == null ? "" : r.getArrivalTime(),
+                        r.getDepartureTime() == null ? "" : r.getDepartureTime(),
+                        csv(r.getRemarks())
+                );
+            }
+            showInfoWide("Exported: " + file.getAbsolutePath());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("Export failed: " + ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void deleteDockLog(ActionEvent event) {
+        DockLogViewRow sel = dockLogs_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showInfoWide("Please select a dock log to delete.");
+            return;
+        }
+        var confirm = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.CONFIRMATION,
+            "Delete this dock log for " + sel.getFisherfolkName() + " on " + sel.getDockingDate() + "?",
+            javafx.scene.control.ButtonType.YES, javafx.scene.control.ButtonType.NO);
+        confirm.setHeaderText("Confirm delete");
+        confirm.showAndWait();
+        if (confirm.getResult() != javafx.scene.control.ButtonType.YES) return;
+
+        boolean ok = mysqlconnect.deleteDockLogById(sel.getLogId());
+        if (ok) {
+            dockData.remove(sel);
+            refreshDockStats();
+            showInfoWide("Dock log deleted.");
+            refreshDockLogsTable();
+        } else {
+            showInfoWide("Delete failed.");
+        }
+    }
+
+    @FXML
+    private void onClearFilterDate_DockLog(ActionEvent event) {
+        dpStartDate_dockLog.setValue(null);
+        dpEndDate_dockLog.setValue(null);
+        applyDockFilters();
+    }
+
+    private void applyDockFilters() {
+        final String q = (filterField_dockLogs.getText() == null) ? "" : filterField_dockLogs.getText().trim().toLowerCase();
+        final java.time.LocalDate start = dpStartDate_dockLog.getValue();
+        final java.time.LocalDate end   = dpEndDate_dockLog.getValue();
+
+        dockFiltered.setPredicate(row -> {
+            // search fisherfolk or boat
+            if (!q.isEmpty()) {
+                String hay = (row.getFisherfolkName() + " " + (row.getBoatName()==null?"":row.getBoatName())).toLowerCase();
+                if (!hay.contains(q)) return false;
+            }
+            // date range
+            if (start != null && row.getDockingDate().isBefore(start)) return false;
+            if (end != null && row.getDockingDate().isAfter(end)) return false;
+            return true;
+        });
+
+        refreshDockStats(); // update labels after filter
+    }
+
+    private void refreshDockStats() {
+        // label: dockings today (from DB)
+        totalDockToday_label.setText(String.valueOf(mysqlconnect.countDockingsToday()));
+
+        // label: most active fisher last 7 days (from DB)
+        mostActiveLast7days_label.setText(mysqlconnect.mostActiveFisherLast7Days());
+    }
+
+    @FXML
+    private void addDockLog(ActionEvent event) {
+        dockUpdateMode = false;
+        editingDockLogId = null;
+
+        hideDockErrors();
+
+        // load active fisherfolk (id, name, boat)
+        dockLogFisherfolk_cb.setDisable(false);
+        dockLogFisherfolk_cb.setItems(mysqlconnect.loadActiveFisherfolkItems()); // ObservableList<FisherfolkItem>
+        dockLogFisherfolk_cb.getSelectionModel().clearSelection();
+        dockLogBoatName_label.setText("—");
+
+        // default date = today, editable
+        dockLogDate_dp.setValue(java.time.LocalDate.now());
+        dockLogDate_dp.setDisable(false);
+
+        // times empty; arrival required, departure optional on ADD
+        dockLogArrivalTime_tf.clear();
+        dockLogArrivalTime_tf.setPromptText("HH:mm");
+        dockLogArrivalTime_tf.setDisable(false);
+
+        dockLogDepartureTime_tf.clear();
+        dockLogDepartureTime_tf.setPromptText("HH:mm (optional)");
+        dockLogDepartureTime_tf.setDisable(false);
+
+        dockLogRemarks_ta.clear();
+
+        // show popup, disable background panes
+        addNewDockLog_popup.setVisible(true);
+        dockingLogs_pane.setDisable(true);
+        sideNavigation_vbox.setDisable(true);
+    }
+
+    @FXML
+    private void updateDockLogDeparture(ActionEvent event) {
+        var sel = dockLogs_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { showInfoWide("Please select a dock log to update."); return; }
+
+        dockUpdateMode = true;
+        editingDockLogId = sel.getLogId();
+
+        hideDockErrors();
+
+        // fill fields from selected row, but lock fisherfolk/date/arrival
+        var item = new FisherfolkItem(sel.getFisherfolkId(), sel.getFisherfolkName(), sel.getBoatName());
+        dockLogFisherfolk_cb.getItems().setAll(item);
+        dockLogFisherfolk_cb.getSelectionModel().select(0);
+        dockLogFisherfolk_cb.setDisable(true);
+
+        dockLogBoatName_label.setText(item.getBoatName() == null ? "—" : item.getBoatName());
+
+        dockLogDate_dp.setValue(sel.getDockingDate());
+        dockLogDate_dp.setDisable(true);
+
+        dockLogArrivalTime_tf.setText(sel.getArrivalTime() == null ? "" : sel.getArrivalTime().toString());
+        dockLogArrivalTime_tf.setDisable(true);
+
+        dockLogDepartureTime_tf.setText(sel.getDepartureTime() == null ? "" : sel.getDepartureTime().toString());
+        dockLogDepartureTime_tf.setPromptText("HH:mm");
+        dockLogDepartureTime_tf.setDisable(false); // this is what we are updating
+
+        dockLogRemarks_ta.setText(sel.getRemarks() == null ? "" : sel.getRemarks());
+
+        addNewDockLog_popup.setVisible(true);
+        dockingLogs_pane.setDisable(true);
+        sideNavigation_vbox.setDisable(true);
+    }
+ 
+    @FXML
+    private void btnCancel_onAddDockLog(ActionEvent event) {
+        addNewDockLog_popup.setVisible(false);
+        dockingLogs_pane.setDisable(false);
+        sideNavigation_vbox.setDisable(false);
+        dockUpdateMode = false;
+        editingDockLogId = null;
+    }
+
+    @FXML
+    private void btnClear_onAddDockLog(ActionEvent event) {
+        hideDockErrors();
+        if (dockUpdateMode) {
+            // only editable: departure + remarks in update mode
+            dockLogDepartureTime_tf.clear();
+            dockLogRemarks_ta.clear();
+        } else {
+            dockLogFisherfolk_cb.getSelectionModel().clearSelection();
+            dockLogBoatName_label.setText("—");
+            dockLogDate_dp.setValue(java.time.LocalDate.now());
+            dockLogArrivalTime_tf.clear();
+            dockLogDepartureTime_tf.clear();
+            dockLogRemarks_ta.clear();
+        }
+    }
+
+    @FXML
+    private void btnSave_onAddDockLog(ActionEvent event) {
+        hideDockErrors();
+
+        if (!dockUpdateMode) {
+            // -------- ADD MODE --------
+            FisherfolkItem fi = (FisherfolkItem) dockLogFisherfolk_cb.getValue();
+            if (fi == null) { dockLogFisherfolk_err.setVisible(true); return; }
+
+            var date = dockLogDate_dp.getValue();
+            if (date == null) { dockLogDockDate_err.setVisible(true); return; }
+
+            var arr = parseTime(dockLogArrivalTime_tf.getText());
+            if (arr == null) { dockLogArrivalTime_err.setText("Use 24h HH:mm"); dockLogArrivalTime_err.setVisible(true); return; }
+
+            // departure optional
+            var depText = dockLogDepartureTime_tf.getText();
+            java.time.LocalTime dep = (depText == null || depText.isBlank()) ? null : parseTime(depText);
+            if (depText != null && !depText.isBlank() && dep == null) {
+                dockLogArrivalTime_err.setText(""); // keep arrival msg clean
+                // reuse same label or add another label for departure
+                showInfoWide("Invalid departure time. Use 24h HH:mm.");
+                return;
+            }
+            if (dep != null && !dep.isAfter(arr)) {
+                showInfoWide("Departure must be after arrival.");
+                return;
+            }
+
+            String remarks = dockLogRemarks_ta.getText();
+
+            boolean ok = mysqlconnect.insertDockLog(fi.getId(), date, arr, dep, remarks);
+            if (ok) {
+                showInfoWide("Dock log added.");
+                addNewDockLog_popup.setVisible(false);
+                dockingLogs_pane.setDisable(false);
+                sideNavigation_vbox.setDisable(false);
+                dockUpdateMode = false;
+                editingDockLogId = null;
+                refreshDockLogsTable(); // reload table
+            } else {
+                showInfoWide("Save failed.");
+            }
+
+        } else {
+            // -------- UPDATE-DEPARTURE MODE --------
+            if (editingDockLogId == null) { showInfoWide("Nothing to update."); return; }
+
+            // Only departure time is required here; remarks optional
+            var depText = dockLogDepartureTime_tf.getText();
+            if (depText == null || depText.isBlank()) {
+                showInfoWide("Please enter departure time (HH:mm).");
+                return;
+            }
+            var dep = parseTime(depText);
+            if (dep == null) { showInfoWide("Invalid departure time. Use 24h HH:mm."); return; }
+
+            // Optional: sanity vs arrival (we can read the disabled field)
+            var arr = parseTime(dockLogArrivalTime_tf.getText());
+            if (arr != null && !dep.isAfter(arr)) { showInfoWide("Departure must be after arrival."); return; }
+
+            String remarks = dockLogRemarks_ta.getText();
+
+            boolean ok = mysqlconnect.updateDockLogDeparture(editingDockLogId, dep, remarks);
+            if (ok) {
+                showInfoWide("Departure updated.");
+                addNewDockLog_popup.setVisible(false);
+                dockingLogs_pane.setDisable(false);
+                sideNavigation_vbox.setDisable(false);
+                dockUpdateMode = false;
+                editingDockLogId = null;
+                refreshDockLogsTable();
+            } else {
+                showInfoWide("Update failed.");
+            }
+        }
+    }
+
+    // helpers
+    private void hideDockErrors() {
+        dockLogFisherfolk_err.setVisible(false);
+        dockLogDockDate_err.setVisible(false);
+        dockLogArrivalTime_err.setVisible(false);
+    }
+    private java.time.LocalTime parseTime(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        if (t.isEmpty()) return null;
+        try {
+            return java.time.LocalTime.parse(t, java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    private void refreshDockLogsTable() {
+        // re-fetch from DB
+        var fresh = mysqlconnect.loadDockLogsView();
+        // if needed to preserve sorting/filtering: replace items on the backing list
+        dockData.setAll(fresh); // dockData is the ObservableList backing the FilteredList
+        applyDockFilters();     // re-apply current search/date filters
+        refreshDockStats();     // update “today” & “most active” labels
+    }
+
+
+
+
 
 
 

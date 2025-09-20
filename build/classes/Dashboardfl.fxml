@@ -1218,7 +1218,7 @@
             </HBox>
          </bottom>
       </BorderPane>
-      <ScrollPane fx:id="transactionANDsales_pane" layoutX="224.0" layoutY="121.0" prefHeight="542.0" prefWidth="1038.0" style="-fx-background-color: transparent;">
+      <ScrollPane fx:id="transactionANDsales_pane" layoutX="224.0" layoutY="121.0" prefHeight="542.0" prefWidth="1038.0" style="-fx-background-color: transparent;" visible="false">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
                <children>
@@ -1611,6 +1611,315 @@
                   </Button>
                   <Button onAction="#btnClear_onAddTransaction" text="Clear" />
                   <Button defaultButton="true" onAction="#btnSave_onAddTransaction" styleClass="primary" text="Save" />
+               </children>
+               <padding>
+                  <Insets bottom="16" left="20" right="20" top="12" />
+               </padding>
+               <BorderPane.margin>
+                  <Insets right="30.0" />
+               </BorderPane.margin>
+            </HBox>
+         </bottom>
+      </BorderPane>
+      <ScrollPane fx:id="dockingLogs_pane" layoutX="224.0" layoutY="120.0" prefHeight="553.0" prefWidth="1048.0" style="-fx-background-color: transparent;">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+               <children>
+                  <HBox prefHeight="114.0" prefWidth="769.0">
+                     <children>
+                        <Pane prefHeight="94.0" prefWidth="256.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                           <children>
+                              <Label fx:id="totalDockToday_label" alignment="CENTER" layoutY="28.0" prefHeight="32.0" prefWidth="257.0" text="5" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="22.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" layoutY="10.0" prefHeight="21.0" prefWidth="254.0" text="Total Dockings Today" textFill="WHITE">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="39.0" fitWidth="42.0" layoutX="17.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/DOCK.png" />
+                                 </image>
+                              </ImageView>
+                              <Label alignment="CENTER" layoutY="57.0" prefHeight="25.0" prefWidth="255.0" text="Total for today" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                        </Pane>
+                        <Pane prefHeight="94.0" prefWidth="480.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                           <children>
+                              <Label fx:id="mostActiveLast7days_label" alignment="CENTER" layoutX="-1.0" layoutY="26.0" prefHeight="38.0" prefWidth="482.0" text="Juan Dela Cruz" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="22.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" layoutX="2.0" layoutY="10.0" prefHeight="21.0" prefWidth="478.0" text="Most Active Fisherfolk" textFill="WHITE">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="39.0" fitWidth="38.0" layoutX="43.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/PERSON.png" />
+                                 </image>
+                              </ImageView>
+                              <Label alignment="CENTER" layoutY="51.0" prefHeight="38.0" prefWidth="480.0" text="Last 7 days" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                        </Pane>
+                     </children>
+                  </HBox>
+                  <HBox layoutY="109.0" prefHeight="432.0" prefWidth="1035.0">
+                     <children>
+                        <Pane prefHeight="402.0" prefWidth="752.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="184.0" text="Docking Logs" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" layoutX="231.0" layoutY="29.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="479.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                                 <children>
+                                    <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/search.png" />
+                                       </image>
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" left="10.0" top="5.0" />
+                                       </HBox.margin>
+                                    </ImageView>
+                                    <TextField fx:id="filterField_dockLogs" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search Fisherfolk / Boat Name" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="dockLogs_tv" layoutX="26.0" layoutY="68.0" prefHeight="274.0" prefWidth="693.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                 <columns>
+                                    <TableColumn fx:id="dockLogFisherfolk_col" prefWidth="123.33332252502441" text="FISHERFOLK" />
+                                    <TableColumn fx:id="dockLogBoat_col" prefWidth="95.77775573730469" text="BOAT" />
+                                    <TableColumn fx:id="dockLogDate_col" prefWidth="109.11112976074219" text="DOCKING DATE" />
+                                    <TableColumn fx:id="dockLogArrival_col" prefWidth="83.11114501953125" text="ARRIVAL" />
+                                    <TableColumn fx:id="dockLogDeparture_col" prefWidth="88.4444580078125" text="DEPARTURE" />
+                                    <TableColumn fx:id="dockLogRemarks_col" prefWidth="198.2222900390625" text="REMARKS" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </Pane>
+                     </children>
+                  </HBox>
+                  <Pane layoutX="781.0" layoutY="10.0" prefHeight="508.0" prefWidth="243.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                     <children>
+                        <Label alignment="CENTER" layoutX="25.0" layoutY="6.0" prefHeight="34.0" prefWidth="195.0" text="Quick Actions" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <VBox layoutX="35.0" layoutY="43.0" prefHeight="457.0" prefWidth="176.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#dockLog_generateReport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="Generate Report" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="15.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#addDockLog" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 5px;" text="Record Docking" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#updateDockLogDeparture" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0e6902; -fx-background-radius: 5px;" text="Update Departure" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#deleteDockLog" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #7b0606; -fx-background-radius: 5px;" text="Delete" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Label alignment="CENTER" prefHeight="17.0" prefWidth="217.0" text="Filter by Date Range:" textFill="WHITE">
+                                 <VBox.margin>
+                                    <Insets top="40.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox prefHeight="31.0" prefWidth="173.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="36.0" text="From:" textFill="WHITE">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="dpStartDate_dockLog" prefHeight="31.0" prefWidth="137.0">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </DatePicker>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox prefHeight="32.0" prefWidth="173.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="35.0" text="To:" textFill="WHITE">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="dpEndDate_dockLog" prefHeight="31.0" prefWidth="137.0">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" top="10.0" />
+                                       </HBox.margin>
+                                    </DatePicker>
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="3.0" prefWidth="173.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#onClearFilterDate_DockLog" prefHeight="20.0" prefWidth="85.0" style="-fx-background-color: transparent; -fx-border-color: #e85760; -fx-border-radius: 5px;" text="CLEAR" textFill="#e85760">
+                                       <font>
+                                          <Font name="System Bold" size="8.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets left="55.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
+      <BorderPane fx:id="addNewDockLog_popup" layoutX="272.0" layoutY="78.0" prefHeight="537.0" prefWidth="859.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
+         <top>
+            <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
+               <children>
+                  <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Dock Log" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="12" left="20" right="20" top="16" />
+               </padding>
+            </HBox>
+         </top>
+         <center>
+            <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="394.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10" left="20" right="20" top="10" />
+               </padding>
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="50.0" />
+                  <ColumnConstraints percentWidth="50.0" />
+               </columnConstraints>
+               <children>
+                  <Label text="Fisherfolk" textFill="WHITE" />
+                  <ComboBox fx:id="dockLogFisherfolk_cb" prefHeight="25.0" prefWidth="373.0" promptText="Select Fisherfolk" GridPane.rowIndex="1" />
+                  <Label fx:id="dockLogFisherfolk_err" styleClass="error" text="Please select fisherfolk" textFill="#ff7e7e" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Docking Date" textFill="WHITE" GridPane.rowIndex="3" />
+                  <Label fx:id="dockLogDockDate_err" styleClass="error" text="Please select date" textFill="#ff7e7e" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="95.0" text="Arrival Time" textFill="WHITE" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="dockLogArrivalTime_err" styleClass="error" text="Please enter arrival time (eg., 06:19)" textFill="#ff7e7e" GridPane.rowIndex="8">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label text="Remarks" textFill="WHITE" GridPane.rowIndex="10" />
+                  <Label text="Departure Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <Label text="Boat Name" textFill="WHITE" GridPane.columnIndex="1" />
+                  <Label fx:id="dockLogBoatName_label" prefHeight="47.0" prefWidth="377.0" style="-fx-background-color: white;" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin>
+                     <padding>
+                        <Insets left="5.0" />
+                     </padding>
+                  </Label>
+                  <DatePicker fx:id="dockLogDate_dp" prefHeight="25.0" prefWidth="373.0" GridPane.rowIndex="4" />
+                  <TextField fx:id="dockLogArrivalTime_tf" promptText="HH:mm" GridPane.rowIndex="7" />
+                  <TextField fx:id="dockLogDepartureTime_tf" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <TextArea fx:id="dockLogRemarks_ta" prefHeight="74.0" prefWidth="364.0" GridPane.rowIndex="11" />
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                  <RowConstraints />
+                  <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                  <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" />
+               </rowConstraints>
+            </GridPane>
+         </center>
+         <bottom>
+            <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
+               <children>
+                  <Button onAction="#btnCancel_onAddDockLog" text="Cancel">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+                  <Button onAction="#btnClear_onAddDockLog" text="Clear" />
+                  <Button defaultButton="true" onAction="#btnSave_onAddDockLog" styleClass="primary" text="Save" />
                </children>
                <padding>
                   <Insets bottom="16" left="20" right="20" top="12" />

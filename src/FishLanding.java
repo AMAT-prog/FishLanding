@@ -35,7 +35,7 @@ public class FishLanding extends Application {
         } catch (IOException ex) {
             Logger.getLogger(FishLanding.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+    }  
 
     /**
      * @param args the command line arguments

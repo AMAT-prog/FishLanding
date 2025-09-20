@@ -9,7 +9,7 @@
  */
 import java.time.LocalDate;
 import java.time.LocalTime;
-
+//for view dock log in FISHERMEN pane
 public class DockLogRecord {
     private final int logId;
     private final int fisherId;
