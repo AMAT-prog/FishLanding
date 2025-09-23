@@ -43,7 +43,15 @@ import java.sql.Types;
 import java.sql.DriverManager;  // only if you use DriverManager directly
 import javafx.collections.FXCollections;
 import java.sql.ResultSet;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 import javafx.scene.layout.VBox;
@@ -226,6 +234,18 @@ public class DashboardflController implements Initializable {
     private boolean dockUpdateMode = false;     // false = Add, true = Update-Departure
     private Integer editingDockLogId = null;    // set in update mode
 
+    //REPORTS & ANALYTICS
+    private final java.text.NumberFormat pesoFmt =
+        java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("en", "PH"));
+    
+    //SPECIES
+    // --- state
+    private javafx.collections.ObservableList<SpeciesItem> speciesData;
+    private javafx.collections.transformation.FilteredList<SpeciesItem> speciesFiltered;
+    private javafx.collections.transformation.SortedList<SpeciesItem> speciesSorted;
+
+    private boolean speciesUpdateMode = false; // false = add, true = edit
+    private Integer editingSpeciesId = null;
 
     
     @FXML
@@ -394,6 +414,68 @@ public class DashboardflController implements Initializable {
     private TextField dockLogDepartureTime_tf;
     @FXML
     private TextArea dockLogRemarks_ta;
+    
+    @FXML
+    private ScrollPane reportsANDanalytics_pane;
+    @FXML
+    private ToggleGroup reports_toggle;
+    @FXML
+    private ToggleButton rbDaily;
+    @FXML
+    private ToggleButton rbWeekly;
+    @FXML
+    private ToggleButton rbMonthly;
+    @FXML
+    private LineChart<String, Number> salesChart;
+    @FXML
+    private NumberAxis salesYAxis;
+    @FXML
+    private CategoryAxis salesXAxis;
+    @FXML
+    private DatePicker dpStart;
+    @FXML
+    private DatePicker dpEnd;
+    @FXML
+    private TabPane reportsTabPane;
+    @FXML
+    private Tab salesTab;
+    @FXML
+    private Tab speciesTab;
+    @FXML
+    private Tab contribTab;
+    @FXML
+    private Tab volumesTab;
+    @FXML
+    private BarChart<String,Number> contribBarChart;
+    @FXML
+    private PieChart speciesPieChart;
+    @FXML
+    private StackedBarChart<String,Number> catchStackedBarChart;
+    @FXML
+    private Label speciesDateLabel;
+    @FXML
+    private Label fisherfolkDateLabel;
+    @FXML
+    private Label catchVolumeDateLabel;
+    
+    @FXML
+    private ScrollPane species_pane;
+    @FXML
+    private TableView<SpeciesItem> species_tv;
+    @FXML
+    private TableColumn<SpeciesItem, String> speciesName_col;
+    @FXML
+    private TableColumn<SpeciesItem, String> speciesDescription_col;
+    @FXML
+    private TextField filterField_species;
+    @FXML
+    private BorderPane addSpecies_popup;
+    @FXML
+    private Label speciesName_err;
+    @FXML
+    private TextField speciesName_tf;
+    @FXML
+    private TextArea speciesDescription_tf;
 
     
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -405,6 +487,8 @@ public class DashboardflController implements Initializable {
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
     }
 
     @FXML
@@ -415,6 +499,8 @@ public class DashboardflController implements Initializable {
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
     }
 
     @FXML
@@ -425,6 +511,8 @@ public class DashboardflController implements Initializable {
         landings_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
     }
 
     @FXML
@@ -435,6 +523,8 @@ public class DashboardflController implements Initializable {
         fishermen_pane.setVisible(false);
         landings_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
     }
 
     @FXML
@@ -445,15 +535,32 @@ public class DashboardflController implements Initializable {
         landings_pane.setVisible(false);
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
-        
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
     }
 
     @FXML
     private void reportsAnalytics_btn(ActionEvent event) {
+        reportsANDanalytics_pane.setVisible(true);
+        
+        dashboard_pane.setVisible(false);
+        landings_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
+        species_pane.setVisible(false);
     }
 
     @FXML
     private void species_btn(ActionEvent event) {
+        species_pane.setVisible(true);
+         
+        landings_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        dashboard_pane.setVisible(false);
     }
 
     @FXML
@@ -473,6 +580,8 @@ public class DashboardflController implements Initializable {
         fishermen_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
         // LANDINGS or CATCHES
         LANDINGS_SEARCH();
         hideAllErrors();
@@ -782,6 +891,83 @@ public class DashboardflController implements Initializable {
             var fi = (FisherfolkItem) b;
             dockLogBoatName_label.setText(fi == null || fi.getBoatName() == null ? "—" : fi.getBoatName());
         });
+
+        //REPORTS & ANALYTICS
+        salesChart.setAnimated(false);
+        salesYAxis.setForceZeroInRange(true);
+        salesChart.setCreateSymbols(true);
+        ((NumberAxis) salesChart.getYAxis()).setForceZeroInRange(false);
+
+        // default to monthly current year
+        rbDaily.setSelected(true);
+        // optional: default range = Jan 1..Dec 31 of this year
+        var now = java.time.LocalDate.now();
+        dpStart.setValue(now.with(java.time.temporal.TemporalAdjusters.firstDayOfYear()));
+        dpEnd.setValue(now.with(java.time.temporal.TemporalAdjusters.lastDayOfYear()));
+
+        // listeners
+        rbDaily.setOnAction(e -> loadSalesSeries());
+        rbWeekly.setOnAction(e -> loadSalesSeries());
+        rbMonthly.setOnAction(e -> loadSalesSeries());
+        dpStart.valueProperty().addListener((o,a,b) -> loadSalesSeries());
+        dpEnd.valueProperty().addListener((o,a,b) -> loadSalesSeries());
+
+        loadSalesSeries();
+        loadSpeciesDistributionAuto();
+        loadFisherfolkContribAuto();
+        loadCatchVolumesAuto();
+        
+        // Fisherfolk Contributions (BarChart)
+        contribBarChart.setCategoryGap(18);   // space between categories
+        contribBarChart.setBarGap(6);         // space between series within a category
+
+        // Stacked bar: usually one category per period, but spacing helps when many
+        catchStackedBarChart.setCategoryGap(20);
+
+        // If y-axis values get cramped:
+        NumberAxis y1 = (NumberAxis) contribBarChart.getYAxis();
+        y1.setMinorTickCount(0);
+        y1.setTickLabelGap(8);
+        y1.setForceZeroInRange(false);
+
+        NumberAxis y2 = (NumberAxis) catchStackedBarChart.getYAxis();
+        y2.setMinorTickCount(0);
+        y2.setTickLabelGap(8);
+        y2.setForceZeroInRange(false);
+
+        // Optional tooltips (nice UX on bars & pie slices)
+        contribBarChart.getData().forEach(s ->
+            s.getData().forEach(d ->
+                Tooltip.install(d.getNode(), new Tooltip(
+                    s.getName() + ": " + d.getYValue()))
+        ));
+        speciesPieChart.getData().forEach(d ->
+            Tooltip.install(d.getNode(), new Tooltip(
+                d.getName() + " (" + String.format("%.1f%%", d.getPieValue()) + ")"))
+        );
+
+        //SPECIES
+        // SPECIES table
+        speciesName_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
+        speciesDescription_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(
+                c.getValue().getDescription() == null ? "" : c.getValue().getDescription()));
+
+        speciesData = mysqlconnect.loadSpecies();
+
+        speciesFiltered = new javafx.collections.transformation.FilteredList<>(speciesData, s -> true);
+        speciesSorted = new javafx.collections.transformation.SortedList<>(speciesFiltered);
+        speciesSorted.comparatorProperty().bind(species_tv.comparatorProperty());
+        species_tv.setItems(speciesSorted);
+
+        // filter by name
+        filterField_species.textProperty().addListener((obs, o, v) -> {
+            String q = v == null ? "" : v.trim().toLowerCase();
+            speciesFiltered.setPredicate(s -> q.isEmpty() || (s.getSpeciesName() != null && s.getSpeciesName().toLowerCase().contains(q)));
+        });
+
+        // hide popup initially
+        addSpecies_popup.setVisible(false);
+        speciesName_err.setVisible(false);
 
         
     }
@@ -2492,13 +2678,353 @@ public class DashboardflController implements Initializable {
         applyDockFilters();     // re-apply current search/date filters
         refreshDockStats();     // update “today” & “most active” labels
     }
+    ////////////////////////////////////////////////////////////////////////////end Dock Logs
+    ////////////////////////////////////////////////////////////////////////////REPORTS & ANALYTICS
+    private void loadSalesSeries() {
+        var start = dpStart.getValue();
+        var end   = dpEnd.getValue();
 
+        java.util.List<mysqlconnect.PeriodRevenue> rows;
+        String seriesName;
+        if (rbDaily.isSelected()) {
+            rows = mysqlconnect.salesDaily(start, end);
+            seriesName = "Daily Revenue";
+        } else if (rbWeekly.isSelected()) {
+            rows = mysqlconnect.salesWeekly(start, end);
+            seriesName = "Weekly Revenue";
+        } else {
+            rows = mysqlconnect.salesMonthly(start, end);
+            seriesName = "Monthly Revenue";
+        }
 
+        var series = new javafx.scene.chart.XYChart.Series<String, Number>();
+        series.setName(seriesName);
+        for (var r : rows) {
+            var dp = new javafx.scene.chart.XYChart.Data<String, Number>(r.label, r.revenue);
+            // tooltip with peso format
+            javafx.scene.control.Tooltip t = new javafx.scene.control.Tooltip(pesoFmt.format(r.revenue));
+            javafx.scene.control.Tooltip.install(dp.getNode() == null ? new javafx.scene.shape.Rectangle(0,0) : dp.getNode(), t);
+            series.getData().add(dp);
+        }
 
-
-
-
-
+        salesChart.getData().setAll(series);
+    }
     
+    private java.time.LocalDate startOfMonth() {
+        return java.time.LocalDate.now().withDayOfMonth(1);
+    }
+    private java.time.LocalDate endOfMonth() {
+        return java.time.LocalDate.now().withDayOfMonth(java.time.LocalDate.now().lengthOfMonth());
+    }
+
+    private void loadSpeciesDistributionAuto() {
+        var res = mysqlconnect.loadSpeciesDistribution(startOfMonth(), endOfMonth());
+        speciesPieChart.setData(javafx.collections.FXCollections.observableArrayList(res.getValue()));
+
+        // add % to labels (optional)
+        double total = speciesPieChart.getData().stream().mapToDouble(javafx.scene.chart.PieChart.Data::getPieValue).sum();
+        speciesPieChart.getData().forEach(d -> {
+            double pct = total == 0 ? 0 : (d.getPieValue() / total) * 100;
+            d.setName(d.getName() + String.format(" (%.1f%%)", pct));
+        });
+
+        speciesDateLabel.setText(res.getKey().isBlank() ? "All time" : res.getKey());
+    }
+
+    private void loadFisherfolkContribAuto() {
+        var res = mysqlconnect.loadFisherfolkContrib(startOfMonth(), endOfMonth(), true); // paidOnly=true
+        contribBarChart.getData().setAll(res.getValue());
+        fisherfolkDateLabel.setText(res.getKey().isBlank() ? "All time" : res.getKey());
+    }
+
+    private void loadCatchVolumesAuto() {
+        var res = mysqlconnect.loadCatchVolumes(startOfMonth(), endOfMonth());
+        catchStackedBarChart.getData().clear();
+        res.getValue().forEach((species, list) -> {
+            var s = new javafx.scene.chart.XYChart.Series<String,Number>();
+            s.setName(species);
+            s.getData().addAll(list);
+            catchStackedBarChart.getData().add(s);
+        });
+        catchVolumeDateLabel.setText(res.getKey().isBlank() ? "All time" : res.getKey());
+    }
+    
+    private void reloadReports(java.time.LocalDate start, java.time.LocalDate end) {
+        var sp = mysqlconnect.loadSpeciesDistribution(start, end);
+        speciesPieChart.setData(javafx.collections.FXCollections.observableArrayList(sp.getValue()));
+        speciesDateLabel.setText(sp.getKey());
+
+        var ff = mysqlconnect.loadFisherfolkContrib(start, end, true);
+        contribBarChart.getData().setAll(ff.getValue());
+        fisherfolkDateLabel.setText(ff.getKey());
+
+        var cv = mysqlconnect.loadCatchVolumes(start, end);
+        catchStackedBarChart.getData().clear();
+        cv.getValue().forEach((k,v) -> {
+            var s = new javafx.scene.chart.XYChart.Series<String,Number>();
+            s.setName(k); s.getData().addAll(v);
+            catchStackedBarChart.getData().add(s);
+        });
+        catchVolumeDateLabel.setText(cv.getKey());
+    }
+
+    // ====== SNAPSHOT CHART TO PNG ======
+    private boolean snapshotToPng(javafx.scene.Node node, java.io.File outFile) {
+        try {
+            javafx.scene.image.WritableImage img = node.snapshot(null, null);
+            javax.imageio.ImageIO.write(
+                javafx.embed.swing.SwingFXUtils.fromFXImage(img, null),
+                "png",
+                outFile
+            );
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfo("Failed to save chart image: " + ex.getMessage());
+            return false;
+        }
+    }
+
+    // ====== GENERIC PRINT OF ANY NODE ======
+    private void printNode(javafx.scene.Node node) {
+        javafx.print.PrinterJob job = javafx.print.PrinterJob.createPrinterJob();
+        if (job != null && job.showPrintDialog(node.getScene().getWindow())) {
+            if (job.printPage(node)) job.endJob();
+        }
+    }
+    
+    @FXML
+    private void btnExport(ActionEvent event) {
+        // Determine which tab is active and delegate.
+        // Example ids: salesTab, speciesTab, contribTab, volumesTab
+        var selectedTab = reportsTabPane.getSelectionModel().getSelectedItem();
+        if (selectedTab == salesTab) {
+            exportSales();
+        } else if (selectedTab == speciesTab) {
+            exportChartOnly(speciesPieChart, "species_distribution");
+        } else if (selectedTab == contribTab) {
+            exportChartOnly(contribBarChart, "fisherfolk_contributions");
+        } else if (selectedTab == volumesTab) {
+            exportChartOnly(catchStackedBarChart, "catch_volumes");
+        }
+    }
+    private void exportSales() {
+        // 1) Pick CSV destination
+        var chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Export Sales Trend (CSV)");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv"));
+        // sensible default name with timestamp
+        String period = rbDaily.isSelected() ? "daily" : rbWeekly.isSelected() ? "weekly" : "monthly";
+        String ts = java.time.LocalDateTime.now().toString().replace(':','-').substring(0,19);
+        chooser.setInitialFileName("sales_trend_" + period + "_" + ts + ".csv");
+
+        java.io.File csvFile = chooser.showSaveDialog(salesChart.getScene().getWindow());
+        if (csvFile == null) return; // user cancelled
+
+        // 2) Write CSV of current series
+        var series = salesChart.getData().isEmpty() ? null : salesChart.getData().get(0);
+        if (series == null) { showInfo("No data to export."); return; }
+
+        try (var pw = new java.io.PrintWriter(csvFile, java.nio.charset.StandardCharsets.UTF_8)) {
+            pw.println("Period,RevenuePHP");
+            for (var dp : series.getData()) {
+                pw.printf("%s,%.2f%n", dp.getXValue(), dp.getYValue().doubleValue());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfo("Export failed: " + ex.getMessage());
+            return;
+        }
+
+        // 3) Save a PNG of the chart next to the CSV
+        String baseName = csvFile.getName();
+        int dot = baseName.lastIndexOf('.');
+        if (dot > 0) baseName = baseName.substring(0, dot);
+        java.io.File pngFile = new java.io.File(csvFile.getParentFile(), baseName + ".png");
+
+        boolean okPng = snapshotToPng(salesChart, pngFile);
+
+        showInfo("Exported:\n" + csvFile.getAbsolutePath() + (okPng ? "\n" + pngFile.getAbsolutePath() : ""));
+    }
+
+    private void exportChartOnly(javafx.scene.Node chart, String defaultBaseName) {
+        var chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Save Chart Image (PNG)");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PNG image (*.png)", "*.png"));
+        String ts = java.time.LocalDateTime.now().toString().replace(':','-').substring(0,19);
+        chooser.setInitialFileName(defaultBaseName + "_" + ts + ".png");
+        var file = chooser.showSaveDialog(chart.getScene().getWindow());
+        if (file == null) return;
+        if (snapshotToPng(chart, file)) showInfo("Saved: " + file.getAbsolutePath());
+    }
+
+    @FXML
+    private void btnPrint(ActionEvent event) {
+         var selectedTab = reportsTabPane.getSelectionModel().getSelectedItem();
+        if (selectedTab == salesTab) {
+            printNode(salesChart);
+        } else if (selectedTab == speciesTab) {
+            printNode(speciesPieChart);
+        } else if (selectedTab == contribTab) {
+            printNode(contribBarChart);
+        } else if (selectedTab == volumesTab) {
+            printNode(catchStackedBarChart);
+        }
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////end of reports & analytics
+    ////////////////////////////////////////////////////////////////////////////SPECIES
+    // --- tiny helpers
+    private void hideSpeciesErrors() { speciesName_err.setVisible(false); }
+
+    private void showInfoSpecies(String msg) {
+        var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION, msg,
+                javafx.scene.control.ButtonType.OK);
+        a.setHeaderText(null); a.showAndWait();
+    }
+    
+    @FXML
+    private void addSpecies(ActionEvent event) {
+        speciesUpdateMode = false;
+        editingSpeciesId = null;
+
+        hideSpeciesErrors();
+        speciesName_tf.clear();
+        speciesDescription_tf.clear();
+
+        addSpecies_popup.setVisible(true);
+        // optionally disable background panes 
+        sideNavigation_vbox.setDisable(true);
+        species_pane.setDisable(true);
+    }
+
+    @FXML
+    private void updateSpecies(ActionEvent event) {
+        SpeciesItem sel = species_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { showInfoSpecies("Please select a species to edit."); return; }
+
+        speciesUpdateMode = true;
+        editingSpeciesId = sel.getId();
+
+        hideSpeciesErrors();
+        speciesName_tf.setText(sel.getSpeciesName());
+        speciesDescription_tf.setText(sel.getDescription());
+
+        addSpecies_popup.setVisible(true);
+        sideNavigation_vbox.setDisable(true);
+        species_pane.setDisable(true);
+    }
+
+    @FXML
+    private void deleteSpecies(ActionEvent event) {
+        SpeciesItem sel = species_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { showInfoSpecies("Please select a species to delete."); return; }
+
+        var confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                "Delete species \"" + sel.getSpeciesName() + "\"?\nThis can’t be undone.",
+                javafx.scene.control.ButtonType.YES, javafx.scene.control.ButtonType.NO);
+        confirm.setHeaderText("Confirm delete");
+        confirm.showAndWait();
+        if (confirm.getResult() != javafx.scene.control.ButtonType.YES) return;
+
+        boolean ok = mysqlconnect.deleteSpecies(sel.getId());
+        if (!ok) {
+            showInfoSpecies("Cannot delete.\nThis species is still used by existing Catch records.");
+            return;
+        }
+
+        speciesData.remove(sel); // reflects immediately
+        showInfoSpecies("Species deleted.");
+    }
+
+    @FXML
+    private void btnExport_SPECIES(ActionEvent event) {
+        var chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Export species");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV file", "*.csv"));
+        chooser.setInitialFileName("species_" + java.time.LocalDate.now() + ".csv");
+        java.io.File file = chooser.showSaveDialog(species_tv.getScene().getWindow());
+        if (file == null) return;
+
+        try (var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+            pw.println("ID,Name,Description");
+            for (SpeciesItem s : speciesSorted) {
+                pw.printf("%d,%s,%s%n",
+                    s.getId(),
+                    csv(s.getSpeciesName()),
+                    csv(s.getDescription()));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoSpecies("Export failed: " + ex.getMessage());
+            return;
+        }
+        showInfoSpecies("Exported to:\n" + file.getAbsolutePath());
+    }
+
+    // on adding or editing species (popup form)
+    @FXML
+    private void btnCancel_onAddSpecies(ActionEvent event) {
+        addSpecies_popup.setVisible(false);
+        speciesName_err.setVisible(false);
+        // re-enable background panes 
+        sideNavigation_vbox.setDisable(false);
+        species_pane.setDisable(false);
+    }
+
+    @FXML
+    private void btnClear_onAddSpecies(ActionEvent event) {
+        hideSpeciesErrors();
+        speciesName_tf.clear();
+        speciesDescription_tf.clear();
+    }
+
+    @FXML
+    private void btnSave_onAddSpecies(ActionEvent event) {
+        hideSpeciesErrors();
+
+        String name = speciesName_tf.getText() == null ? "" : speciesName_tf.getText().trim();
+        String desc = speciesDescription_tf.getText() == null ? null : speciesDescription_tf.getText().trim();
+
+        if (name.isEmpty()) {
+            speciesName_err.setVisible(true);
+            return;
+        }
+
+        boolean ok;
+        if (!speciesUpdateMode) {
+            ok = mysqlconnect.insertSpecies(name, desc);
+            if (ok) {
+                // quick refresh: append the newly added by reloading (or fetch last insert id)
+                speciesData.setAll(mysqlconnect.loadSpecies());
+            }
+        } else {
+            ok = mysqlconnect.updateSpecies(editingSpeciesId, name, desc);
+            if (ok) {
+                // update the in-memory row so the table refreshes without requery
+                for (SpeciesItem s : speciesData) {
+                    if (s.getId() == editingSpeciesId) {
+                        s.setSpeciesName(name);
+                        s.setDescription(desc);
+                        break;
+                    }
+                }
+                // force table refresh
+                species_tv.refresh();
+            }
+        }
+
+        if (ok) {
+            addSpecies_popup.setVisible(false);
+            speciesUpdateMode = false;
+            editingSpeciesId = null;
+            showInfoSpecies("Saved.");
+        } else {
+            showInfoSpecies("Save failed. Please try again.");
+        }
+        sideNavigation_vbox.setDisable(false);
+        species_pane.setDisable(false);
+    }
+
     
 }

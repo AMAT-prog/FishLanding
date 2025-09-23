@@ -1,3 +1,0 @@
-ID,DateTime,Buyer,Fisherfolk,Fish Type,Qty,Unit Price,Total,Payment Method,Status
-3,2025-09-17T09:15,"FreshMart Grocery","Maria Santos","Galunggong",50.00,120.00,6000.00,"Bank Transfer","Paid"
-1,2025-09-15T10:30,"Jana Santos","Juan Dela Cruz","Bangus",20.00,150.00,3000.00,"Cash","Paid"

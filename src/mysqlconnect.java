@@ -524,6 +524,349 @@ public static ObservableList<Catch> getCatch() {
         } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
+    //REPORTS & ANALYTICS
+    //SALES
+    // --- simple pair ---
+    public static final class PeriodRevenue {
+        public final String label;   // e.g. "2025-09-20", "2025-W38", "2025-09"
+        public final double revenue;
+        public PeriodRevenue(String label, double revenue) { this.label = label; this.revenue = revenue; }
+    }
+
+    // Common WHERE clause builder
+    private static String paidAndRangeWhere(boolean withRange) {
+        return " WHERE payment_status='Paid' " + (withRange ? " AND transaction_date BETWEEN ? AND ? " : " ");
+    }
+
+    public static java.util.List<PeriodRevenue> salesDaily(java.time.LocalDate start, java.time.LocalDate end) {
+        var list = new java.util.ArrayList<PeriodRevenue>();
+        boolean bounded = (start != null && end != null);
+        String sql = "SELECT DATE(transaction_date) d, SUM(total_price) rev " +
+                     "FROM transactions" + paidAndRangeWhere(bounded) +
+                     "GROUP BY d ORDER BY d";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            if (bounded) {
+                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+            }
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) list.add(new PeriodRevenue(rs.getString("d"), rs.getDouble("rev")));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static java.util.List<PeriodRevenue> salesWeekly(java.time.LocalDate start, java.time.LocalDate end) {
+        var list = new java.util.ArrayList<PeriodRevenue>();
+        boolean bounded = (start != null && end != null);
+        String sql = "SELECT YEARWEEK(transaction_date, 3) yw, SUM(total_price) rev " +
+                     "FROM transactions" + paidAndRangeWhere(bounded) +
+                     "GROUP BY yw ORDER BY yw";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            if (bounded) {
+                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+            }
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String label = rs.getString("yw"); // e.g. 2025xx → show as 2025-W38
+                    if (label != null && label.length() >= 6)
+                        label = label.substring(0,4) + "-W" + label.substring(4);
+                    list.add(new PeriodRevenue(label, rs.getDouble("rev")));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static java.util.List<PeriodRevenue> salesMonthly(java.time.LocalDate start, java.time.LocalDate end) {
+        var list = new java.util.ArrayList<PeriodRevenue>();
+        boolean bounded = (start != null && end != null);
+        String sql = "SELECT DATE_FORMAT(transaction_date,'%Y-%m') ym, SUM(total_price) rev " +
+                     "FROM transactions" + paidAndRangeWhere(bounded) +
+                     "GROUP BY ym ORDER BY ym";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            if (bounded) {
+                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+            }
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) list.add(new PeriodRevenue(rs.getString("ym"), rs.getDouble("rev")));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    //fisherfolk contributions
+//    public static java.util.List<javafx.scene.chart.XYChart.Data<String, Number>> loadFisherfolkContributions() {
+//        var list = new java.util.ArrayList<javafx.scene.chart.XYChart.Data<String, Number>>();
+//        String sql = "SELECT f.name, SUM(t.quantity_sold) AS qty_sold " +
+//                     "FROM transactions t JOIN fisherfolk f ON t.fisherfolk_id=f.fisherfolk_id " +
+//                     "WHERE t.payment_status='Paid' " +
+//                     "GROUP BY f.fisherfolk_id, f.name ORDER BY qty_sold DESC LIMIT 10";
+//        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+//            while (rs.next()) {
+//                list.add(new javafx.scene.chart.XYChart.Data<>(rs.getString("name"), rs.getDouble("qty_sold")));
+//            }
+//        } catch (Exception e) { e.printStackTrace(); }
+//        return list;
+//    }
+    // ---- Fisherfolk Contributions (from TRANSACTIONS) ----
+    public static javafx.util.Pair<String, javafx.scene.chart.XYChart.Series<String, Number>>
+    loadFisherfolkContrib(java.time.LocalDate start, java.time.LocalDate end, boolean paidOnly) {
+
+        var series = new javafx.scene.chart.XYChart.Series<String, Number>();
+        String label = "";
+
+        String labelSql = """
+            SELECT DATE_FORMAT(MIN(t.transaction_date),'%M %Y') AS s,
+                   DATE_FORMAT(MAX(t.transaction_date),'%M %Y') AS e
+            FROM transactions t
+            WHERE t.transaction_date BETWEEN ? AND ?
+              """ + (paidOnly ? "AND t.payment_status='Paid'" : "") + """
+        """;
+
+        String dataSql = """
+            SELECT f.name, SUM(t.quantity_sold) AS qty
+            FROM transactions t
+            JOIN fisherfolk f ON f.fisherfolk_id = t.fisherfolk_id
+            WHERE t.transaction_date BETWEEN ? AND ?
+              """ + (paidOnly ? "AND t.payment_status='Paid'" : "") + """
+            GROUP BY f.fisherfolk_id, f.name
+            ORDER BY qty DESC
+            LIMIT 12
+        """;
+
+        try (var conn = ConnectDb()) {
+            try (var ps = conn.prepareStatement(labelSql)) {
+                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String s = rs.getString("s"), e = rs.getString("e");
+                        label = s != null && e != null && !s.equals(e) ? (s + " — " + e) : (s != null ? s : "");
+                    }
+                }
+            }
+            try (var ps = conn.prepareStatement(dataSql)) {
+                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        series.getData().add(new javafx.scene.chart.XYChart.Data<>(
+                            rs.getString("name"), rs.getDouble("qty")));
+                    }
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+
+        series.setName(paidOnly ? "Top Fisherfolk (Paid sales)" : "Top Fisherfolk (All sales)");
+        return new javafx.util.Pair<>(label, series);
+    }
+
+    
+    //species distribution
+//    public static java.util.List<javafx.scene.chart.PieChart.Data> loadSpeciesDistribution() {
+//        var list = new java.util.ArrayList<javafx.scene.chart.PieChart.Data>();
+//        String sql = "SELECT s.species_name, SUM(c.quantity) AS total_qty " +
+//                     "FROM catch c JOIN species s ON c.species_id=s.species_id " +
+//                     "GROUP BY s.species_id, s.species_name";
+//        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+//            while (rs.next()) {
+//                list.add(new javafx.scene.chart.PieChart.Data(rs.getString("species_name"), rs.getDouble("total_qty")));
+//            }
+//        } catch (Exception e) { e.printStackTrace(); }
+//        return list;
+//    }
+    // ---- Species Distribution (from CATCH) ----
+    public static javafx.util.Pair<String, javafx.collections.ObservableList<javafx.scene.chart.PieChart.Data>>
+    loadSpeciesDistribution(java.time.LocalDate start, java.time.LocalDate end) {
+
+        var data = javafx.collections.FXCollections.<javafx.scene.chart.PieChart.Data>observableArrayList();
+        String label = "";
+
+        String labelSql = """
+            SELECT DATE_FORMAT(MIN(c.catch_date),'%M %Y') AS s,
+                   DATE_FORMAT(MAX(c.catch_date),'%M %Y') AS e
+            FROM catch c
+            WHERE c.catch_date BETWEEN ? AND ?
+        """;
+        String dataSql = """
+            SELECT s.species_name, SUM(c.quantity) AS total_qty
+            FROM catch c
+            JOIN species s ON s.species_id = c.species_id
+            WHERE c.catch_date BETWEEN ? AND ?
+            GROUP BY s.species_id, s.species_name
+            ORDER BY total_qty DESC
+        """;
+
+        try (var conn = ConnectDb()) {
+            try (var ps = conn.prepareStatement(labelSql)) {
+                ps.setDate(1, java.sql.Date.valueOf(start));
+                ps.setDate(2, java.sql.Date.valueOf(end));
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String s = rs.getString("s");
+                        String e = rs.getString("e");
+                        label = s != null && e != null && !s.equals(e) ? (s + " — " + e) : (s != null ? s : "");
+                    }
+                }
+            }
+            try (var ps = conn.prepareStatement(dataSql)) {
+                ps.setDate(1, java.sql.Date.valueOf(start));
+                ps.setDate(2, java.sql.Date.valueOf(end));
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        data.add(new javafx.scene.chart.PieChart.Data(
+                            rs.getString("species_name"),
+                            rs.getDouble("total_qty")));
+                    }
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+
+        return new javafx.util.Pair<>(label, data);
+    }
+
+    //catch volume
+//    public static java.util.Map<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>> loadCatchVolumes() {
+//        // Map<species, List<Data<month, qty>>>
+//        var map = new java.util.LinkedHashMap<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>>();
+//        String sql = "SELECT DATE_FORMAT(c.catch_date,'%Y-%m') ym, s.species_name, SUM(c.quantity) total_qty " +
+//                     "FROM catch c JOIN species s ON c.species_id=s.species_id " +
+//                     "GROUP BY ym, s.species_name ORDER BY ym, s.species_name";
+//        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+//            while (rs.next()) {
+//                String species = rs.getString("species_name");
+//                String month = rs.getString("ym");
+//                double qty = rs.getDouble("total_qty");
+//                map.computeIfAbsent(species, k -> new java.util.ArrayList<>())
+//                   .add(new javafx.scene.chart.XYChart.Data<>(month, qty));
+//            }
+//        } catch (Exception e) { e.printStackTrace(); }
+//        return map;
+//    }
+    // ---- Catch Volumes (STACKED by species, grouped by month) ----
+    public static javafx.util.Pair<String, java.util.Map<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>>>
+    loadCatchVolumes(java.time.LocalDate start, java.time.LocalDate end) {
+
+        var map = new java.util.LinkedHashMap<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>>();
+        String label = "";
+
+        String labelSql = """
+            SELECT DATE_FORMAT(MIN(c.catch_date),'%M %Y') AS s,
+                   DATE_FORMAT(MAX(c.catch_date),'%M %Y') AS e
+            FROM catch c
+            WHERE c.catch_date BETWEEN ? AND ?
+        """;
+
+        String dataSql = """
+            SELECT DATE_FORMAT(c.catch_date,'%Y-%m') ym,
+                   s.species_name,
+                   SUM(c.quantity) total_qty
+            FROM catch c
+            JOIN species s ON s.species_id = c.species_id
+            WHERE c.catch_date BETWEEN ? AND ?
+            GROUP BY ym, s.species_name
+            ORDER BY ym, s.species_name
+        """;
+
+        try (var conn = ConnectDb()) {
+            try (var ps = conn.prepareStatement(labelSql)) {
+                ps.setDate(1, java.sql.Date.valueOf(start));
+                ps.setDate(2, java.sql.Date.valueOf(end));
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String s = rs.getString("s"), e = rs.getString("e");
+                        label = s != null && e != null && !s.equals(e) ? (s + " — " + e) : (s != null ? s : "");
+                    }
+                }
+            }
+            try (var ps = conn.prepareStatement(dataSql)) {
+                ps.setDate(1, java.sql.Date.valueOf(start));
+                ps.setDate(2, java.sql.Date.valueOf(end));
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String sp = rs.getString("species_name");
+                        String month = rs.getString("ym");
+                        double qty = rs.getDouble("total_qty");
+                        map.computeIfAbsent(sp, k -> new java.util.ArrayList<>())
+                           .add(new javafx.scene.chart.XYChart.Data<>(month, qty));
+                    }
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+
+        return new javafx.util.Pair<>(label, map);
+    }
+    
+    //SPECIES
+    // ===== SPECIES: load all =====
+    public static javafx.collections.ObservableList<SpeciesItem> loadSpecies() {
+        var list = javafx.collections.FXCollections.<SpeciesItem>observableArrayList();
+        String sql = "SELECT species_id, species_name, description FROM species ORDER BY species_name";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new SpeciesItem(
+                    rs.getInt("species_id"),
+                    rs.getString("species_name"),
+                    rs.getString("description")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ===== SPECIES: insert =====
+    public static boolean insertSpecies(String name, String desc) {
+        String sql = "INSERT INTO species (species_name, description) VALUES (?, ?)";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, name);
+            if (desc == null || desc.isBlank()) ps.setNull(2, java.sql.Types.VARCHAR);
+            else ps.setString(2, desc);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ===== SPECIES: update =====
+    public static boolean updateSpecies(int id, String name, String desc) {
+        String sql = "UPDATE species SET species_name=?, description=? WHERE species_id=?";
+        try (java.sql.Connection c = ConnectDb();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, name);
+            if (desc == null || desc.isBlank()) ps.setNull(2, java.sql.Types.VARCHAR);
+            else ps.setString(2, desc);
+            ps.setInt(3, id);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ===== SPECIES: delete (blocked if used by catch) =====
+    public static boolean deleteSpecies(int id) {
+        // hard block if referenced by catch
+        String chk = "SELECT COUNT(*) FROM catch WHERE species_id=?";
+        String del = "DELETE FROM species WHERE species_id=?";
+        try (java.sql.Connection c = ConnectDb()) {
+            try (java.sql.PreparedStatement ps = c.prepareStatement(chk)) {
+                ps.setInt(1, id);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        return false; // caller will show message explaining why
+                    }
+                }
+            }
+            try (java.sql.PreparedStatement ps = c.prepareStatement(del)) {
+                ps.setInt(1, id);
+                return ps.executeUpdate() == 1;
+            }
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+
+
 
 
 }

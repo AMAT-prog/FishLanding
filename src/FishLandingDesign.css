@@ -90,7 +90,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 /* Cells */
 .dark-table .table-cell {
     -fx-text-fill: #E5E7EB;         /* text */
-    -fx-font-size: 13px;
+    -fx-font-size: 11px;
     -fx-padding: 8 12 8 12;
     -fx-border-color: transparent transparent #0F172A transparent; /* subtle divider line */
     -fx-border-width: 0 0 1 0;

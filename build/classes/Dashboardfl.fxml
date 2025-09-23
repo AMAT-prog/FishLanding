@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
@@ -1621,7 +1623,7 @@
             </HBox>
          </bottom>
       </BorderPane>
-      <ScrollPane fx:id="dockingLogs_pane" layoutX="224.0" layoutY="120.0" prefHeight="553.0" prefWidth="1048.0" style="-fx-background-color: transparent;">
+      <ScrollPane fx:id="dockingLogs_pane" layoutX="224.0" layoutY="120.0" prefHeight="553.0" prefWidth="1048.0" style="-fx-background-color: transparent;" visible="false">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
                <children>
@@ -1920,6 +1922,317 @@
                   </Button>
                   <Button onAction="#btnClear_onAddDockLog" text="Clear" />
                   <Button defaultButton="true" onAction="#btnSave_onAddDockLog" styleClass="primary" text="Save" />
+               </children>
+               <padding>
+                  <Insets bottom="16" left="20" right="20" top="12" />
+               </padding>
+               <BorderPane.margin>
+                  <Insets right="30.0" />
+               </BorderPane.margin>
+            </HBox>
+         </bottom>
+      </BorderPane>
+      <ScrollPane fx:id="reportsANDanalytics_pane" layoutX="224.0" layoutY="120.0" prefHeight="563.0" prefWidth="1058.0" style="-fx-background-color: transparent;" visible="false">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+               <children>
+                  <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
+                     <children>
+                        <Pane prefHeight="543.0" prefWidth="829.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label layoutX="24.0" layoutY="-4.0" prefHeight="32.0" prefWidth="184.0" styleClass="chart-title" stylesheets="@reports-analytics.css" text="Reports &amp; Analytics" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <TabPane fx:id="reportsTabPane" layoutX="28.0" layoutY="30.0" prefHeight="484.0" prefWidth="786.0" stylesheets="@reports-analytics.css" tabClosingPolicy="UNAVAILABLE">
+                                <tabs>
+                                  <Tab fx:id="salesTab" text="Sales Trends">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <HBox layoutX="323.0" layoutY="8.0" prefHeight="25.0" prefWidth="459.0" styleClass="segmented" stylesheets="@reports-analytics.css">
+                                                   <children>
+                                                      <ToggleButton fx:id="rbDaily" mnemonicParsing="false" styleClass="left" stylesheets="@reports-analytics.css" text="Daily">
+                                                         <HBox.margin>
+                                                            <Insets left="220.0" />
+                                                         </HBox.margin>
+                                                         <toggleGroup>
+                                                            <ToggleGroup fx:id="reports_toggle" />
+                                                         </toggleGroup>
+                                                      </ToggleButton>
+                                                      <ToggleButton fx:id="rbWeekly" mnemonicParsing="false" styleClass="middle" stylesheets="@reports-analytics.css" text="Weekly" toggleGroup="$reports_toggle" />
+                                                      <ToggleButton fx:id="rbMonthly" mnemonicParsing="false" styleClass="right" stylesheets="@reports-analytics.css" text="Monthly" toggleGroup="$reports_toggle" />
+                                                   </children>
+                                                </HBox>
+                                                <LineChart fx:id="salesChart" animated="false" layoutX="12.0" layoutY="53.0" prefHeight="376.0" prefWidth="766.0" styleClass="linechart" stylesheets="@reports-analytics.css">
+                                                  <xAxis>
+                                                    <CategoryAxis fx:id="salesXAxis" label="Period" side="BOTTOM" tickLabelFill="WHITE" />
+                                                  </xAxis>
+                                                  <yAxis>
+                                                    <NumberAxis fx:id="salesYAxis" label="Revenue (₱)" side="LEFT" tickLabelFill="WHITE" />
+                                                  </yAxis>
+                                                </LineChart>
+                                                <HBox layoutX="3.0" layoutY="6.0" prefHeight="27.0" prefWidth="317.0" stylesheets="@reports-analytics.css">
+                                                   <children>
+                                                      <Label prefHeight="27.0" prefWidth="38.0" stylesheets="@reports-analytics.css" text="From:" textFill="WHITE" />
+                                                      <DatePicker fx:id="dpStart" prefHeight="25.0" prefWidth="115.0" styleClass="date-picker" stylesheets="@reports-analytics.css" />
+                                                      <Label prefHeight="27.0" prefWidth="29.0" text="To:" textFill="WHITE">
+                                                         <HBox.margin>
+                                                            <Insets left="10.0" />
+                                                         </HBox.margin>
+                                                      </Label>
+                                                      <DatePicker fx:id="dpEnd" prefHeight="28.0" prefWidth="123.0" styleClass="date-picker" stylesheets="@reports-analytics.css" />
+                                                   </children>
+                                                </HBox>
+                                             </children>
+                                          </AnchorPane>
+                                    </content>
+                                  </Tab>
+                                  <Tab fx:id="speciesTab" text="Species Distribution">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <PieChart fx:id="speciesPieChart" layoutX="59.0" layoutY="31.0" prefHeight="363.0" prefWidth="665.0" stylesheets="@reports-analytics.css" />
+                                                <Label fx:id="speciesDateLabel" layoutX="26.0" layoutY="6.0" prefHeight="26.0" prefWidth="130.0" text="Label" textFill="WHITE" />
+                                             </children></AnchorPane>
+                                    </content>
+                                  </Tab>
+                                    <Tab fx:id="contribTab" text="Fisherfolk Contributions">
+                                      <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="384.0" prefWidth="749.0" stylesheets="@reports-analytics.css">
+                                                  <xAxis>
+                                                    <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
+                                                  </xAxis>
+                                                  <yAxis>
+                                                    <NumberAxis side="LEFT" tickLabelFill="WHITE" />
+                                                  </yAxis>
+                                                </BarChart>
+                                                <Label fx:id="fisherfolkDateLabel" layoutX="54.0" layoutY="20.0" prefWidth="116.0" text="Label" textFill="WHITE" />
+                                             </children></AnchorPane>
+                                      </content>
+                                    </Tab>
+                                    <Tab fx:id="volumesTab" text="Catch Volumes">
+                                      <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="415.0" prefWidth="758.0" stylesheets="@reports-analytics.css">
+                                                  <xAxis>
+                                                    <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
+                                                  </xAxis>
+                                                  <yAxis>
+                                                    <NumberAxis side="LEFT" tickLabelFill="WHITE" />
+                                                  </yAxis>
+                                                </StackedBarChart>
+                                                <Label fx:id="catchVolumeDateLabel" layoutX="93.0" layoutY="5.0" prefWidth="111.0" text="Label" textFill="WHITE" />
+                                             </children></AnchorPane>
+                                      </content>
+                                    </Tab>
+                                </tabs>
+                              </TabPane>
+                           </children>
+                        </Pane>
+                     </children>
+                  </HBox>
+                  <Pane layoutX="854.0" layoutY="6.0" prefHeight="521.0" prefWidth="170.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                     <children>
+                        <Label alignment="CENTER" layoutX="1.0" layoutY="6.0" prefHeight="34.0" prefWidth="174.0" text="Report Actions" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <VBox layoutX="10.0" layoutY="54.0" prefHeight="436.0" prefWidth="152.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#btnExport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="Export" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="15.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#btnPrint" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="Print" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
+      <ScrollPane fx:id="species_pane" layoutX="224.0" layoutY="120.0" prefHeight="573.0" prefWidth="1068.0" style="-fx-background-color: transparent;">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+               <children>
+                  <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
+                     <children>
+                        <Pane prefHeight="543.0" prefWidth="829.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label layoutX="24.0" layoutY="-4.0" prefHeight="32.0" prefWidth="184.0" styleClass="chart-title" stylesheets="@reports-analytics.css" text="Species Overview" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <TableView fx:id="species_tv" layoutX="29.0" layoutY="69.0" prefHeight="426.0" prefWidth="786.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                <columns>
+                                  <TableColumn fx:id="speciesName_col" prefWidth="172.22226905822754" text="Species" />
+                                  <TableColumn fx:id="speciesDescription_col" prefWidth="612.0" text="Description" />
+                                </columns>
+                              </TableView>
+                              <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="36.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="777.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                                 <children>
+                                    <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/search.png" />
+                                       </image>
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" left="10.0" top="5.0" />
+                                       </HBox.margin>
+                                    </ImageView>
+                                    <TextField fx:id="filterField_species" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="738.0" promptText="Search Species" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </Pane>
+                     </children>
+                  </HBox>
+                  <Pane layoutX="854.0" layoutY="6.0" prefHeight="521.0" prefWidth="170.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                     <children>
+                        <Label alignment="CENTER" layoutX="1.0" layoutY="15.0" prefHeight="39.0" prefWidth="174.0" text="Quick Actions" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <VBox layoutX="10.0" layoutY="54.0" prefHeight="436.0" prefWidth="152.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#deleteSpecies" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #7b0606; -fx-background-radius: 5px;" text="Delete" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#updateSpecies" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0e6902; -fx-background-radius: 5px;" text="Edit" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#addSpecies" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 5px;" text="Add " textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#btnExport_SPECIES" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="Export List" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="20.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
+      <BorderPane fx:id="addSpecies_popup" layoutX="282.0" layoutY="130.0" prefHeight="407.0" prefWidth="829.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
+         <top>
+            <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
+               <children>
+                  <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Edit Species" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="12" left="20" right="20" top="16" />
+               </padding>
+            </HBox>
+         </top>
+         <center>
+            <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="284.0" prefWidth="665.0" vgap="12" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10" left="20" right="20" top="10" />
+               </padding>
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="100.0" />
+               </columnConstraints>
+               <children>
+                  <Label text="Species Name" textFill="WHITE" />
+                  <Label fx:id="speciesName_err" styleClass="error" text="Please enter species name" textFill="#ff7e7e" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="System Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="95.0" text="Description" textFill="WHITE" />
+                     </children>
+                  </HBox>
+                  <TextField fx:id="speciesName_tf" prefHeight="25.0" prefWidth="406.0" GridPane.rowIndex="1" />
+                  <TextArea fx:id="speciesDescription_tf" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="72.0" prefWidth="625.0" GridPane.rowIndex="8" />
+               </children>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                  <RowConstraints maxHeight="18.0" minHeight="17.333333333333343" prefHeight="18.0" />
+                  <RowConstraints maxHeight="50.0" minHeight="70.0" prefHeight="50.0" />
+                  <RowConstraints maxHeight="2.66668701171875" minHeight="0.0" prefHeight="2.66668701171875" />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                  <RowConstraints />
+                  <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                  <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" />
+               </rowConstraints>
+            </GridPane>
+         </center>
+         <bottom>
+            <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
+               <children>
+                  <Button onAction="#btnCancel_onAddSpecies" text="Cancel">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+                  <Button onAction="#btnClear_onAddSpecies" text="Clear" />
+                  <Button defaultButton="true" onAction="#btnSave_onAddSpecies" styleClass="primary" text="Save" />
                </children>
                <padding>
                   <Insets bottom="16" left="20" right="20" top="12" />

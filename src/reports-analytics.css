@@ -1,0 +1,259 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 23 Sept 2025, 17:25:00
+    Author     : Anna Margarette
+*/
+/* ===========================
+   Reports & Analytics (Dark)
+   =========================== */
+
+/* ---------- LineChart (Sales Trends) ---------- */
+#salesChart {
+    -fx-background-color: transparent;
+}
+
+#salesChart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+#salesChart .chart-horizontal-grid-lines,
+#salesChart .chart-vertical-grid-lines {
+    -fx-stroke: #242a33;
+}
+
+#salesChart .chart-horizontal-zero-line,
+#salesChart .chart-vertical-zero-line {
+    -fx-stroke: #364050;
+}
+
+#salesChart .chart-title,
+#salesChart .axis-label,
+#salesChart .axis .tick-label {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+}
+
+#salesChart .default-color0.chart-series-line {
+    -fx-stroke: #2d8cff;
+    -fx-stroke-width: 2.5px;
+}
+
+#salesChart .default-color0.chart-line-symbol {
+    -fx-background-color: #151a21, #2d8cff;
+    -fx-background-radius: 6, 4;
+    -fx-padding: 3;
+    -fx-effect: dropshadow(gaussian, rgba(45,140,255,0.25), 8, 0.4, 0, 0);
+}
+
+/* Hide symbols unless hovered */
+#salesChart .chart-line-symbol { -fx-opacity: 1; }
+/*#salesChart:hover .chart-line-symbol { -fx-opacity: 1; }*/
+
+#salesChart .axis {
+    -fx-tick-label-fill: #9aa4b2;
+    -fx-minor-tick-visible: false;
+}
+#salesChart .axis .axis-line,
+#salesChart .axis .tick-mark {
+    -fx-stroke: #2a303a;
+}
+
+#salesChart .chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10 0 0 0;
+}
+#salesChart .chart-legend-item {
+    -fx-text-fill: #cbd5e1;
+}
+#salesChart .chart-legend-item-symbol {
+    -fx-background-color: #2d8cff;
+}
+
+/* ---------- TabPane ---------- */
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-padding: 0 0 12 0;
+}
+
+.tab-pane .tab-header-area .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 18;
+    -fx-text-base-color: #9aa4b2;
+    -fx-font-weight: 600;
+}
+
+.tab-pane .tab-header-area .tab:selected {
+    -fx-background-color: #202733;
+    -fx-text-base-color: #e6edf3;
+}
+
+/* Remove underline/border line */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* ---------- ToggleButtons (Daily/Weekly/Monthly) ---------- */
+.toggle-button {
+    -fx-background-color: #1a202a;
+    -fx-text-fill: #cbd5e1;
+    -fx-padding: 6 14 6 14;
+    -fx-border-color: #2a303a;
+    -fx-border-width: 1;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #2d8cff;
+    -fx-text-fill: white;
+    -fx-border-color: #2d8cff;
+}
+
+.toggle-button:focused { -fx-focus-color: transparent; }
+.toggle-button:hover   { -fx-background-color: #222a35; }
+
+/* Rounded segmented look */
+.toggle-button.left   { -fx-background-radius: 18 0 0 18;-fx-border-radius: 18 0 0 18; }
+.toggle-button.middle { -fx-background-radius: 0; }
+.toggle-button.right  { -fx-background-radius: 0 18 18 0; -fx-border-radius: 0 18 18 0; }
+
+/* ---------- DatePickers ---------- */
+.date-picker {
+    -fx-background-color: #1a202a;
+    -fx-background-radius: 8;
+    -fx-text-fill: #e6edf3;
+    -fx-border-color: #2a303a;
+    -fx-border-radius: 8;
+}
+
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e6edf3;
+    -fx-prompt-text-fill: #7d8796;
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.date-picker .arrow-button .arrow {
+    -fx-background-color: #9aa4b2;
+}
+
+/* popup calendar */
+.date-picker-popup > .month-year-pane,
+.date-picker-popup > * > .spinner,
+.date-picker-popup {
+    -fx-background-color: #141a22;
+    -fx-text-fill: #e6edf3;
+}
+
+.date-picker-popup .button,
+.date-picker-popup .spinner .button {
+    -fx-background-color: #1a202a;
+    -fx-text-fill: #cbd5e1;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #e6edf3;
+}
+
+.date-picker-popup .calendar-grid {
+    -fx-background-color: #141a22;
+}
+
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cbd5e1;
+}
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #202733;
+}
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #2d8cff;
+    -fx-text-fill: white;
+}
+
+/* ========= Shared chart tweaks ========= */
+.chart-plot-background { -fx-background-color: transparent; }
+
+.chart-horizontal-grid-lines,
+.chart-vertical-grid-lines { -fx-stroke: #242a33; }
+
+.axis .tick-label { -fx-text-fill: #9aa4b2; -fx-font-size: 12px; }
+.axis .axis-line, .axis .tick-mark { -fx-stroke: #2a303a; }
+
+.chart-legend { -fx-background-color: transparent; -fx-padding: 10 0 0 0; }
+.chart-legend-item { -fx-text-fill: #cbd5e1; }
+
+/* ========= CONSISTENT PALETTE across all charts (series order) ========= */
+/* 0: Bangus, 1: Tilapia, 2: Galunggong, 3: Maya-maya (adjust if needed) */
+.default-color0.chart-pie, .default-color0.chart-bar, .default-color0.chart-series-line,
+.default-color0.chart-legend-item-symbol { -fx-pie-color: #f36c3d; -fx-bar-fill: linear-gradient(to bottom, #f77a49, #ef5c2f); -fx-background-color: #2d8cff; }
+.default-color1.chart-pie, .default-color1.chart-bar, .default-color1.chart-series-line,
+.default-color1.chart-legend-item-symbol { -fx-pie-color: #f3a21b; -fx-bar-fill: linear-gradient(to bottom, #f6b23e, #ec9a12); -fx-background-color: #f3a21b; }
+.default-color2.chart-pie, .default-color2.chart-bar, .default-color2.chart-series-line,
+.default-color2.chart-legend-item-symbol { -fx-pie-color: #2faa58; -fx-bar-fill: linear-gradient(to bottom, #3fba6a, #2e9b4f); -fx-background-color: #2faa58; }
+.default-color3.chart-pie, .default-color3.chart-bar, .default-color3.chart-series-line,
+.default-color3.chart-legend-item-symbol { -fx-pie-color: #2aa3bf; -fx-bar-fill: linear-gradient(to bottom, #33b3d1, #2294ae); -fx-background-color: #2aa3bf; }
+
+/* ========= PieChart (Species Distribution) ========= */
+#speciesPieChart {
+    -fx-background-color: transparent;
+}
+#speciesPieChart .chart-title { -fx-text-fill: #e6edf3; }
+#speciesPieChart .chart-pie-label {      /* label text */
+    -fx-fill: #e6edf3;
+    -fx-font-size: 12px;
+}
+#speciesPieChart .chart-pie-label-line {  /* leader lines */
+    -fx-stroke: #7d8796;
+}
+
+/* hover “pop” */
+#speciesPieChart .chart-pie:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.08), 10, 0.2, 0, 0);
+}
+
+/* ========= BarChart (Fisherfolk Contributions) ========= */
+#contribBarChart {
+    -fx-background-color: transparent;
+}
+#contribBarChart .chart-title { -fx-text-fill: white; }
+#contribBarChart .chart-bar {
+    -fx-background-insets: 0,1;
+    -fx-background-radius: 6;      /* rounded tops */
+}
+#contribBarChart .chart-bar:hover {
+    -fx-opacity: 0.9;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0.2, 0, 3);
+}
+
+/* ========= StackedBarChart (Catch Volumes) ========= */
+#catchStackedBarChart {
+    -fx-background-color: transparent;
+}
+catchStackedBarChart .chart-title { -fx-text-fill: white; }
+catchStackedBarChart .chart-bar {
+    -fx-background-insets: 0,1;
+    -fx-background-radius: 4;      /* slight rounding */
+}
+catchStackedBarChart .chart-legend-item-symbol { -fx-background-radius: 6; }
+
+#catchStackedBarChart .chart-bar {
+    -fx-background-insets: 0,1;
+    -fx-background-radius: 6;  /* rounded corners */
+}
+
+/* ========= Tabs (already dark) – add a subtle glow for selected ========= */
+.tab-pane .tab-header-area .tab:selected {
+    -fx-background-color: #202733;
+    -fx-effect: dropshadow(gaussian, rgba(45,140,255,0.25), 8, 0.3, 0, 0);
+}
+
