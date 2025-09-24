@@ -865,6 +865,85 @@ public static ObservableList<Catch> getCatch() {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    //ACCOUNT PROFILE
+    public static UserAccount loadUserById(int userId) {
+        String sql = "SELECT user_id, username, role, name, contact_number, created_at, photo FROM users WHERE user_id=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    byte[] pic = rs.getBytes("photo");
+                    return new UserAccount(
+                        rs.getInt("user_id"),
+                        rs.getString("username"),
+                        rs.getString("role"),
+                        rs.getString("name"),
+                        rs.getString("contact_number"),
+                        rs.getTimestamp("created_at"),
+                        pic
+                    );
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public static boolean updateUserPersonal(int userId, String name, String contact, String role) {
+        String sql = "UPDATE users SET name=?, contact_number=?, role=? WHERE user_id=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setString(2, contact);
+            ps.setString(3, role);
+            ps.setInt(4, userId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public static boolean updateUserPhoto(int userId, byte[] photoBytes) {
+        String sql = "UPDATE users SET photo=? WHERE user_id=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            if (photoBytes == null) ps.setNull(1, java.sql.Types.BLOB);
+            else ps.setBytes(1, photoBytes);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public static boolean verifyCurrentUsername(int userId, String currentUsername) {
+        String sql = "SELECT 1 FROM users WHERE user_id=? AND username=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, currentUsername);
+            try (var rs = ps.executeQuery()) { return rs.next(); }
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public static boolean verifyCurrentPassword(int userId, String currentPassword) {
+        // NOTE: if you hash passwords, check the hash here instead.
+        String sql = "SELECT 1 FROM users WHERE user_id=? AND password=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, currentPassword);
+            try (var rs = ps.executeQuery()) { return rs.next(); }
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public static boolean updateUsername(int userId, String newUsername) {
+        String sql = "UPDATE users SET username=? WHERE user_id=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setString(1, newUsername); ps.setInt(2, userId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public static boolean updatePassword(int userId, String newPassword) {
+        // Hash here if you use hashing.
+        String sql = "UPDATE users SET password=? WHERE user_id=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setString(1, newPassword); ps.setInt(2, userId);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
 
 
 

@@ -49,12 +49,20 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 import javafx.scene.layout.VBox;
+import javafx.beans.binding.Bindings;
+import javafx.scene.layout.Region;
+import javafx.animation.TranslateTransition;
+import javafx.fxml.FXML;
+import javafx.scene.control.ToggleButton;
+import javafx.util.Duration;
 
 
 /**
@@ -247,6 +255,22 @@ public class DashboardflController implements Initializable {
     private boolean speciesUpdateMode = false; // false = add, true = edit
     private Integer editingSpeciesId = null;
 
+    //ACCOUNT PROFILE
+    private final javafx.collections.ObservableList<String> ROLES =
+        javafx.collections.FXCollections.observableArrayList("Admin","Staff");
+
+    // Which user is logged in? If having a session, set this accordingly:
+    private int currentUserId = 1;  // <-- replace with the real logged-in user id
+
+    // Keep original values so Cancel can restore:
+    private String origName, origContact, origRole;
+    private byte[]  origPhoto;
+    
+    //DATA INFORMATION
+    // Keep these consistent with CSS:
+    private static final double TRACK_WIDTH = 56;
+    private static final double PADDING     = 3;   // -fx-padding
+    private static final double THUMB_SIZE  = 24;
     
     @FXML
     private BorderPane viewFisherHistory_popup;
@@ -476,6 +500,52 @@ public class DashboardflController implements Initializable {
     private TextField speciesName_tf;
     @FXML
     private TextArea speciesDescription_tf;
+    
+    @FXML
+    private ScrollPane accountProfile_pane;
+    @FXML
+    private TextField accountName_tf;
+    @FXML
+    private TextField accountContact_tf;
+    @FXML
+    private ComboBox<String> accountRole_cb;
+    @FXML
+    private HBox cancelSavebtn_hbox;
+    @FXML
+    private TextField newUsername_tf;
+    @FXML
+    private PasswordField currentPassword_pf;
+    @FXML
+    private PasswordField newPassword_pf;
+    @FXML
+    private PasswordField confirmNewPassword_pf;
+    @FXML
+    private Label password_err;
+    @FXML
+    private TextField currentUsername_tf;
+    @FXML
+    private Label username_err;
+    @FXML
+    private Label updatedDate_label;
+    @FXML
+    private ImageView accountPhoto_iv;
+    @FXML
+    private TextField currentPassword_tf_visible;
+    @FXML
+    private TextField newPassword_tf_visible;
+    @FXML
+    private TextField confirmNewPassword_tf_visible;
+    @FXML
+    private Button uploadPhoto_btn;
+    
+    @FXML
+    private ToggleButton autoBackupSwitch;
+    @FXML
+    private Region thumb;
+    @FXML
+    private Label lastBackup_label;
+    @FXML
+    private ScrollPane dataInformation_pane;
 
     
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -489,6 +559,8 @@ public class DashboardflController implements Initializable {
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
@@ -501,6 +573,8 @@ public class DashboardflController implements Initializable {
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
@@ -513,6 +587,8 @@ public class DashboardflController implements Initializable {
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
@@ -525,6 +601,8 @@ public class DashboardflController implements Initializable {
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
@@ -537,6 +615,8 @@ public class DashboardflController implements Initializable {
         transactionANDsales_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
@@ -549,6 +629,8 @@ public class DashboardflController implements Initializable {
         transactionANDsales_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
@@ -561,14 +643,36 @@ public class DashboardflController implements Initializable {
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         dashboard_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
 
     @FXML
     private void dataInformation_btn(ActionEvent event) {
+        dataInformation_pane.setVisible(true);
+         
+        landings_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dashboard_pane.setVisible(false);
     }
 
     @FXML
     private void accountProfile_btn(ActionEvent event) {
+        accountProfile_pane.setVisible(true);
+         
+        landings_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
+        dashboard_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
     }
     
     ////////////////////////////////////////////////////////////////////////////end of Side Navigation
@@ -582,6 +686,8 @@ public class DashboardflController implements Initializable {
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
         // LANDINGS or CATCHES
         LANDINGS_SEARCH();
         hideAllErrors();
@@ -969,7 +1075,44 @@ public class DashboardflController implements Initializable {
         addSpecies_popup.setVisible(false);
         speciesName_err.setVisible(false);
 
+        //ACCOUNT PROFILE
+        initUserProfile();
         
+        //DATA INFORMATION
+//        Region thumb = (Region) autoBackupSwitch.getGraphic();
+//        thumb.translateXProperty().bind(
+//                Bindings.when(autoBackupSwitch.selectedProperty())
+//                        .then(48 - 22 - 4)    // trackWidth - thumbSize - 2*padding = 48 - 22 - 4 = 22
+//                        .otherwise(0)
+//        );
+//        autoBackupSwitch.accessibleTextProperty().bind(
+//            Bindings.when(autoBackupSwitch.selectedProperty()).then("On").otherwise("Off")
+//        );
+
+        // If kept the fixed CSS sizes, a constant works:
+        final double ON_OFFSET = TRACK_WIDTH - THUMB_SIZE - (2 * PADDING);
+
+        // Smooth slide animation when toggling
+        autoBackupSwitch.selectedProperty().addListener((obs, wasOn, isOn) -> {
+            double target = isOn ? ON_OFFSET : 0;
+            TranslateTransition tt = new TranslateTransition(Duration.millis(140), thumb);
+            tt.setToX(target);
+            tt.play();
+        });
+
+        // Set initial position (in case it's pre-selected)
+        thumb.setTranslateX(autoBackupSwitch.isSelected() ? ON_OFFSET : 0);
+
+        // If later, change sizes dynamically, replace the above with a binding:
+        // thumb.translateXProperty().bind(Bindings.createDoubleBinding(
+        //     () -> autoBackupSwitch.isSelected()
+        //           ? autoBackupSwitch.getWidth() - thumb.getWidth() - (2 * PADDING)
+        //           : 0,
+        //     autoBackupSwitch.selectedProperty(),
+        //     autoBackupSwitch.widthProperty(),
+        //     thumb.widthProperty()
+        // ));
+    
     }
         
     ////////////////////////////////////////////////////////////////////////////end of initialization
@@ -3025,6 +3168,251 @@ public class DashboardflController implements Initializable {
         sideNavigation_vbox.setDisable(false);
         species_pane.setDisable(false);
     }
+    ////////////////////////////////////////////////////////////////////////////end of species
+    ////////////////////////////////////////////////////////////////////////////ACCOUNT PROFILE
+    
+    // ===== INIT =====
+    private void initUserProfile() {
+        accountRole_cb.setItems(ROLES);
+
+        loadUserIntoForm();
+
+        // start in read-only mode
+        setPersonalEditable(false);
+        cancelSavebtn_hbox.setDisable(true);
+
+        // bind visibility of plain/hidden password fields
+        bindPasswordMirror(currentPassword_pf, currentPassword_tf_visible);
+        bindPasswordMirror(newPassword_pf, newPassword_tf_visible);
+        bindPasswordMirror(confirmNewPassword_pf, confirmNewPassword_tf_visible);
+    }
+
+    private void loadUserIntoForm() {
+        UserAccount u = mysqlconnect.loadUserById(currentUserId);
+        if (u == null) return;
+
+        accountName_tf.setText(u.getName());
+        accountContact_tf.setText(u.getContact());
+        accountRole_cb.getSelectionModel().select(u.getRole());
+
+        origName = u.getName(); origContact = u.getContact(); origRole = u.getRole();
+        origPhoto = u.getPhoto();
+
+        // photo
+        if (u.getPhoto() != null && u.getPhoto().length > 0) {
+            accountPhoto_iv.setImage(new javafx.scene.image.Image(
+                new java.io.ByteArrayInputStream(u.getPhoto())));
+        } else {
+            // fallback avatar (put an image in resources)
+            var defaultImg = getClass().getResource("/img/ACCOUNT.png");
+            if (defaultImg != null)
+                accountPhoto_iv.setImage(new javafx.scene.image.Image(defaultImg.toExternalForm()));
+            else
+                accountPhoto_iv.setImage(null);
+        }
+
+        // last updated
+        if (u.getUpdatedAt() != null) {
+            updatedDate_label.setText("Last updated: " + u.getUpdatedAt().toString());
+        } else {
+            updatedDate_label.setText("Last updated: —");
+        }
+    }
+
+    private void setPersonalEditable(boolean editable) {
+        accountName_tf.setEditable(editable);
+        accountContact_tf.setEditable(editable);
+        accountRole_cb.setDisable(!editable);
+        uploadPhoto_btn.setDisable(!editable);
+    }
+
+    // Mirror helper so eye icon can flip between PasswordField and TextField
+    private void bindPasswordMirror(PasswordField pf, TextField tfVisible) {
+        tfVisible.managedProperty().bind(tfVisible.visibleProperty());
+        tfVisible.setVisible(false);
+        tfVisible.textProperty().bindBidirectional(pf.textProperty());
+    }
+
+    // ====== PERSONAL INFO ======
+    @FXML
+    private void btnUploadPic_onAccountProfile(ActionEvent e) {
+        var chooser = new javafx.stage.FileChooser();
+        chooser.getExtensionFilters().add(
+            new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png","*.jpg","*.jpeg"));
+        var f = chooser.showOpenDialog(accountPhoto_iv.getScene().getWindow());
+        if (f == null) return;
+        try {
+            byte[] bytes = java.nio.file.Files.readAllBytes(f.toPath());
+            // optimistic UI
+            accountPhoto_iv.setImage(new javafx.scene.image.Image(new java.io.ByteArrayInputStream(bytes)));
+            if (!mysqlconnect.updateUserPhoto(currentUserId, bytes)) {
+                showInfo("Failed to update photo.");
+                loadUserIntoForm(); // revert
+                return;
+            }
+            // refresh last updated
+            loadUserIntoForm();
+            showInfo("Photo updated.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfo("Upload failed: " + ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void btnEdit_onAccountProfile(ActionEvent e) {
+        cancelSavebtn_hbox.setDisable(false);
+        setPersonalEditable(true);
+        accountName_tf.requestFocus();
+    }
+
+    @FXML
+    private void btnCancel_onPersonalInfo(ActionEvent e) {
+        // restore originals
+        accountName_tf.setText(origName);
+        accountContact_tf.setText(origContact);
+        accountRole_cb.getSelectionModel().select(origRole);
+        // photo restored by reload
+        loadUserIntoForm();
+
+        cancelSavebtn_hbox.setDisable(true);
+        setPersonalEditable(false);
+    }
+
+    @FXML
+    private void btnSave_onPersonalInfo(ActionEvent e) {
+        String name = trim(accountName_tf.getText());
+        String contact = trim(accountContact_tf.getText());
+        String role = (String) accountRole_cb.getValue();
+
+        if (name.isBlank()) { showInfo("Name is required."); return; }
+        if (role == null)   { showInfo("Please choose a role."); return; }
+
+        boolean ok = mysqlconnect.updateUserPersonal(currentUserId, name, contact, role);
+        if (ok) {
+            showInfo("Profile saved.");
+            cancelSavebtn_hbox.setDisable(true);
+            setPersonalEditable(false);
+            loadUserIntoForm();
+        } else {
+            showInfo("Save failed.");
+        }
+    }
+
+    // ====== SECURITY (USERNAME/PASSWORD) ======
+    @FXML
+    private void btnCancel_onSecurity(ActionEvent e) {
+        textfieldclear();
+        messagelabelHide();
+    }
+    private void textfieldclear(){
+        currentUsername_tf.clear();
+        newUsername_tf.clear();
+        currentPassword_pf.clear(); newPassword_pf.clear(); confirmNewPassword_pf.clear();
+    }
+    private void messagelabelHide(){
+        username_err.setVisible(false); password_err.setVisible(false);
+    }
+    
+    @FXML
+    private void btnSave_onSecurity(ActionEvent e) {
+        username_err.setVisible(false);
+        password_err.setVisible(false);
+
+        // 1) Username change (optional if both fields filled)
+        String curU = trim(currentUsername_tf.getText());
+        String newU = trim(newUsername_tf.getText());
+        if (!curU.isBlank() || !newU.isBlank()) {
+            if (curU.isBlank() || newU.isBlank()) {
+                username_err.setText("Fill both current and new username.");
+                username_err.setVisible(true); return;
+            }
+            if (!mysqlconnect.verifyCurrentUsername(currentUserId, curU)) {
+                username_err.setText("Current username doesn't match.");
+                username_err.setVisible(true); return;
+            }
+            if (!mysqlconnect.updateUsername(currentUserId, newU)) {
+                username_err.setText("Failed to update username (maybe taken).");
+                username_err.setVisible(true); return;
+            }
+            username_err.setText("Username updated.");
+            username_err.setVisible(true);
+        }
+
+        // 2) Password change (optional)
+        String curP = currentPassword_pf.getText();
+        String newP = newPassword_pf.getText();
+        String cfmP = confirmNewPassword_pf.getText();
+        if (!curP.isBlank() || !newP.isBlank() || !cfmP.isBlank()) {
+            if (curP.isBlank() || newP.isBlank() || cfmP.isBlank()) {
+                password_err.setText("Fill all password fields.");
+                password_err.setVisible(true); return;
+            }
+            if (!mysqlconnect.verifyCurrentPassword(currentUserId, curP)) {
+                password_err.setText("Current password is incorrect.");
+                password_err.setVisible(true); return;
+            }
+            if (!newP.equals(cfmP)) {
+                password_err.setText("Passwords don't match!");
+                password_err.setVisible(true); return;
+            }
+            if (!mysqlconnect.updatePassword(currentUserId, newP)) {
+                password_err.setText("Failed to update password.");
+                password_err.setVisible(true); return;
+            }
+            password_err.setText("Password updated.");
+            password_err.setVisible(true);
+        }
+
+        // refresh "last updated"
+        loadUserIntoForm();
+        textfieldclear();
+//        // optionally clear security fields
+//        btnCancel_onSecurity(null);
+    }
+
+    // ====== eye icons (press to show / release to hide) ======
+    @FXML private void showCurrentPass(javafx.scene.input.MouseEvent e) {
+        toggleShow(currentPassword_pf, currentPassword_tf_visible);
+    }
+    @FXML private void showNewPass(javafx.scene.input.MouseEvent e) {
+        toggleShow(newPassword_pf, newPassword_tf_visible);
+    }
+    @FXML private void showConfirmNewPass(javafx.scene.input.MouseEvent e) {
+        toggleShow(confirmNewPassword_pf, confirmNewPassword_tf_visible);
+    }
+
+    private void toggleShow(PasswordField pf, TextField tfVisible) {
+        boolean show = !tfVisible.isVisible();
+        tfVisible.setVisible(show);
+        pf.setVisible(!show);
+    }
+
+    // ===== helpers =====
+    private String trim(String s) { return s == null ? "" : s.trim(); }
+    ////////////////////////////////////////////////////////////////////////////end of account profile
+    ////////////////////////////////////////////////////////////////////////////DATA INFORMATION
+    @FXML
+    private void manualBackup_btn(ActionEvent event) {
+    }
+
+    @FXML
+    private void restoreData_browseFilesBTN(ActionEvent event) {
+    }
+
+    @FXML
+    private void exportALL_CSV(ActionEvent event) {
+    }
+
+    @FXML
+    private void exportALL_PDF(ActionEvent event) {
+    }
+
+    @FXML
+    private void exportALL_EXCEL(ActionEvent event) {
+    }
+
+
 
     
 }

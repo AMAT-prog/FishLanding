@@ -180,4 +180,121 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-font-weight: bold;
 }
 
+.pane1{
+    -fx-background-color: #1E2128;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-width: 2;
+    -fx-border-color: #21252C;
+}
+
+.textPersonalInfo{
+    -fx-border-color: transparent transparent white transparent;
+    -fx-background-color: #16181d;
+    -fx-font-size: 12px; 
+    -fx-text-fill: white;
+    -fx-border-radius: 3px;
+}
+
+/* Give this style class to your Role ComboBox: role-combo */
+.role-combo {
+  -fx-background-color: #16181d;
+  -fx-border-color: transparent transparent white transparent;
+  /*-fx-border-color: #3a3f4b;*/
+  -fx-background-radius: 6;
+  -fx-border-radius: 3;
+  -fx-padding: 2px 6px;
+}
+
+/* Text in the closed button cell (what you see when not expanded) */
+.role-combo .list-cell {
+  -fx-text-fill: white;
+  -fx-font-size: 12px;
+  -fx-background-color: transparent; /* keep dark */
+}
+
+/* If the ComboBox is set editable=true, style its internal TextField */
+.role-combo .text-field {
+  -fx-background-color: transparent;
+  -fx-text-fill: white;
+  -fx-prompt-text-fill: #94a3b8;
+  -fx-font-size: 12px;
+}
+
+/* Keep it readable when disabled (JavaFX dims disabled controls by default) */
+.role-combo:disabled,
+.role-combo:disabled .list-cell,
+.role-combo:disabled .text-field {
+  -fx-opacity: 1.0;                /* <-- stop auto-dimming */
+  -fx-text-fill: #cbd5e1;          /* softer gray for disabled text */
+  -fx-background-color: #1f232b;   /* subtle contrast when disabled */
+}
+
+/* Popup list styling */
+.combo-box-popup .list-view {
+  -fx-background-color: #1f232b;
+  -fx-control-inner-background: #1f232b;
+}
+.combo-box-popup .list-view .list-cell {
+  -fx-text-fill: #e5e7eb;
+}
+.combo-box-popup .list-view .list-cell:filled:hover {
+  -fx-background-color: #2b303b;
+}
+.combo-box-popup .list-view .list-cell:filled:selected {
+  -fx-background-color: #334155;
+  -fx-text-fill: white;
+}
+
+/* Optional: make the arrow visible on dark bg */
+.role-combo .arrow,
+.role-combo .arrow-button {
+  -fx-background-color: transparent;
+}
+
+
+/* === Toggle "Track" === */
+/* Sizes we can tweak (keep in sync with the Java constants below) */
+.switch {
+    -fx-min-width: 56; -fx-pref-width: 56; -fx-max-width: 56;   /* track width  */
+    -fx-min-height: 30; -fx-pref-height: 30; -fx-max-height: 30;/* track height */
+    -fx-padding: 3;                                            /* PADDING = 3  */
+    -fx-background-radius: 15;
+    -fx-background-insets: 0;
+    -fx-cursor: hand;
+
+    /* OFF appearance */
+    -fx-background-color: #1f2630;     /* <-- FILLED off track */
+    -fx-border-color: #2b3a4a;
+    -fx-border-width: 1;
+    -fx-border-radius: 15;
+}
+
+/* ON appearance (FILLED) */
+.switch:selected {
+    -fx-background-color: #0f74b8;     /* <-- FILLED on track */
+    -fx-border-color: #1591da;
+}
+
+/* remove default button visuals */
+.switch:armed, .switch:focused, .switch:hover { -fx-background-insets: 0; }
+
+/* THUMB (black circle with cyan rim) */
+.switch .thumb {
+    -fx-min-width: 24; -fx-pref-width: 24; -fx-max-width: 24;  /* THUMB = 24   */
+    -fx-min-height: 24; -fx-pref-height: 24; -fx-max-height: 24;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-background-color: #000000;
+    -fx-border-color: #0ec2ff;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 6, 0.25, 0, 1);
+}
+
+/* optional hover pop */
+.switch:hover .thumb { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.40), 8, 0.3, 0, 1); }
+
+/* disabled state */
+.switch:disabled { -fx-opacity: 0.55; }
+
 

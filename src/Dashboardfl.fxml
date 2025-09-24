@@ -11,6 +11,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -28,6 +29,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -945,7 +947,7 @@
             </HBox>
          </bottom>
       </BorderPane>
-      <AnchorPane fx:id="fishermen_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="532.0" prefWidth="1035.0" style="-fx-background-color: black;">
+      <AnchorPane fx:id="fishermen_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="532.0" prefWidth="1035.0" style="-fx-background-color: black;" visible="false">
          <children>
             <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
                <children>
@@ -2072,7 +2074,7 @@
             </AnchorPane>
          </content>
       </ScrollPane>
-      <ScrollPane fx:id="species_pane" layoutX="224.0" layoutY="120.0" prefHeight="573.0" prefWidth="1068.0" style="-fx-background-color: transparent;">
+      <ScrollPane fx:id="species_pane" layoutX="224.0" layoutY="120.0" prefHeight="573.0" prefWidth="1068.0" style="-fx-background-color: transparent;" visible="false">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
                <children>
@@ -2243,5 +2245,332 @@
             </HBox>
          </bottom>
       </BorderPane>
+      <ScrollPane fx:id="accountProfile_pane" layoutX="225.0" layoutY="122.0" prefHeight="551.0" prefWidth="1047.0" style="-fx-background-color: transparent;" visible="false">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+               <children>
+                  <Pane layoutX="32.0" layoutY="24.0" prefHeight="476.0" prefWidth="477.0" styleClass="pane1" stylesheets="@FishLandingDesign.css">
+                     <children>
+                        <ImageView fx:id="accountPhoto_iv" fitHeight="105.0" fitWidth="104.0" layoutX="188.0" layoutY="73.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/PERSON.png" />
+                           </image>
+                        </ImageView>
+                        <Label alignment="CENTER" layoutX="-2.0" layoutY="-5.0" prefHeight="55.0" prefWidth="480.0" text="PERSONAL INFORMATION" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="uploadPhoto_btn" layoutX="198.0" layoutY="188.0" mnemonicParsing="false" onAction="#btnUploadPic_onAccountProfile" style="-fx-background-color: transparent; -fx-border-color: #3755b5; -fx-border-radius: 5;" text="Update Photo" textFill="WHITE" />
+                        <GridPane layoutX="40.0" layoutY="218.0" prefHeight="198.0" prefWidth="400.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Name" textFill="WHITE" />
+                              <TextField fx:id="accountName_tf" editable="false" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" text="John Doe" GridPane.rowIndex="1" />
+                              <Label text="Contact Number" textFill="WHITE" GridPane.rowIndex="2" />
+                              <TextField fx:id="accountContact_tf" editable="false" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" text="0912450123" GridPane.rowIndex="3" />
+                              <Label text="Role" textFill="WHITE" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="accountRole_cb" prefHeight="28.0" prefWidth="449.0" styleClass="role-combo" stylesheets="@FishLandingDesign.css" GridPane.rowIndex="5" />
+                           </children>
+                        </GridPane>
+                        <Button layoutX="331.0" layoutY="8.0" mnemonicParsing="false" onAction="#btnEdit_onAccountProfile" prefHeight="27.0" prefWidth="53.0" style="-fx-background-color: transparent;" text="Edit" textFill="WHITE">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="18.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/edit.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <HBox fx:id="cancelSavebtn_hbox" disable="true" layoutX="177.0" layoutY="439.0" prefHeight="27.0" prefWidth="263.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#btnCancel_onPersonalInfo" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5;" text="Cancel" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets left="175.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#btnSave_onPersonalInfo" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5;" text="Save" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets left="5.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </Pane>
+                  <Pane layoutX="524.0" layoutY="24.0" prefHeight="476.0" prefWidth="476.0" styleClass="pane1" stylesheets="@FishLandingDesign.css">
+                     <children>
+                        <Label alignment="CENTER" layoutX="2.0" layoutY="-6.0" prefHeight="65.0" prefWidth="476.0" text="SECURITY SETTINGS" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <GridPane layoutX="38.0" layoutY="51.0" prefHeight="377.0" prefWidth="405.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="New Username" textFill="WHITE" GridPane.rowIndex="3" />
+                              <TextField fx:id="currentUsername_tf" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" GridPane.rowIndex="2" />
+                              <TextField fx:id="newUsername_tf" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" GridPane.rowIndex="4" />
+                              <Label text="Change Password" textFill="WHITE" GridPane.rowIndex="6">
+                                 <font>
+                                    <Font name="System Bold Italic" size="13.0" />
+                                 </font></Label>
+                              <Label text="Current Password" textFill="WHITE" GridPane.rowIndex="7" />
+                              <Label text="New Password" textFill="WHITE" GridPane.rowIndex="9" />
+                              <Label text="Confirm New Password" textFill="WHITE" GridPane.rowIndex="11" />
+                              <PasswordField fx:id="currentPassword_pf" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" GridPane.rowIndex="8" />
+                              <PasswordField fx:id="newPassword_pf" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" GridPane.rowIndex="10" />
+                              <PasswordField fx:id="confirmNewPassword_pf" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" GridPane.rowIndex="12" />
+                              <Label fx:id="password_err" alignment="CENTER" prefHeight="27.0" prefWidth="405.0" text="Password don't match!" textFill="#ff7e7e" visible="false" GridPane.rowIndex="13">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                                 <GridPane.margin>
+                                    <Insets top="4.0" />
+                                 </GridPane.margin>
+                              </Label>
+                              <Label text="Current Username" textFill="WHITE" GridPane.rowIndex="1" />
+                              <Label text="Change Username" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold Italic" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="username_err" alignment="CENTER" prefHeight="27.0" prefWidth="405.0" text="Username don't match!" textFill="#ff7e7e" visible="false" GridPane.rowIndex="5">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                                 <GridPane.margin>
+                                    <Insets top="4.0" />
+                                 </GridPane.margin>
+                              </Label>
+                              <TextField fx:id="currentPassword_tf_visible" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" visible="false" GridPane.rowIndex="8" />
+                              <TextField fx:id="newPassword_tf_visible" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" visible="false" GridPane.rowIndex="10" />
+                              <TextField fx:id="confirmNewPassword_tf_visible" styleClass="textPersonalInfo" stylesheets="@FishLandingDesign.css" visible="false" GridPane.rowIndex="12" />
+                              <ImageView fitHeight="31.0" fitWidth="32.0" onMouseClicked="#showCurrentPass" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="8">
+                                 <image>
+                                    <Image url="@image/SHOWpassword.png" />
+                                 </image>
+                                 <GridPane.margin>
+                                    <Insets left="375.0" />
+                                 </GridPane.margin>
+                              </ImageView>
+                              <ImageView fitHeight="31.0" fitWidth="32.0" onMouseClicked="#showNewPass" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="10">
+                                 <image>
+                                    <Image url="@image/SHOWpassword.png" />
+                                 </image>
+                                 <GridPane.margin>
+                                    <Insets left="375.0" />
+                                 </GridPane.margin>
+                              </ImageView>
+                              <ImageView fitHeight="31.0" fitWidth="32.0" onMouseClicked="#showConfirmNewPass" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="12">
+                                 <image>
+                                    <Image url="@image/SHOWpassword.png" />
+                                 </image>
+                                 <GridPane.margin>
+                                    <Insets left="375.0" />
+                                 </GridPane.margin>
+                              </ImageView>
+                           </children>
+                        </GridPane>
+                        <HBox layoutX="180.0" layoutY="439.0" prefHeight="29.0" prefWidth="263.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#btnCancel_onSecurity" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5;" text="Cancel" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets left="175.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#btnSave_onSecurity" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5;" text="Save" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets left="5.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </HBox>
+                        <Label fx:id="updatedDate_label" alignment="CENTER" layoutY="42.0" prefHeight="17.0" prefWidth="472.0" text="Label" textFill="#34d947" />
+                     </children></Pane>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
+      <ScrollPane fx:id="dataInformation_pane" layoutX="225.0" layoutY="122.0" prefHeight="561.0" prefWidth="1057.0" style="-fx-background-color: transparent;">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+               <children>
+                  <Pane layoutX="32.0" layoutY="79.0" prefHeight="394.0" prefWidth="466.0" styleClass="pane1" stylesheets="@FishLandingDesign.css">
+                     <children>
+                        <Label layoutX="15.0" layoutY="11.0" prefHeight="55.0" prefWidth="452.0" text="Data Backup &amp; Restore" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <HBox layoutX="18.0" layoutY="77.0" prefHeight="86.0" prefWidth="428.0">
+                           <children>
+                              <VBox prefHeight="57.0" prefWidth="325.0">
+                                 <children>
+                                    <Label prefHeight="28.0" prefWidth="140.0" text="Enable Auto Backup" textFill="WHITE">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Automatically backs up your data every 24 hours" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Italic" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <ToggleButton fx:id="autoBackupSwitch" contentDisplay="GRAPHIC_ONLY" focusTraversable="false" maxWidth="87.0" mnemonicParsing="false" prefWidth="87.0" styleClass="switch" stylesheets="@FishLandingDesign.css" text="ToggleButton">
+                                 <HBox.margin>
+                                    <Insets left="58.0" top="10.0" />
+                                 </HBox.margin>
+                                 <graphic>
+                                    <Region fx:id="thumb" styleClass="thumb" />
+                                </graphic>
+                              </ToggleButton>
+                           </children>
+                        </HBox>
+                        <Button layoutX="18.0" layoutY="155.0" mnemonicParsing="false" onAction="#manualBackup_btn" prefHeight="25.0" prefWidth="428.0" style="-fx-background-color: #3e59d2; -fx-background-radius: 5;" text="Manual Backup" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Button>
+                        <VBox layoutX="26.0" layoutY="213.0" prefHeight="148.0" prefWidth="420.0">
+                           <children>
+                              <Label prefHeight="35.0" prefWidth="105.0" text="Restore Data" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="30.0" prefWidth="318.0" text="Upload a back up file to restore your data" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Button mnemonicParsing="false" onAction="#restoreData_browseFilesBTN" prefHeight="25.0" prefWidth="549.0" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 5;" text="Browse Files" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+                  <Pane layoutX="530.0" layoutY="80.0" prefHeight="394.0" prefWidth="470.0" styleClass="pane1" stylesheets="@FishLandingDesign.css">
+                     <children>
+                        <Label layoutX="21.0" layoutY="4.0" prefHeight="66.0" prefWidth="450.0" text="Data Export &amp; Sync Status" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <VBox layoutX="25.0" layoutY="76.0" prefHeight="277.0" prefWidth="421.0">
+                           <children>
+                              <Label prefHeight="31.0" prefWidth="144.0" text="Export Data" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="30.0" prefWidth="333.0" text="Download data in various formats for offline analysis or archival" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <HBox prefHeight="92.0" prefWidth="428.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#exportALL_CSV" prefHeight="37.0" prefWidth="113.0" style="-fx-background-color: black; -fx-border-color: WHITE; -fx-border-radius: 5;" text="Export as CSV" textFill="WHITE">
+                                       <HBox.margin>
+                                          <Insets left="40.0" top="20.0" />
+                                       </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#exportALL_PDF" prefHeight="37.0" prefWidth="113.0" style="-fx-background-color: black; -fx-border-color: WHITE; -fx-border-radius: 5;" text="Export as PDF" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets left="5.0" top="20.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#exportALL_EXCEL" prefHeight="37.0" prefWidth="113.0" style="-fx-background-color: black; -fx-border-color: WHITE; -fx-border-radius: 5;" text="Export as Excel" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets left="5.0" top="20.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <Label prefHeight="31.0" prefWidth="267.0" text="Data Sync Status" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lastBackup_label" prefHeight="29.0" prefWidth="419.0" text="Last Backup Label" textFill="#82ff8a">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label text="All changes are automatically synced." textFill="WHITE" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+                  <Label layoutX="37.0" layoutY="25.0" text="DATA MANAGEMENT" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
    </children>
 </AnchorPane>
