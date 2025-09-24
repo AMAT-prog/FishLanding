@@ -2007,7 +2007,7 @@
                                       <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                              <children>
-                                                <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="384.0" prefWidth="749.0" stylesheets="@reports-analytics.css">
+                                                <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="367.0" prefWidth="749.0" stylesheets="@reports-analytics.css">
                                                   <xAxis>
                                                     <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
                                                   </xAxis>
@@ -2023,7 +2023,7 @@
                                       <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                              <children>
-                                                <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="415.0" prefWidth="758.0" stylesheets="@reports-analytics.css">
+                                                <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="393.0" prefWidth="758.0" stylesheets="@reports-analytics.css">
                                                   <xAxis>
                                                     <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
                                                   </xAxis>

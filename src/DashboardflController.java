@@ -63,6 +63,13 @@ import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.ToggleButton;
 import javafx.util.Duration;
+   import com.lowagie.text.Document;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import javafx.stage.FileChooser;
+
 
 
 /**
@@ -271,6 +278,54 @@ public class DashboardflController implements Initializable {
     private static final double TRACK_WIDTH = 56;
     private static final double PADDING     = 3;   // -fx-padding
     private static final double THUMB_SIZE  = 24;
+    
+    // ==== DATA MANAGEMENT (Backup / Restore / Export) ====
+
+    // Adjust to your DB credentials (or read them from mysqlconnect)
+    private static final String DB_HOST = "localhost";
+    private static final String DB_PORT = "3306";
+    private static final String DB_NAME = "fish_landing_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASS = "root"; // keep safe
+
+    // If mysqldump/mysql aren't in PATH, put absolute paths here:
+     private static final String MYSQLDUMP = "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe";
+     private static final String MYSQL     = "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe";
+//    private static final String MYSQLDUMP = "mysqldump";
+//    private static final String MYSQL     = "mysql";
+
+    private static final java.time.format.DateTimeFormatter TS = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+
+    // Preferences to remember toggle + folder + last backup
+    private static final java.util.prefs.Preferences PREFS =
+            java.util.prefs.Preferences.userRoot().node("fish_landing/data_mgmt");
+
+    private static final String PREF_AUTO_ON   = "auto_backup_on";
+    private static final String PREF_AUTO_DIR  = "auto_backup_dir";
+    private static final String PREF_LAST_BACK = "last_backup_iso";
+
+    // Scheduler
+    private java.util.concurrent.ScheduledExecutorService backupScheduler;
+
+    // convenience
+    private String nowStamp() { return java.time.LocalDateTime.now().format(TS); }
+
+    private void updateLastBackupLabel() {
+        String iso = PREFS.get(PREF_LAST_BACK, null);
+        if (iso == null) {
+            lastBackup_label.setText("No backups yet");
+        } else {
+            var t = java.time.LocalDateTime.parse(iso);
+            var nice = t.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            lastBackup_label.setText("Last backup: " + nice);
+        }
+    }
+
+    private void rememberLastBackupNow() {
+        PREFS.put(PREF_LAST_BACK, java.time.LocalDateTime.now().toString());
+        updateLastBackupLabel();
+    }
+
     
     @FXML
     private BorderPane viewFisherHistory_popup;
@@ -1079,16 +1134,6 @@ public class DashboardflController implements Initializable {
         initUserProfile();
         
         //DATA INFORMATION
-//        Region thumb = (Region) autoBackupSwitch.getGraphic();
-//        thumb.translateXProperty().bind(
-//                Bindings.when(autoBackupSwitch.selectedProperty())
-//                        .then(48 - 22 - 4)    // trackWidth - thumbSize - 2*padding = 48 - 22 - 4 = 22
-//                        .otherwise(0)
-//        );
-//        autoBackupSwitch.accessibleTextProperty().bind(
-//            Bindings.when(autoBackupSwitch.selectedProperty()).then("On").otherwise("Off")
-//        );
-
         // If kept the fixed CSS sizes, a constant works:
         final double ON_OFFSET = TRACK_WIDTH - THUMB_SIZE - (2 * PADDING);
 
@@ -1112,6 +1157,26 @@ public class DashboardflController implements Initializable {
         //     autoBackupSwitch.widthProperty(),
         //     thumb.widthProperty()
         // ));
+        
+        // --- toggle animation already have remains ---
+        // Restore toggle state and schedule if needed
+        boolean autoOn = PREFS.getBoolean(PREF_AUTO_ON, false);
+        autoBackupSwitch.setSelected(autoOn);
+
+        // shift the thumb to match current state (already did this)
+//        {
+//            final double ON_OFFSET = 56 - 24 - (2 * 3);
+//            thumb.setTranslateX(autoBackupSwitch.isSelected() ? ON_OFFSET : 0);
+//        }
+
+        // react to clicks (onAction in FXML can call the same)
+        autoBackupSwitch.setOnAction(e -> setAutoBackupEnabled(autoBackupSwitch.isSelected()));
+
+        updateLastBackupLabel();
+
+        // If it was ON when app opened, start/resume scheduler
+        if (autoOn) startAutoBackupScheduler();
+
     
     }
         
@@ -3392,27 +3457,395 @@ public class DashboardflController implements Initializable {
     private String trim(String s) { return s == null ? "" : s.trim(); }
     ////////////////////////////////////////////////////////////////////////////end of account profile
     ////////////////////////////////////////////////////////////////////////////DATA INFORMATION
+    private void setAutoBackupEnabled(boolean enabled) {
+        PREFS.putBoolean(PREF_AUTO_ON, enabled);
+        if (enabled) {
+            // ensure we have a folder
+            String dir = PREFS.get(PREF_AUTO_DIR, null);
+            if (dir == null || dir.isBlank()) {
+                var chooser = new javafx.stage.DirectoryChooser();
+                chooser.setTitle("Choose folder for automatic backups");
+                var folder = chooser.showDialog(lastBackup_label.getScene().getWindow());
+                if (folder == null) {
+                    autoBackupSwitch.setSelected(false);
+                    PREFS.putBoolean(PREF_AUTO_ON, false);
+                    return;
+                }
+                PREFS.put(PREF_AUTO_DIR, folder.getAbsolutePath());
+            }
+            startAutoBackupScheduler();
+        } else {
+            stopAutoBackupScheduler();
+        }
+    }
+
+    private void startAutoBackupScheduler() {
+        stopAutoBackupScheduler(); // clean any previous
+        backupScheduler = java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+            var t = new Thread(r, "AutoBackupScheduler");
+            t.setDaemon(true);
+            return t;
+        });
+        // run first backup 24h from now; then every 24h
+        long periodHours = 24;
+        backupScheduler.scheduleAtFixedRate(() -> {
+            try {
+                String dir = PREFS.get(PREF_AUTO_DIR, null);
+                if (dir == null) return; // nothing to do
+                String file = new java.io.File(dir, "fish_landing_backup_" + nowStamp() + ".sql").getAbsolutePath();
+                boolean ok = runMysqldump(file);
+                if (ok) {
+                    javafx.application.Platform.runLater(this::rememberLastBackupNow);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }, periodHours, periodHours, java.util.concurrent.TimeUnit.HOURS);
+    }
+
+    private void stopAutoBackupScheduler() {
+        if (backupScheduler != null) {
+            backupScheduler.shutdownNow();
+            backupScheduler = null;
+        }
+    }
+    
     @FXML
     private void manualBackup_btn(ActionEvent event) {
+        var fc = new javafx.stage.FileChooser();
+        fc.setTitle("Save SQL Backup");
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+        fc.setInitialFileName("fish_landing_backup_" + nowStamp() + ".sql");
+        var file = fc.showSaveDialog(lastBackup_label.getScene().getWindow());
+        if (file == null) return;
+
+        boolean ok = runMysqldump(file.getAbsolutePath());
+        if (ok) {
+            rememberLastBackupNow();
+            showInfo("Backup saved:\n" + file.getAbsolutePath());
+        } else {
+            showWarn("Backup failed. Make sure mysqldump is installed and PATH is set.");
+        }
     }
 
     @FXML
     private void restoreData_browseFilesBTN(ActionEvent event) {
+        var fc = new javafx.stage.FileChooser();
+        fc.setTitle("Choose SQL Backup to Restore");
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+        var file = fc.showOpenDialog(lastBackup_label.getScene().getWindow());
+        if (file == null) return;
+
+        var confirm = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.WARNING,
+                "This will OVERWRITE all data in " + DB_NAME + ". This cannot be undone.\n\nProceed?",
+                javafx.scene.control.ButtonType.YES, javafx.scene.control.ButtonType.NO);
+        confirm.setHeaderText("Restore database?");
+        confirm.showAndWait();
+        if (confirm.getResult() != javafx.scene.control.ButtonType.YES) return;
+
+        boolean ok = runMysqlSource(file.getAbsolutePath());
+        if (ok) {
+            showInfo("Restore complete.\n" + file.getAbsolutePath());
+            // TODO: refresh UI tables here
+            // e.g., refreshFishermen(); refreshCatches(); refreshTransactions(); refreshDockLogs();
+            initUserProfile();
+            
+            species_tv.refresh();
+            
+            loadCatchVolumesAuto();
+            loadFisherfolkContribAuto();
+            loadSpeciesDistributionAuto();
+            loadSalesSeries();
+            
+            refreshDockLogsTable();
+            refreshTransactionsTable();
+            reloadFisherTable();
+            LANDINGS_SEARCH();
+            
+            refreshDockStats();
+            updateTransHeaderKpis();
+            
+            loadFisherfolkOptions();
+            loadSpeciesOptions();
+        } else {
+            showWarn("Restore failed. Ensure 'mysql' client is available and the SQL file is valid.");
+        }
+    }
+
+    private boolean runMysqldump(String outSqlPath) {
+        try {
+            var pb = new ProcessBuilder(
+                    MYSQLDUMP,
+                    "-h", DB_HOST,
+                    "-P", DB_PORT,
+                    "-u", DB_USER,
+                    "--password=" + DB_PASS,
+                    "--databases", DB_NAME,
+                    "--routines",
+                    "--triggers",
+                    "--events"
+            );
+            // direct process stdout to file
+            pb.redirectOutput(new java.io.File(outSqlPath));
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            var p = pb.start();
+            int code = p.waitFor();
+            return code == 0;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean runMysqlSource(String sqlPath) {
+        try {
+            var pb = new ProcessBuilder(
+                    MYSQL,
+                    "-h", DB_HOST,
+                    "-P", DB_PORT,
+                    "-u", DB_USER,
+                    "--password=" + DB_PASS,
+                    DB_NAME,
+                    "-e", "SOURCE " + sqlPath
+            );
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            var p = pb.start();
+            int code = p.waitFor();
+            return code == 0;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     @FXML
     private void exportALL_CSV(ActionEvent event) {
+        var dc = new javafx.stage.DirectoryChooser();
+        dc.setTitle("Choose folder to export CSV files");
+        var dir = dc.showDialog(lastBackup_label.getScene().getWindow());
+        if (dir == null) return;
+
+        String stamp = nowStamp();
+        int written = 0;
+        written += exportTableToCsv("fisherfolk",     new java.io.File(dir, "fisherfolk_" + stamp + ".csv"));
+        written += exportTableToCsv("species",        new java.io.File(dir, "species_" + stamp + ".csv"));
+        written += exportTableToCsv("catch",          new java.io.File(dir, "catch_" + stamp + ".csv"));
+        written += exportTableToCsv("transactions",   new java.io.File(dir, "transactions_" + stamp + ".csv"));
+        written += exportTableToCsv("docking_logs",   new java.io.File(dir, "docking_logs_" + stamp + ".csv"));
+//        written += exportTableToCsv("users",          new java.io.File(dir, "users_" + stamp + ".csv"));
+
+        showInfo("Exported " + written + " CSV file(s) to:\n" + dir.getAbsolutePath());
+        rememberLastBackupNow(); // if wanted the label to reflect “sync” actions too
     }
 
+    private int exportTableToCsv(String table, java.io.File file) {
+        String sql = "SELECT * FROM " + table;
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery();
+             var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+
+            var md = rs.getMetaData();
+            int cols = md.getColumnCount();
+
+            // header
+            for (int i = 1; i <= cols; i++) {
+                if (i > 1) pw.print(",");
+                pw.print(csv(md.getColumnLabel(i)));
+            }
+            pw.println();
+
+            // rows
+            while (rs.next()) {
+                for (int i = 1; i <= cols; i++) {
+                    if (i > 1) pw.print(",");
+                    String v = rs.getString(i);
+                    pw.print(csv(v));
+                }
+                pw.println();
+            }
+            return 1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return 0;
+        }
+    }
+
+    
     @FXML
     private void exportALL_PDF(ActionEvent event) {
+        try (var conn = mysqlconnect.ConnectDb()) {
+            var file = chooseExportFile("Export All (PDF)", DB_NAME + "_export", ".pdf");
+            if (file == null) return;
+
+            var doc = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4.rotate(), 24, 24, 24, 24);
+            com.lowagie.text.pdf.PdfWriter.getInstance(doc, new java.io.FileOutputStream(file));
+            doc.open();
+
+            var titleFont = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 18, com.lowagie.text.Font.BOLD);
+            var headFont  = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.BOLD);
+            var cellFont  = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10);
+
+            doc.add(new com.lowagie.text.Paragraph("Fish Landing – Full Data Export", titleFont));
+            doc.add(new com.lowagie.text.Paragraph(
+                "Generated: " + java.time.LocalDateTime.now() + "\n\n"));
+
+            for (var spec : exportTables()) {
+                var t = fetchTable(conn, spec);
+
+                // Section header
+                var h = new com.lowagie.text.Paragraph("\n" + t.name.toUpperCase(), headFont);
+                doc.add(h);
+
+                var table = new com.lowagie.text.pdf.PdfPTable(t.headers.size());
+                table.setWidthPercentage(100);
+
+                // headers
+                for (var hd : t.headers) {
+                    var cell = new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(hd, headFont));
+                    cell.setGrayFill(0.92f);
+                    table.addCell(cell);
+                }
+
+                // rows
+                for (var row : t.rows) {
+                    for (Object v : row) {
+                        var ph = new com.lowagie.text.Phrase(v == null ? "" : String.valueOf(v), cellFont);
+                        table.addCell(new com.lowagie.text.pdf.PdfPCell(ph));
+                    }
+                }
+                doc.add(table);
+            }
+
+            doc.close();
+
+            lastBackup_label.setText("Last Export (PDF): " + java.time.LocalDateTime.now());
+            showInfoWide("Exported to:\n" + file.getAbsolutePath());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("PDF export failed: " + ex.getMessage());
+        }
     }
 
     @FXML
     private void exportALL_EXCEL(ActionEvent event) {
+        try (var conn = mysqlconnect.ConnectDb()) {
+            var file = chooseExportFile("Export All (Excel)", DB_NAME + "_export", ".xlsx");
+            if (file == null) return;
+
+            try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+                for (var spec : exportTables()) {
+                    var t = fetchTable(conn, spec);
+                    var sheet = wb.createSheet(t.name);
+
+                    // header style (bold)
+                    var bold = wb.createFont(); bold.setBold(true);
+                    var headStyle = wb.createCellStyle(); headStyle.setFont(bold);
+
+                    int r = 0;
+                    var hr = sheet.createRow(r++);
+                    for (int i = 0; i < t.headers.size(); i++) {
+                        var cell = hr.createCell(i);
+                        cell.setCellValue(t.headers.get(i));
+                        cell.setCellStyle(headStyle);
+                    }
+
+                    for (var row : t.rows) {
+                        var rr = sheet.createRow(r++);
+                        for (int i = 0; i < row.size(); i++) {
+                            var cell = rr.createCell(i);
+                            Object v = row.get(i);
+                            if (v == null) cell.setBlank();
+                            else if (v instanceof Number n) cell.setCellValue(n.doubleValue());
+                            else if (v instanceof java.sql.Date d) cell.setCellValue(d.toLocalDate().toString());
+                            else if (v instanceof java.sql.Time ttime) cell.setCellValue(ttime.toLocalTime().toString());
+                            else if (v instanceof java.sql.Timestamp ts) cell.setCellValue(ts.toLocalDateTime().toString());
+                            else cell.setCellValue(String.valueOf(v));
+                        }
+                    }
+                    for (int i = 0; i < t.headers.size(); i++) sheet.autoSizeColumn(i);
+                }
+                try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
+            }
+
+            lastBackup_label.setText("Last Export (Excel): " + java.time.LocalDateTime.now());
+            showInfoWide("Exported to:\n" + file.getAbsolutePath());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("Excel export failed: " + ex.getMessage());
+        }
+    }
+    
+    private java.io.File chooseExportFile(String title, String baseName, String ext) {
+        javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+        fc.setTitle(title);
+        fc.setInitialFileName(baseName + "_" +
+                java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmm")) + ext);
+        
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter(
+                ext.equals(".pdf") ? "PDF Files" : ext.equals(".xlsx") ? "Excel Files" : "All Files",
+                "*" + ext));
+        
+        java.io.File file = fc.showSaveDialog(null);
+        if (file == null) return null;
+        
+        // 🔑 Append extension if user didn’t type it
+        if (!file.getName().toLowerCase().endsWith(ext)) {
+            file = new java.io.File(file.getAbsolutePath() + ext);
+        }
+        return file;
     }
 
 
+    private void showWarn(String msg) {
+        var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING, msg, javafx.scene.control.ButtonType.OK);
+        a.setHeaderText(null); a.showAndWait();
+    }
+
+
+// ==== EXPORT HELPERS =========================================================
+
+    private static class TableSpec {
+        final String name, sql;
+        TableSpec(String name, String sql) { this.name = name; this.sql = sql; }
+    }
+
+    // All tables wanted to export (can add views too)
+    private java.util.List<TableSpec> exportTables() {
+        return java.util.List.of(
+            new TableSpec("fisherfolk",     "SELECT * FROM fisherfolk ORDER BY fisherfolk_id"),
+            new TableSpec("species",        "SELECT * FROM species ORDER BY species_id"),
+            new TableSpec("catch",          "SELECT * FROM catch ORDER BY catch_id"),
+            new TableSpec("transactions",   "SELECT * FROM transactions ORDER BY transaction_id"),
+            new TableSpec("docking_logs",   "SELECT * FROM docking_logs ORDER BY log_id")
+            // new TableSpec("v_catch_available", "SELECT * FROM v_catch_available") // optional
+        );
+    }
+
+
+    // Read a SQL query into an in-memory table (headers + rows)
+    private static class TableData {
+        final String name;
+        final java.util.List<String> headers = new java.util.ArrayList<>();
+        final java.util.List<java.util.List<Object>> rows = new java.util.ArrayList<>();
+        TableData(String name) { this.name = name; }
+    }
+
+    private TableData fetchTable(java.sql.Connection c, TableSpec spec) throws Exception {
+        try (var ps = c.prepareStatement(spec.sql); var rs = ps.executeQuery()) {
+            var md = rs.getMetaData();
+            var t = new TableData(spec.name);
+            for (int i = 1; i <= md.getColumnCount(); i++) t.headers.add(md.getColumnLabel(i));
+            while (rs.next()) {
+                var row = new java.util.ArrayList<Object>(md.getColumnCount());
+                for (int i = 1; i <= md.getColumnCount(); i++) row.add(rs.getObject(i));
+                t.rows.add(row);
+            }
+            return t;
+        }
+    }
 
     
 }

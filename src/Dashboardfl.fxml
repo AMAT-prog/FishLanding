@@ -2007,7 +2007,7 @@
                                       <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                              <children>
-                                                <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="384.0" prefWidth="749.0" stylesheets="@reports-analytics.css">
+                                                <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="367.0" prefWidth="749.0" stylesheets="@reports-analytics.css">
                                                   <xAxis>
                                                     <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
                                                   </xAxis>
@@ -2023,7 +2023,7 @@
                                       <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                              <children>
-                                                <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="415.0" prefWidth="758.0" stylesheets="@reports-analytics.css">
+                                                <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="393.0" prefWidth="758.0" stylesheets="@reports-analytics.css">
                                                   <xAxis>
                                                     <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
                                                   </xAxis>
@@ -2455,7 +2455,7 @@
                                           <Font size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label text="Automatically backs up your data every 24 hours" textFill="WHITE">
+                                    <Label text="Automatically backs up your data every 24 hours." textFill="WHITE">
                                        <font>
                                           <Font name="System Italic" size="12.0" />
                                        </font>
@@ -2484,7 +2484,7 @@
                                     <Font size="14.0" />
                                  </font>
                               </Label>
-                              <Label prefHeight="30.0" prefWidth="318.0" text="Upload a back up file to restore your data" textFill="WHITE">
+                              <Label prefHeight="30.0" prefWidth="318.0" text="Upload a back up file to restore your data." textFill="WHITE">
                                  <font>
                                     <Font name="System Italic" size="12.0" />
                                  </font>
@@ -2515,7 +2515,7 @@
                                     <Font size="14.0" />
                                  </font>
                               </Label>
-                              <Label prefHeight="30.0" prefWidth="333.0" text="Download data in various formats for offline analysis or archival" textFill="WHITE">
+                              <Label prefHeight="30.0" prefWidth="369.0" text="Download data in various formats for offline analysis or archival." textFill="WHITE">
                                  <font>
                                     <Font name="System Italic" size="12.0" />
                                  </font>
