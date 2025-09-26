@@ -68,6 +68,7 @@ import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import javafx.scene.Node;
 import javafx.stage.FileChooser;
 
 
@@ -80,23 +81,9 @@ import javafx.stage.FileChooser;
 public class DashboardflController implements Initializable {
 
     @FXML
-    private ToggleButton weekToggle;
-    @FXML
     private ToggleGroup timeToggleGroup;
     @FXML
-    private ToggleButton monthToggle;
-    @FXML
-    private LineChart<?, ?> lineChart;
-    @FXML
     private ScrollPane landings_pane;
-    @FXML
-    private Label TotalLandingsToday_label;
-    @FXML
-    private Label TotalLandingsThisMonth_label;
-    @FXML
-    private Label AveragePerFisherfolk_label;
-    @FXML
-    private Label TotalSales_label;
     @FXML
     private TextField filterField_fishLandings;
     @FXML
@@ -273,60 +260,53 @@ public class DashboardflController implements Initializable {
     private String origName, origContact, origRole;
     private byte[]  origPhoto;
     
-    //DATA INFORMATION
-    // Keep these consistent with CSS:
-    private static final double TRACK_WIDTH = 56;
-    private static final double PADDING     = 3;   // -fx-padding
-    private static final double THUMB_SIZE  = 24;
-    
-    // ==== DATA MANAGEMENT (Backup / Restore / Export) ====
+    //DATA INFORMATION MODULE and DATA INFORMATION on dashboard
+    // ==========================================================
+    // SECTION A — Class fields (top of controller, before initialize)
+    // ==========================================================
 
-    // Adjust to your DB credentials (or read them from mysqlconnect)
+    // Switch geometry (matches your CSS)
+    private static final double TRACK_WIDTH = 56;
+    private static final double PADDING     = 3;
+    private static final double THUMB_SIZE  = 24;
+    private static final double ON_OFFSET   = TRACK_WIDTH - THUMB_SIZE - (2 * PADDING);
+
+    // ---- DB + tools (unchanged) ----
     private static final String DB_HOST = "localhost";
     private static final String DB_PORT = "3306";
     private static final String DB_NAME = "fish_landing_db";
     private static final String DB_USER = "root";
-    private static final String DB_PASS = "root"; // keep safe
+    private static final String DB_PASS = "root";
+    private static final String MYSQLDUMP = "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe";
+    private static final String MYSQL     = "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe";
 
-    // If mysqldump/mysql aren't in PATH, put absolute paths here:
-     private static final String MYSQLDUMP = "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe";
-     private static final String MYSQL     = "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe";
-//    private static final String MYSQLDUMP = "mysqldump";
-//    private static final String MYSQL     = "mysql";
-
-    private static final java.time.format.DateTimeFormatter TS = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-
-    // Preferences to remember toggle + folder + last backup
-    private static final java.util.prefs.Preferences PREFS =
-            java.util.prefs.Preferences.userRoot().node("fish_landing/data_mgmt");
-
-    private static final String PREF_AUTO_ON   = "auto_backup_on";
-    private static final String PREF_AUTO_DIR  = "auto_backup_dir";
-    private static final String PREF_LAST_BACK = "last_backup_iso";
-
-    // Scheduler
     private java.util.concurrent.ScheduledExecutorService backupScheduler;
 
-    // convenience
-    private String nowStamp() { return java.time.LocalDateTime.now().format(TS); }
+    // ---- Settings file (single source of truth) ----
+    private static final java.nio.file.Path SETTINGS_DIR  =
+            java.nio.file.Paths.get(System.getProperty("user.home"), ".fishlanding");
+    private static final java.nio.file.Path SETTINGS_FILE =
+            SETTINGS_DIR.resolve("settings.properties");
+    private static final String KEY_AUTO_ENABLED = "autoBackup.enabled";
+    private static final String KEY_AUTO_DIR     = "autoBackup.dir";
+    private static final String KEY_AUTO_LAST    = "autoBackup.last";
 
-    private void updateLastBackupLabel() {
-        String iso = PREFS.get(PREF_LAST_BACK, null);
-        if (iso == null) {
-            lastBackup_label.setText("No backups yet");
-        } else {
-            var t = java.time.LocalDateTime.parse(iso);
-            var nice = t.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            lastBackup_label.setText("Last backup: " + nice);
-        }
+    // Shared state for both toggles
+    private final javafx.beans.property.BooleanProperty autoBackupEnabled =
+            new javafx.beans.property.SimpleBooleanProperty(false);
+    private java.nio.file.Path backupDir; // current chosen folder (may be null)
+    private boolean suppressMirror = false; // prevent feedback loops
+
+    private static String nowIso() {
+        return java.time.LocalDateTime.now().toString();
     }
-
-    private void rememberLastBackupNow() {
-        PREFS.put(PREF_LAST_BACK, java.time.LocalDateTime.now().toString());
-        updateLastBackupLabel();
+    private static String nowStamp() {
+        return java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
     }
+    // settings.properties keys (same file)
+    private static final String KEY_LAST_BACKUP_ISO = "autoBackup.lastIso";
 
-    
+
     @FXML
     private BorderPane viewFisherHistory_popup;
     @FXML
@@ -415,11 +395,16 @@ public class DashboardflController implements Initializable {
     @FXML
     private DatePicker dpEndDate_transac;
     
-    @FXML private BorderPane               addNewTransaction_popup;
-    @FXML private ComboBox<FisherfolkItem> transacSeller_cb;
-    @FXML private ComboBox<CatchOption>    transacFishType_cb;
-    @FXML private ComboBox<String>         transacPaymentMethod_cb;
-    @FXML private ComboBox<String>         transacPaymentStatus_cb;
+    @FXML 
+    private BorderPane addNewTransaction_popup;
+    @FXML 
+    private ComboBox<FisherfolkItem> transacSeller_cb;
+    @FXML 
+    private ComboBox<CatchOption> transacFishType_cb;
+    @FXML 
+    private ComboBox<String> transacPaymentMethod_cb;
+    @FXML 
+    private ComboBox<String> transacPaymentStatus_cb;
     @FXML
     private TextField transacQuantity_tf;
     @FXML
@@ -446,7 +431,6 @@ public class DashboardflController implements Initializable {
     private Label transacRemainingQuantity_label;
     @FXML
     private Label price_err;
-    
     @FXML
     private ScrollPane dockingLogs_pane;
     @FXML
@@ -602,149 +586,179 @@ public class DashboardflController implements Initializable {
     @FXML
     private ScrollPane dataInformation_pane;
 
+    @FXML
+    private Label TodaysLandingInKG_label;
+    @FXML
+    private Label TodaysLandingInKG_increaseORdecreasePercentageVsLastMonth_label;
+    @FXML
+    private Label TotalFishStockInKg_label;
+    @FXML
+    private Label TotalFishStockInKG_increaseOrDecreasePercentageVsLastMonth_label;
+    @FXML
+    private Label TotalRegisteredFishermen_label;
+    @FXML
+    private Label RegisteredFishermenVsLastMonth_percentageLabel;
+    @FXML
+    private Label TotalSalesInPhp_label;
+    @FXML
+    private Label TotalSalesVsLastMonth_percentageLabel;
     
+    @FXML
+    private TableView<LandingRow> dashboardRecentFishLanding_tv;
+    @FXML
+    private TableColumn<LandingRow, String> dashboardFisherman_col;
+    @FXML
+    private TableColumn<LandingRow, String> dashboardFishType_col;
+    @FXML
+    private TableColumn<LandingRow, Number> dashboardQuantityKg_col;
+    @FXML
+    private TableColumn<LandingRow, Number> dashboardValuePHP_col;
+    
+    @FXML
+    private ToggleButton dashboardLandingsTrend_WeekToggle;
+    @FXML
+    private ToggleButton dashboardLandingsTrend_monthToggle;
+    @FXML
+    private LineChart<String, Number> dashboardLandingsTrend_lineChart;
+    @FXML
+    private NumberAxis dashboardLineChart_numAxis;
+    @FXML
+    private CategoryAxis dashboardLIneChart_categAxis;
+    @FXML
+    private Label dashboardTrendLegend;
+    @FXML
+    private PieChart dashboardTopFishTypesKG_piechart;
+    @FXML
+    private ToggleButton autoBackupSwitch1;
+    @FXML
+    private Region thumb1;
+    
+    @FXML
+    private ToggleButton dashboard_toggle;
+    @FXML
+    private ToggleButton landings_toggle;
+    @FXML
+    private ToggleButton fishermen_toggle;
+    @FXML
+    private ToggleButton sales_toggle;
+    @FXML
+    private ToggleButton docking_toggle;
+    @FXML
+    private ToggleButton species_toggle;
+    @FXML
+    private ToggleButton data_toggle;
+    @FXML
+    private ToggleButton account_toggle;
+    @FXML
+    private ToggleButton reportsAnalytics_toggle;
+    
+    @FXML
+    private Label TotalLandingsTodayKG_label;
+    @FXML
+    private Label TotalLandingsTodayKG_rateVsLastDay;
+    @FXML
+    private Label TotalLandingsThisMonthKG_label;
+    @FXML
+    private Label TotalLandingsThisMonthKG_rateVsLastMonth;
+    @FXML
+    private Label AveragePerFisherfolkKG_label;
+    @FXML
+    private Label AveragePerFisherfolkKG_rateThisMonth;
+    @FXML
+    private Label TotalSalesPHP_label;
+    @FXML
+    private Label TotalSalesPHP_rateVsLastMonth;
+
+    private void wireNav() {
+        // Default selection
+        sideNav.selectToggle(dashboard_toggle);
+        showSection(dashboard_toggle, dashboard_pane);
+    }
+
+    private void showSection(ToggleButton which, Node paneToShow) {
+        // select the sidebar button (this also applies the :selected CSS)
+        sideNav.selectToggle(which);
+
+        // hide all, then show the requested pane
+        dashboard_pane.setVisible(false);
+        landings_pane.setVisible(false);
+        fishermen_pane.setVisible(false);
+        transactionANDsales_pane.setVisible(false);
+        dockingLogs_pane.setVisible(false);
+        reportsANDanalytics_pane.setVisible(false);
+        species_pane.setVisible(false);
+        accountProfile_pane.setVisible(false);
+        dataInformation_pane.setVisible(false);
+
+        paneToShow.setVisible(true);
+    }
+
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
-    @FXML
-    private void dashboard_btn(ActionEvent event) {
-        dashboard_pane.setVisible(true);
-         
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
+    @FXML private void landings_btn(ActionEvent e) {
+        showSection(landings_toggle, landings_pane);
+    }
+    @FXML private void fishermen_btn(ActionEvent e) {
+        showSection(fishermen_toggle, fishermen_pane);
+    }
+    @FXML private void transactionSales_btn(ActionEvent e) {
+        showSection(sales_toggle, transactionANDsales_pane);
+    }
+    @FXML private void dockingLogs_btn(ActionEvent e) {
+        showSection(docking_toggle, dockingLogs_pane);
+    }
+    @FXML private void reportsAnalytics_btn(ActionEvent e) {
+        showSection(reportsAnalytics_toggle, reportsANDanalytics_pane);
+    }
+    @FXML private void species_btn(ActionEvent e) {
+        showSection(species_toggle, species_pane);
+    }
+    @FXML private void accountProfile_btn(ActionEvent e) {
+        showSection(account_toggle, accountProfile_pane);
+    }
+    @FXML private void dataInformation_btn(ActionEvent e) {
+        showSection(data_toggle, dataInformation_pane);
+    }
+    @FXML private void dashboard_btn(ActionEvent e) {
+        showSection(dashboard_toggle, dashboard_pane);
     }
 
-    @FXML
-    private void landings_btn(ActionEvent event) {
-        landings_pane.setVisible(true);
-       
-        dashboard_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
-
-    @FXML
-    private void fishermen_btn(ActionEvent event) {
-        fishermen_pane.setVisible(true);
-        
-        dashboard_pane.setVisible(false);
-        landings_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
-
-    @FXML
-    private void transactionSales_btn(ActionEvent event) {
-        transactionANDsales_pane.setVisible(true);
-        
-        dashboard_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        landings_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
-
-    @FXML
-    private void dockingLogs_btn(ActionEvent event) {
-        dockingLogs_pane.setVisible(true);
-        
-        dashboard_pane.setVisible(false);
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
-
-    @FXML
-    private void reportsAnalytics_btn(ActionEvent event) {
-        reportsANDanalytics_pane.setVisible(true);
-        
-        dashboard_pane.setVisible(false);
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
-
-    @FXML
-    private void species_btn(ActionEvent event) {
-        species_pane.setVisible(true);
-         
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        dashboard_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
-
-    @FXML
-    private void dataInformation_btn(ActionEvent event) {
-        dataInformation_pane.setVisible(true);
-         
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dashboard_pane.setVisible(false);
-    }
-
-    @FXML
-    private void accountProfile_btn(ActionEvent event) {
-        accountProfile_pane.setVisible(true);
-         
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        dashboard_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
-    }
     
     ////////////////////////////////////////////////////////////////////////////end of Side Navigation
+    ////////////////////////////////////////////////////////////////////////////DASHBOARD QUICK ACTIONS
+    @FXML private void dashboard_fisherfolk(ActionEvent e) {
+        showSection(fishermen_toggle, fishermen_pane);
+    }
+    @FXML private void dashboard_landings(ActionEvent e) {
+        showSection(landings_toggle, landings_pane);
+    }
+    @FXML private void dashboard_sales(ActionEvent e) {
+        showSection(sales_toggle, transactionANDsales_pane);
+    }
+    @FXML private void dashboard_analytics(ActionEvent e) {
+        showSection(reportsAnalytics_toggle, reportsANDanalytics_pane);
+    }
+    @FXML private void dashboard_species(ActionEvent e) {
+        showSection(species_toggle, species_pane);
+    }
+
+    
+    ////////////////////////////////////////////////////////////////////////////end of dashboard quick actions
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        dashboard_pane.setVisible(true);
-        landings_pane.setVisible(false);
-        fishermen_pane.setVisible(false);
-        transactionANDsales_pane.setVisible(false);
-        dockingLogs_pane.setVisible(false);
-        reportsANDanalytics_pane.setVisible(false);
-        species_pane.setVisible(false);
-        accountProfile_pane.setVisible(false);
-        dataInformation_pane.setVisible(false);
+        wireNav();
+//        dashboard_pane.setVisible(true);
+//        landings_pane.setVisible(false);
+//        fishermen_pane.setVisible(false);
+//        transactionANDsales_pane.setVisible(false);
+//        dockingLogs_pane.setVisible(false);
+//        reportsANDanalytics_pane.setVisible(false);
+//        species_pane.setVisible(false);
+//        accountProfile_pane.setVisible(false);
+//        dataInformation_pane.setVisible(false);
         // LANDINGS or CATCHES
         LANDINGS_SEARCH();
+        refreshLandingsKPIs();
         hideAllErrors();
         loadFisherfolkOptions();
         loadSpeciesOptions();
@@ -804,6 +818,31 @@ public class DashboardflController implements Initializable {
                         updateVisual(row.isActive(), true);
                         showInfoFISHERMEN("Failed to update status.");
                     }
+                                ///// UPDATE FISHERFOLK(SELLER LIST) COMBO BOX IN ADD TRANSACTION/////
+                                transacSeller_cb.setItems(mysqlconnect.loadActiveFisherfolkItems());
+                                transacSeller_cb.setConverter(new javafx.util.StringConverter<>() {
+                                    @Override public String toString(FisherfolkItem f) { return f == null ? "" : f.getName(); }
+                                    @Override public FisherfolkItem fromString(String s) { return null; }
+                                });
+                                // when seller changes -> reload catch options for that seller
+                                transacSeller_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
+                                    if (sel != null) {
+                                        var opts = mysqlconnect.loadCatchOptionsByFisher(sel.getId());
+                                        transacFishType_cb.setItems(opts);
+                                    } else {
+                                        transacFishType_cb.getItems().clear();
+                                    }
+                                    transacFishType_cb.getSelectionModel().clearSelection();
+                                    currentCatchOpt = null;
+                                    transacRemainingQuantity_label.setText("");
+                                    if (!transactionUpdateMode) transacUnitPrice_tf.clear();
+                                    updateTotalLabel();
+                                    hideErrors();
+                                });
+                                allSellers = mysqlconnect.loadActiveFisherfolkItems();
+                                transacSeller_cb.setItems(allSellers);
+                                ///// UPDATE FISHERFOLK OPTIONS IN LANDINGS
+                                loadFisherfolkOptions();
                 });
             }
 
@@ -1133,51 +1172,63 @@ public class DashboardflController implements Initializable {
         //ACCOUNT PROFILE
         initUserProfile();
         
-        //DATA INFORMATION
-        // If kept the fixed CSS sizes, a constant works:
-        final double ON_OFFSET = TRACK_WIDTH - THUMB_SIZE - (2 * PADDING);
 
-        // Smooth slide animation when toggling
-        autoBackupSwitch.selectedProperty().addListener((obs, wasOn, isOn) -> {
-            double target = isOn ? ON_OFFSET : 0;
-            TranslateTransition tt = new TranslateTransition(Duration.millis(140), thumb);
-            tt.setToX(target);
-            tt.play();
+        //DASHBOARD
+        refreshDashboardKPIs();
+        //recent 3-5 landings in dashboard//
+        // columns
+        dashboardFisherman_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getFisherName()));
+        dashboardFishType_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
+        dashboardQuantityKg_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQuantityKg()));
+        dashboardValuePHP_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleDoubleProperty(c.getValue().getValuePhp()));
+
+        // optional pretty formatting you already use elsewhere:
+        setNumeric2dp(dashboardQuantityKg_col);
+        setCurrencyPeso(dashboardValuePHP_col);
+
+        // load 5 most recent
+        dashboardRecentFishLanding_tv.setItems(loadRecentLandings(5));
+
+        //landing trends in dashboard//
+        // Axis labels
+        dashboardLIneChart_categAxis.setLabel("Period");
+        dashboardLineChart_numAxis.setLabel("Kg landed");
+
+        // Style the toggles with CSS
+        dashboardLandingsTrend_WeekToggle.getStyleClass().add("toggle-pill");
+        dashboardLandingsTrend_monthToggle.getStyleClass().add("toggle-pill");
+
+        // Make them mutually exclusive
+        var timeToggleGroup = new javafx.scene.control.ToggleGroup();
+        dashboardLandingsTrend_WeekToggle.setToggleGroup(timeToggleGroup);
+        dashboardLandingsTrend_monthToggle.setToggleGroup(timeToggleGroup);
+
+        // default view
+        dashboardLandingsTrend_monthToggle.setSelected(true);
+        loadMonthlyLandingsTrend(); //draws chart
+
+        dashboardLandingsTrend_monthToggle.selectedProperty().addListener((o, was, is) -> {
+            if (is) loadMonthlyLandingsTrend();
         });
+        dashboardLandingsTrend_WeekToggle.selectedProperty().addListener((o, was, is) -> {
+            if (is) loadWeeklyLandingsTrend();
+        });
+        // hide built-in legend; use centered label instead
+        dashboardLandingsTrend_lineChart.setLegendVisible(false);
 
-        // Set initial position (in case it's pre-selected)
-        thumb.setTranslateX(autoBackupSwitch.isSelected() ? ON_OFFSET : 0);
-
-        // If later, change sizes dynamically, replace the above with a binding:
-        // thumb.translateXProperty().bind(Bindings.createDoubleBinding(
-        //     () -> autoBackupSwitch.isSelected()
-        //           ? autoBackupSwitch.getWidth() - thumb.getWidth() - (2 * PADDING)
-        //           : 0,
-        //     autoBackupSwitch.selectedProperty(),
-        //     autoBackupSwitch.widthProperty(),
-        //     thumb.widthProperty()
-        // ));
+        //top fish type
+        loadDashboardTopFishTypesPie(4); // top-5
         
-        // --- toggle animation already have remains ---
-        // Restore toggle state and schedule if needed
-        boolean autoOn = PREFS.getBoolean(PREF_AUTO_ON, false);
-        autoBackupSwitch.setSelected(autoOn);
+        
+        // Auto-backup (both Dashboard & Data Info toggles)
+        initAutoBackupUI();        // <-- new unified wiring + load settings + start scheduler if needed
+        refreshLastBackupLabel();  // <-- shows “Last backup …” if any
+        
 
-        // shift the thumb to match current state (already did this)
-//        {
-//            final double ON_OFFSET = 56 - 24 - (2 * 3);
-//            thumb.setTranslateX(autoBackupSwitch.isSelected() ? ON_OFFSET : 0);
-//        }
-
-        // react to clicks (onAction in FXML can call the same)
-        autoBackupSwitch.setOnAction(e -> setAutoBackupEnabled(autoBackupSwitch.isSelected()));
-
-        updateLastBackupLabel();
-
-        // If it was ON when app opened, start/resume scheduler
-        if (autoOn) startAutoBackupScheduler();
-
-    
     }
         
     ////////////////////////////////////////////////////////////////////////////end of initialization
@@ -1381,7 +1432,7 @@ public class DashboardflController implements Initializable {
                 err.setHeaderText(null);
                 err.showAndWait();
             }
-        }
+        } refreshLandingsKPIs();
     }
 
     @FXML
@@ -1626,6 +1677,7 @@ public class DashboardflController implements Initializable {
         addNewLanding_popup.setVisible(false);
         landings_pane.setDisable(false);
         sideNavigation_vbox.setDisable(false);
+        refreshLandingsKPIs();
     }
     
     private LocalTime parseOptionalTime(String text) {
@@ -1662,9 +1714,206 @@ public class DashboardflController implements Initializable {
 }
     
     @FXML
-    private void generateReport(ActionEvent event) {
+    private void exportLandings(ActionEvent event) {
+        // Ask where to save
+        var chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Export Landings (Excel)");
+        chooser.getExtensionFilters().add(
+            new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
+        );
+        String base = "landings_" + java.time.LocalDate.now();
+        chooser.setInitialFileName(base + ".xlsx");
+
+        var file = chooser.showSaveDialog(TotalLandingsTodayKG_label.getScene().getWindow());
+        if (file == null) return; // user cancelled
+
+        // Query rows (join names so the sheet is readable)
+        final String sql = """
+            SELECT c.catch_id,
+                   f.name        AS fisherfolk,
+                   s.species_name AS species,
+                   c.quantity,
+                   c.price_per_kilo,
+                   c.total_value,
+                   c.catch_date,
+                   c.docking_time,
+                   c.remarks
+            FROM catch c
+            JOIN fisherfolk f ON f.fisherfolk_id = c.fisherfolk_id
+            JOIN species    s ON s.species_id     = c.species_id
+            ORDER BY c.catch_date DESC, c.catch_id DESC
+        """;
+
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+             var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+
+            var sh = wb.createSheet("Landings");
+
+            // header style
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {
+                "Catch ID","Fisherfolk","Species","Quantity (kg)",
+                "Price / kg","Total Value","Catch Date","Docking Time","Remarks"
+            };
+            int r = 0;
+            var hr = sh.createRow(r++);
+            for (int i = 0; i < headers.length; i++) {
+                var cell = hr.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(head);
+            }
+
+            // rows
+            while (rs.next()) {
+                var row = sh.createRow(r++);
+                int cix = 0;
+                row.createCell(cix++).setCellValue(rs.getInt("catch_id"));
+                row.createCell(cix++).setCellValue(rs.getString("fisherfolk"));
+                row.createCell(cix++).setCellValue(rs.getString("species"));
+                row.createCell(cix++).setCellValue(rs.getDouble("quantity"));
+                row.createCell(cix++).setCellValue(rs.getDouble("price_per_kilo"));
+                row.createCell(cix++).setCellValue(rs.getDouble("total_value"));
+                var cd = rs.getDate("catch_date");
+                row.createCell(cix++).setCellValue(cd == null ? "" : cd.toString());
+                var dt = rs.getTime("docking_time");
+                row.createCell(cix++).setCellValue(dt == null ? "" : dt.toString());
+                row.createCell(cix++).setCellValue(rs.getString("remarks"));
+            }
+
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
+
+            // success message
+            showInfoWide("Landings exported to:\n" + file.getAbsolutePath());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("Export failed: " + ex.getMessage());
+        }
     }
+
     
+    //LANDINGS KPI'S
+    // ---------- LANDINGS KPI HELPERS ----------
+    // quick numeric queries (returns 0 on any issue)
+    private double qd(String sql) {
+        try (var c = mysqlconnect.ConnectDb();
+             var st = c.createStatement();
+             var rs = st.executeQuery(sql)) {
+            return rs.next() ? rs.getDouble(1) : 0.0;
+        } catch (Exception ex) { ex.printStackTrace(); return 0.0; }
+    }
+
+    // percentage delta = (now - prev) / prev * 100
+    private Double pctDelta(double nowVal, double prevVal) {
+        if (prevVal == 0) {
+            if (nowVal == 0) return null;     // “—”
+            return 100.0;                     // define as +100% when prev was 0
+        }
+        return (nowVal - prevVal) / prevVal * 100.0;
+    }
+
+    // color + arrow on a label, e.g. ▲ 12.3% / ▼ 8.0% / — 
+    private void setDeltaLabel(Label lbl, Double pct) {
+        if (pct == null) {
+            lbl.setText("—");
+            lbl.setStyle("-fx-text-fill:#e6edf3;"); // neutral
+            return;
+        }
+        String arrow = pct >= 0 ? "▲" : "▼";
+        String color = pct >= 0 ? "#22c55e" : "#e85760";
+        lbl.setText(String.format("%s %.1f%%", arrow, Math.abs(pct)));
+        lbl.setStyle("-fx-text-fill:" + color + ";");
+    }
+
+    // currency pretty “₱ 12,345.67”
+    private String peso1(double v) {
+        return "₱ " + String.format("%,.2f", v);
+    }
+
+    private void refreshLandingsKPIs() {
+        // --- totals in kg from CATCH ---
+        double todayKg = qd("""
+            SELECT IFNULL(SUM(quantity),0)
+            FROM catch
+            WHERE catch_date = CURDATE()
+        """);
+
+        double yestKg = qd("""
+            SELECT IFNULL(SUM(quantity),0)
+            FROM catch
+            WHERE catch_date = CURDATE() - INTERVAL 1 DAY
+        """);
+
+        double monthKg = qd("""
+            SELECT IFNULL(SUM(quantity),0)
+            FROM catch
+            WHERE YEAR(catch_date)=YEAR(CURDATE())
+              AND MONTH(catch_date)=MONTH(CURDATE())
+        """);
+
+        double prevMonthKg = qd("""
+            SELECT IFNULL(SUM(quantity),0)
+            FROM catch
+            WHERE YEAR(catch_date)=YEAR(CURDATE() - INTERVAL 1 MONTH)
+              AND MONTH(catch_date)=MONTH(CURDATE() - INTERVAL 1 MONTH)
+        """);
+
+        // --- average kg per fisherfolk (this month) ---
+        double monthDistinctFishers = qd("""
+            SELECT COUNT(DISTINCT fisherfolk_id)
+            FROM catch
+            WHERE YEAR(catch_date)=YEAR(CURDATE())
+              AND MONTH(catch_date)=MONTH(CURDATE())
+        """);
+        double prevMonthDistinctFishers = qd("""
+            SELECT COUNT(DISTINCT fisherfolk_id)
+            FROM catch
+            WHERE YEAR(catch_date)=YEAR(CURDATE() - INTERVAL 1 MONTH)
+              AND MONTH(catch_date)=MONTH(CURDATE() - INTERVAL 1 MONTH)
+        """);
+
+        double avgThisMonth = (monthDistinctFishers == 0) ? 0 : (monthKg / monthDistinctFishers);
+        double avgPrevMonth = (prevMonthDistinctFishers == 0) ? 0 : (prevMonthKg / prevMonthDistinctFishers);
+
+        // --- total sales in PHP (from TRANSACTIONS, monthly) ---
+        double salesMonth = qd("""
+            SELECT IFNULL(SUM(total_price),0)
+            FROM transactions
+            WHERE YEAR(transaction_date)=YEAR(CURDATE())
+              AND MONTH(transaction_date)=MONTH(CURDATE())
+        """);
+
+        double salesPrevMonth = qd("""
+            SELECT IFNULL(SUM(total_price),0)
+            FROM transactions
+            WHERE YEAR(transaction_date)=YEAR(CURDATE() - INTERVAL 1 MONTH)
+              AND MONTH(transaction_date)=MONTH(CURDATE() - INTERVAL 1 MONTH)
+        """);
+
+        // --- Update labels ---
+        // 1) Today total landings
+        TotalLandingsTodayKG_label.setText(String.format("%.2f kg", todayKg));
+        setDeltaLabel(TotalLandingsTodayKG_rateVsLastDay, pctDelta(todayKg, yestKg));
+
+        // 2) This month total landings
+        TotalLandingsThisMonthKG_label.setText(String.format("%.2f kg", monthKg));
+        setDeltaLabel(TotalLandingsThisMonthKG_rateVsLastMonth, pctDelta(monthKg, prevMonthKg));
+
+        // 3) Average per fisherfolk (this month)
+        AveragePerFisherfolkKG_label.setText(String.format("%.2f kg", avgThisMonth));
+        setDeltaLabel(AveragePerFisherfolkKG_rateThisMonth, pctDelta(avgThisMonth, avgPrevMonth));
+
+        // 4) Total sales in PHP (this month)
+        TotalSalesPHP_label.setText(peso1(salesMonth));
+        setDeltaLabel(TotalSalesPHP_rateVsLastMonth, pctDelta(salesMonth, salesPrevMonth));
+    }
+
     ////////////////////////////////////////////////////////////////////////////end of Landings
 
     ////////////////////////////////////////////////////////////////////////////FISHERMEN
@@ -2017,43 +2266,69 @@ public class DashboardflController implements Initializable {
     
     @FXML
     private void export_fisherfolk_list(ActionEvent event) {
-        String filename = "fisherfolk_export_" + java.time.LocalDate.now() + ".csv";
-        try (var pw = new java.io.PrintWriter(filename, java.nio.charset.StandardCharsets.UTF_8)) {
-            pw.println("ID,Name,Age,Gender,Contact,Address,Boat,License,Active");
-            for (FisherfolkRecord f : fisherSorted) {
-                pw.printf("%d,%s,%s,%s,%s,%s,%s,%s,%s%n",
-                    f.getFisherfolkId(),
-                    csv(f.getName()),
-                    f.getAge() == null ? "" : f.getAge().toString(),
-                    csv(f.getGender()),
-                    csv(f.getContactNumber()),
-                    csv(f.getAddress()),
-                    csv(f.getBoatName()),
-                    csv(f.getLicenseNumber()),
-                    f.isActive() ? "Active" : "Inactive"
-                );
+        // chooser
+        var fc = new javafx.stage.FileChooser();
+        fc.setTitle("Save Fisherfolk List");
+        fc.getExtensionFilters().add(
+            new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
+        );
+        fc.setInitialFileName("fisherfolk_export_" + java.time.LocalDate.now() + ".xlsx");
+
+        java.io.File file = fc.showSaveDialog(((javafx.scene.Node)event.getSource()).getScene().getWindow());
+        if (file == null) return;
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new java.io.File(file.getParentFile(), file.getName() + ".xlsx");
+        }
+
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Fisherfolk");
+            // header style
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {"ID","Name","Age","Gender","Contact","Address","Boat","License","Active"};
+            int r = 0;
+            var hr = sh.createRow(r++);
+            for (int i = 0; i < headers.length; i++) {
+                var c = hr.createCell(i);
+                c.setCellValue(headers[i]);
+                c.setCellStyle(head);
             }
+
+            for (FisherfolkRecord f : fisherSorted) {
+                var row = sh.createRow(r++);
+                int c = 0;
+                row.createCell(c++).setCellValue(f.getFisherfolkId());
+                row.createCell(c++).setCellValue(f.getName());
+                row.createCell(c++).setCellValue(f.getAge() == null ? "" : f.getAge().toString());
+                row.createCell(c++).setCellValue(f.getGender());
+                row.createCell(c++).setCellValue(f.getContactNumber());
+                row.createCell(c++).setCellValue(f.getAddress());
+                row.createCell(c++).setCellValue(f.getBoatName());
+                row.createCell(c++).setCellValue(f.getLicenseNumber());
+                row.createCell(c++).setCellValue(f.isActive() ? "Active" : "Inactive");
+            }
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
         } catch (Exception ex) {
             ex.printStackTrace();
             showInfoFISHERMEN("Export failed: " + ex.getMessage());
             return;
         }
-//        showInfoFISHERMEN("Exported: " + new java.io.File(filename).getAbsolutePath());
-        String path = new java.io.File(filename).getAbsolutePath();
-        TextArea textArea = new TextArea("Exported: " + path);
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setMaxWidth(Double.MAX_VALUE);
-        textArea.setMaxHeight(Double.MAX_VALUE);
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        // success dialog (unchanged)
+        var path = file.getAbsolutePath();
+        var ta = new TextArea("Exported: " + path);
+        ta.setEditable(false); ta.setWrapText(true);
+        ta.setMaxWidth(Double.MAX_VALUE); ta.setMaxHeight(Double.MAX_VALUE);
+        var alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText("Export Success");
-        alert.getDialogPane().setContent(textArea);
+        alert.getDialogPane().setContent(ta);
         alert.getDialogPane().setMinWidth(600);
-
         alert.showAndWait();
-
     }
+
 
     //ALSO USED IN TRANSACTION & SALES (for generate sales report)
     private String csv(String s) {
@@ -2141,43 +2416,54 @@ public class DashboardflController implements Initializable {
             (start != null && end != null) ? (start + "_to_" + end) :
             (start != null ? ("From_" + start) : ("Until_" + end));
 
-        String suggested = String.format("sales_%s_%s_%s.csv",
+        String suggested = String.format("sales_%s_%s_%s.xlsx",
                 statusFilter, datePart, java.time.LocalDateTime.now().format(TS_FMT));
 
-        javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+        var fc = new javafx.stage.FileChooser();
         fc.setTitle("Save Sales Report");
-        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
         fc.setInitialFileName(suggested);
-        // optional: choose a default directory
-        // fc.setInitialDirectory(new java.io.File(System.getProperty("user.home"), "Documents"));
 
         java.io.File file = fc.showSaveDialog(transactionANDsales_pane.getScene().getWindow());
-        if (file == null) return; // user cancelled
-
-        // ensure .csv extension
-        if (!file.getName().toLowerCase().endsWith(".csv")) {
-            file = new java.io.File(file.getParentFile(), file.getName() + ".csv");
+        if (file == null) return;
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new java.io.File(file.getParent(), file.getName() + ".xlsx");
         }
-        exportTransactionsCsv(file);
+        exportTransactionsExcel(file);
     }
-    
-    private void exportTransactionsCsv(java.io.File file) {
-        try (var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
-            pw.println("ID,DateTime,Buyer,Fisherfolk,Fish Type,Qty,Unit Price,Total,Payment Method,Status");
-            for (var r : transSorted) { // current filtered+sorted rows
-                pw.printf("%d,%s,%s,%s,%s,%.2f,%.2f,%.2f,%s,%s%n",
-                    r.getTransactionId(),
-                    r.getTxnDate() == null ? "" : r.getTxnDate().toString(),
-                    csv(r.getBuyerName()),
-                    csv(r.getFisherfolkName()),
-                    csv(r.getSpeciesName()),
-                    r.getQtySold(),
-                    r.getUnitPrice(),
-                    r.getTotalPrice(),
-                    csv(r.getPaymentMethod()),
-                    csv(r.getPaymentStatus())
-                );
+
+    private void exportTransactionsExcel(java.io.File file) {
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Sales");
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {
+                "ID","DateTime","Buyer","Fisherfolk","Fish Type","Qty",
+                "Unit Price","Total","Payment Method","Status"
+            };
+            int r = 0;
+            var hr = sh.createRow(r++);
+            for (int i = 0; i < headers.length; i++) {
+                var c = hr.createCell(i); c.setCellValue(headers[i]); c.setCellStyle(head);
             }
+
+            for (var x : transSorted) {
+                var row = sh.createRow(r++); int c = 0;
+                row.createCell(c++).setCellValue(x.getTransactionId());
+                row.createCell(c++).setCellValue(x.getTxnDate() == null ? "" : x.getTxnDate().toString());
+                row.createCell(c++).setCellValue(x.getBuyerName());
+                row.createCell(c++).setCellValue(x.getFisherfolkName());
+                row.createCell(c++).setCellValue(x.getSpeciesName());
+                row.createCell(c++).setCellValue(x.getQtySold());
+                row.createCell(c++).setCellValue(x.getUnitPrice());
+                row.createCell(c++).setCellValue(x.getTotalPrice());
+                row.createCell(c++).setCellValue(x.getPaymentMethod());
+                row.createCell(c++).setCellValue(x.getPaymentStatus());
+            }
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
         } catch (Exception ex) {
             ex.printStackTrace();
             showInfoWide("Export failed: " + ex.getMessage());
@@ -2185,6 +2471,7 @@ public class DashboardflController implements Initializable {
         }
         showInfoWide("Report saved: " + file.getAbsolutePath());
     }
+
 
     @FXML
     private void addTransaction(ActionEvent event) {
@@ -2292,6 +2579,7 @@ public class DashboardflController implements Initializable {
                 showInfoWide("Failed to delete. Please try again.");
             }
         }
+        refreshLandingsKPIs();
     }
 
     @FXML
@@ -2582,51 +2870,62 @@ public class DashboardflController implements Initializable {
             showInfoWide("Save failed. Please check your inputs.");
         }
         refreshTransactionsTable();
+        refreshLandingsKPIs();
     }
     ////////////////////////////////////////////////////////////////////////////end of transaction & sales
     
     ////////////////////////////////////////////////////////////////////////////DOCK LOGS
    @FXML
     private void dockLog_generateReport(ActionEvent e) {
-        // Export the CURRENTLY FILTERED rows
-        java.util.List<DockLogViewRow> rows = new java.util.ArrayList<>(dockFiltered);
-
-        if (rows.isEmpty()) {
-            showInfoWide("Nothing to export.");
-            return;
-        }
+        var rows = new java.util.ArrayList<>(dockFiltered);
+        if (rows.isEmpty()) { showInfoWide("Nothing to export."); return; }
 
         String ts = java.time.LocalDateTime.now()
             .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String defaultName = "dock_logs_" + ts + ".csv";
 
-        // optional: let user choose location
-        javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+        var fc = new javafx.stage.FileChooser();
         fc.setTitle("Save Dock Logs Report");
-        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fc.setInitialFileName(defaultName);
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+        fc.setInitialFileName("dock_logs_" + ts + ".xlsx");
+
         java.io.File file = fc.showSaveDialog(dockLogs_tv.getScene().getWindow());
         if (file == null) return;
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new java.io.File(file.getParent(), file.getName() + ".xlsx");
+        }
 
-        try (var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
-            pw.println("LogID,Fisherfolk,Boat,DockingDate,Arrival,Departure,Remarks");
-            for (var r : rows) {
-                pw.printf("%d,%s,%s,%s,%s,%s,%s%n",
-                        r.getLogId(),
-                        csv(r.getFisherfolkName()),
-                        csv(r.getBoatName()),
-                        r.getDockingDate(),
-                        r.getArrivalTime() == null ? "" : r.getArrivalTime(),
-                        r.getDepartureTime() == null ? "" : r.getDepartureTime(),
-                        csv(r.getRemarks())
-                );
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Dock Logs");
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {"LogID","Fisherfolk","Boat","DockingDate","Arrival","Departure","Remarks"};
+            int r = 0;
+            var hr = sh.createRow(r++);
+            for (int i = 0; i < headers.length; i++) {
+                var c = hr.createCell(i); c.setCellValue(headers[i]); c.setCellStyle(head);
             }
+
+            for (var x : rows) {
+                var row = sh.createRow(r++); int c = 0;
+                row.createCell(c++).setCellValue(x.getLogId());
+                row.createCell(c++).setCellValue(x.getFisherfolkName());
+                row.createCell(c++).setCellValue(x.getBoatName());
+                row.createCell(c++).setCellValue(x.getDockingDate() == null ? "" : x.getDockingDate().toString());
+                row.createCell(c++).setCellValue(x.getArrivalTime() == null ? "" : x.getArrivalTime().toString());
+                row.createCell(c++).setCellValue(x.getDepartureTime() == null ? "" : x.getDepartureTime().toString());
+                row.createCell(c++).setCellValue(x.getRemarks());
+            }
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
             showInfoWide("Exported: " + file.getAbsolutePath());
         } catch (Exception ex) {
             ex.printStackTrace();
             showInfoWide("Export failed: " + ex.getMessage());
         }
     }
+
 
     @FXML
     private void deleteDockLog(ActionEvent event) {
@@ -3015,44 +3314,60 @@ public class DashboardflController implements Initializable {
         } else if (selectedTab == volumesTab) {
             exportChartOnly(catchStackedBarChart, "catch_volumes");
         }
-    }
+    } 
     private void exportSales() {
-        // 1) Pick CSV destination
         var chooser = new javafx.stage.FileChooser();
-        chooser.setTitle("Export Sales Trend (CSV)");
-        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv"));
-        // sensible default name with timestamp
+        chooser.setTitle("Export Sales Trend (Excel)");
+        chooser.getExtensionFilters().add(
+            new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
+        );
         String period = rbDaily.isSelected() ? "daily" : rbWeekly.isSelected() ? "weekly" : "monthly";
         String ts = java.time.LocalDateTime.now().toString().replace(':','-').substring(0,19);
-        chooser.setInitialFileName("sales_trend_" + period + "_" + ts + ".csv");
+        chooser.setInitialFileName("sales_trend_" + period + "_" + ts + ".xlsx");
 
-        java.io.File csvFile = chooser.showSaveDialog(salesChart.getScene().getWindow());
-        if (csvFile == null) return; // user cancelled
+        java.io.File xlsx = chooser.showSaveDialog(salesChart.getScene().getWindow());
+        if (xlsx == null) return;
+        if (!xlsx.getName().toLowerCase().endsWith(".xlsx")) {
+            xlsx = new java.io.File(xlsx.getParentFile(), xlsx.getName() + ".xlsx");
+        }
 
-        // 2) Write CSV of current series
         var series = salesChart.getData().isEmpty() ? null : salesChart.getData().get(0);
         if (series == null) { showInfo("No data to export."); return; }
 
-        try (var pw = new java.io.PrintWriter(csvFile, java.nio.charset.StandardCharsets.UTF_8)) {
-            pw.println("Period,RevenuePHP");
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Sales Trend");
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            var hr = sh.createRow(0);
+            hr.createCell(0).setCellValue("Period");
+            hr.createCell(1).setCellValue("RevenuePHP");
+            hr.getCell(0).setCellStyle(head);
+            hr.getCell(1).setCellStyle(head);
+
+            int r = 1;
             for (var dp : series.getData()) {
-                pw.printf("%s,%.2f%n", dp.getXValue(), dp.getYValue().doubleValue());
+                var row = sh.createRow(r++);
+                row.createCell(0).setCellValue(String.valueOf(dp.getXValue()));
+                row.createCell(1).setCellValue(dp.getYValue().doubleValue());
             }
+            sh.autoSizeColumn(0); sh.autoSizeColumn(1);
+
+            try (var out = new java.io.FileOutputStream(xlsx)) { wb.write(out); }
         } catch (Exception ex) {
             ex.printStackTrace();
             showInfo("Export failed: " + ex.getMessage());
             return;
         }
 
-        // 3) Save a PNG of the chart next to the CSV
-        String baseName = csvFile.getName();
-        int dot = baseName.lastIndexOf('.');
-        if (dot > 0) baseName = baseName.substring(0, dot);
-        java.io.File pngFile = new java.io.File(csvFile.getParentFile(), baseName + ".png");
+        // save PNG snapshot next to Excel
+        String base = xlsx.getName();
+        int dot = base.lastIndexOf('.');
+        if (dot > 0) base = base.substring(0, dot);
+        java.io.File png = new java.io.File(xlsx.getParentFile(), base + ".png");
+        boolean okPng = snapshotToPng(salesChart, png);
 
-        boolean okPng = snapshotToPng(salesChart, pngFile);
-
-        showInfo("Exported:\n" + csvFile.getAbsolutePath() + (okPng ? "\n" + pngFile.getAbsolutePath() : ""));
+        showInfo("Exported:\n" + xlsx.getAbsolutePath() + (okPng ? "\n" + png.getAbsolutePath() : ""));
     }
 
     private void exportChartOnly(javafx.scene.Node chart, String defaultBaseName) {
@@ -3149,19 +3464,37 @@ public class DashboardflController implements Initializable {
     private void btnExport_SPECIES(ActionEvent event) {
         var chooser = new javafx.stage.FileChooser();
         chooser.setTitle("Export species");
-        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV file", "*.csv"));
-        chooser.setInitialFileName("species_" + java.time.LocalDate.now() + ".csv");
+        chooser.getExtensionFilters().add(
+            new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
+        );
+        chooser.setInitialFileName("species_" + java.time.LocalDate.now() + ".xlsx");
         java.io.File file = chooser.showSaveDialog(species_tv.getScene().getWindow());
         if (file == null) return;
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new java.io.File(file.getParent(), file.getName() + ".xlsx");
+        }
 
-        try (var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
-            pw.println("ID,Name,Description");
-            for (SpeciesItem s : speciesSorted) {
-                pw.printf("%d,%s,%s%n",
-                    s.getId(),
-                    csv(s.getSpeciesName()),
-                    csv(s.getDescription()));
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Species");
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {"ID","Name","Description"};
+            var hr = sh.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                var c = hr.createCell(i); c.setCellValue(headers[i]); c.setCellStyle(head);
             }
+
+            int r = 1;
+            for (SpeciesItem s : speciesSorted) {
+                var row = sh.createRow(r++); int c = 0;
+                row.createCell(c++).setCellValue(s.getId());
+                row.createCell(c++).setCellValue(s.getSpeciesName());
+                row.createCell(c++).setCellValue(s.getDescription());
+            }
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
         } catch (Exception ex) {
             ex.printStackTrace();
             showInfoSpecies("Export failed: " + ex.getMessage());
@@ -3169,6 +3502,7 @@ public class DashboardflController implements Initializable {
         }
         showInfoSpecies("Exported to:\n" + file.getAbsolutePath());
     }
+
 
     // on adding or editing species (popup form)
     @FXML
@@ -3457,76 +3791,25 @@ public class DashboardflController implements Initializable {
     private String trim(String s) { return s == null ? "" : s.trim(); }
     ////////////////////////////////////////////////////////////////////////////end of account profile
     ////////////////////////////////////////////////////////////////////////////DATA INFORMATION
-    private void setAutoBackupEnabled(boolean enabled) {
-        PREFS.putBoolean(PREF_AUTO_ON, enabled);
-        if (enabled) {
-            // ensure we have a folder
-            String dir = PREFS.get(PREF_AUTO_DIR, null);
-            if (dir == null || dir.isBlank()) {
-                var chooser = new javafx.stage.DirectoryChooser();
-                chooser.setTitle("Choose folder for automatic backups");
-                var folder = chooser.showDialog(lastBackup_label.getScene().getWindow());
-                if (folder == null) {
-                    autoBackupSwitch.setSelected(false);
-                    PREFS.putBoolean(PREF_AUTO_ON, false);
-                    return;
-                }
-                PREFS.put(PREF_AUTO_DIR, folder.getAbsolutePath());
-            }
-            startAutoBackupScheduler();
-        } else {
-            stopAutoBackupScheduler();
-        }
-    }
-
-    private void startAutoBackupScheduler() {
-        stopAutoBackupScheduler(); // clean any previous
-        backupScheduler = java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-            var t = new Thread(r, "AutoBackupScheduler");
-            t.setDaemon(true);
-            return t;
-        });
-        // run first backup 24h from now; then every 24h
-        long periodHours = 24;
-        backupScheduler.scheduleAtFixedRate(() -> {
-            try {
-                String dir = PREFS.get(PREF_AUTO_DIR, null);
-                if (dir == null) return; // nothing to do
-                String file = new java.io.File(dir, "fish_landing_backup_" + nowStamp() + ".sql").getAbsolutePath();
-                boolean ok = runMysqldump(file);
-                if (ok) {
-                    javafx.application.Platform.runLater(this::rememberLastBackupNow);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }, periodHours, periodHours, java.util.concurrent.TimeUnit.HOURS);
-    }
-
-    private void stopAutoBackupScheduler() {
-        if (backupScheduler != null) {
-            backupScheduler.shutdownNow();
-            backupScheduler = null;
-        }
-    }
     
-    @FXML
-    private void manualBackup_btn(ActionEvent event) {
-        var fc = new javafx.stage.FileChooser();
-        fc.setTitle("Save SQL Backup");
-        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("SQL Files", "*.sql"));
-        fc.setInitialFileName("fish_landing_backup_" + nowStamp() + ".sql");
-        var file = fc.showSaveDialog(lastBackup_label.getScene().getWindow());
-        if (file == null) return;
-
-        boolean ok = runMysqldump(file.getAbsolutePath());
-        if (ok) {
-            rememberLastBackupNow();
-            showInfo("Backup saved:\n" + file.getAbsolutePath());
-        } else {
-            showWarn("Backup failed. Make sure mysqldump is installed and PATH is set.");
-        }
-    }
+//    @FXML
+//    private void manualBackup_btn(ActionEvent event) {
+//        var fc = new javafx.stage.FileChooser();
+//        fc.setTitle("Save SQL Backup");
+//        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+//        fc.setInitialFileName("fish_landing_backup_" + nowStamp() + ".sql");
+//        var file = fc.showSaveDialog(lastBackup_label.getScene().getWindow());
+//        if (file == null) return;
+//
+//        boolean ok = runMysqldump(file.getAbsolutePath());
+//        if (ok) {
+//            rememberLastBackupNow();
+//            showInfo("Backup saved:\n" + file.getAbsolutePath());
+//        } else {
+//            showWarn("Backup failed. Make sure mysqldump is installed and PATH is set.");
+//        }
+//    }
+    
 
     @FXML
     private void restoreData_browseFilesBTN(ActionEvent event) {
@@ -3568,6 +3851,16 @@ public class DashboardflController implements Initializable {
             
             loadFisherfolkOptions();
             loadSpeciesOptions();
+            
+            refreshDashboardKPIs();
+            loadMonthlyLandingsTrend();
+            loadWeeklyLandingsTrend();
+            dashboardRecentFishLanding_tv.setItems(loadRecentLandings(5));
+            loadDashboardTopFishTypesPie(4); // top-4; 
+             
+            initAutoBackupUI();        
+            refreshLastBackupLabel();  
+
         } else {
             showWarn("Restore failed. Ensure 'mysql' client is available and the SQL file is valid.");
         }
@@ -3636,9 +3929,10 @@ public class DashboardflController implements Initializable {
         written += exportTableToCsv("docking_logs",   new java.io.File(dir, "docking_logs_" + stamp + ".csv"));
 //        written += exportTableToCsv("users",          new java.io.File(dir, "users_" + stamp + ".csv"));
 
+        lastBackup_label.setText("Last Export (CSV): " + java.time.LocalDateTime.now());
         showInfo("Exported " + written + " CSV file(s) to:\n" + dir.getAbsolutePath());
-        rememberLastBackupNow(); // if wanted the label to reflect “sync” actions too
-    }
+        
+           }
 
     private int exportTableToCsv(String table, java.io.File file) {
         String sql = "SELECT * FROM " + table;
@@ -3803,8 +4097,6 @@ public class DashboardflController implements Initializable {
         var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING, msg, javafx.scene.control.ButtonType.OK);
         a.setHeaderText(null); a.showAndWait();
     }
-
-
 // ==== EXPORT HELPERS =========================================================
 
     private static class TableSpec {
@@ -3846,6 +4138,751 @@ public class DashboardflController implements Initializable {
             return t;
         }
     }
+    ////////////////////////////////////////////////////////////////////////////end of data information
+    ////////////////////////////////////////////////////////////////////////////DASHBOARD
+    // --- Formatting helpers ---
+    private static String peso(double v) {
+        return "₱" + String.format("%,.2f", v);
+    }
+    private static String kg(double v) {
+        return String.format("%,.2f kg", v);
+    }
+    private static double pctChange(double current, double previous) {
+        if (previous == 0) return current == 0 ? 0.0 : 100.0; // define as +100% when prev=0 and current>0
+        return (current - previous) / previous * 100.0;
+    }
+    private void setDeltaLabel(Label label, double pct) {
+        String arrow = pct >= 0 ? "▲" : "▼";
+        String color = pct >= 0 ? "#22c55e" : "#e85760";
+        label.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+        label.setText(arrow + " " + String.format("%.1f%%", Math.abs(pct)));
+    }
+
+    // --- SQL runner helpers ---
+    private double queryDouble(String sql) {
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            return rs.next() ? rs.getDouble(1) : 0.0;
+        } catch (Exception e) { e.printStackTrace(); return 0.0; }
+    }
+    private double queryDouble(String sql, java.sql.Timestamp t1, java.sql.Timestamp t2) {
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql)) {
+            ps.setTimestamp(1, t1);
+            ps.setTimestamp(2, t2);
+            try (var rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble(1) : 0.0;
+            }
+        } catch (Exception e) { e.printStackTrace(); return 0.0; }
+    }
+    private double queryDouble(String sql, java.sql.Date d1, java.sql.Date d2) {
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql)) {
+            ps.setDate(1, d1);
+            ps.setDate(2, d2);
+            try (var rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble(1) : 0.0;
+            }
+        } catch (Exception e) { e.printStackTrace(); return 0.0; }
+    }
+//////
+    private double queryDouble(String sql, java.sql.Timestamp t1) {
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql)) {
+            ps.setTimestamp(1, t1);
+            try (var rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble(1) : 0.0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+    
+    public void refreshDashboardKPIs() {
+        // Dates we’ll need
+        var today = java.time.LocalDate.now();
+        var monthStart = today.withDayOfMonth(1);
+        var lastMonthEnd = monthStart.minusDays(1);
+        var lastMonthStart = lastMonthEnd.withDayOfMonth(1);
+
+        // --- 1) Today’s Landing (kg) ---
+        double todaysLanding = queryDouble(
+            "SELECT IFNULL(SUM(quantity),0) " +
+            "FROM catch WHERE catch_date = CURDATE()"
+        );
+
+        // Baseline: average daily landing last month
+        double lastMonthDays = lastMonthEnd.getDayOfMonth();
+        double lastMonthLandingTotal = queryDouble(
+            "SELECT IFNULL(SUM(quantity),0) " +
+            "FROM catch WHERE catch_date BETWEEN ? AND ?",
+            java.sql.Date.valueOf(lastMonthStart),
+            java.sql.Date.valueOf(lastMonthEnd)
+        );
+        double lastMonthDailyAvg = lastMonthDays == 0 ? 0.0 : lastMonthLandingTotal / lastMonthDays;
+
+        TodaysLandingInKG_label.setText(kg(todaysLanding));
+        setDeltaLabel(TodaysLandingInKG_increaseORdecreasePercentageVsLastMonth_label,
+                      pctChange(todaysLanding, lastMonthDailyAvg));
+
+        // --- 2) Total Fish Stock (kg): snapshot now vs snapshot at last month end ---
+        // Current stock = sum(catch.quantity - sold.soFar) across all catches
+        double currentStock = queryDouble(
+            "SELECT IFNULL(SUM(c.quantity - IFNULL(s.sold,0)),0) AS stock " +
+            "FROM catch c " +
+            "LEFT JOIN (SELECT catch_id, SUM(quantity_sold) sold FROM transactions GROUP BY catch_id) s " +
+            "       ON s.catch_id = c.catch_id"
+        );
+
+        // Stock as of last month end (include catches up to lastMonthEnd and sales up to lastMonthEnd)
+        double stockLastMonthEnd = queryDouble(
+            "SELECT IFNULL(SUM(c.quantity - IFNULL(s.sold,0)),0) AS stock " +
+            "FROM catch c " +
+            "LEFT JOIN (" +
+            "  SELECT catch_id, SUM(quantity_sold) sold " +
+            "  FROM transactions WHERE transaction_date <= ? GROUP BY catch_id" +
+            ") s ON s.catch_id = c.catch_id " +
+            "WHERE c.catch_date <= DATE(?)",
+            java.sql.Timestamp.valueOf(lastMonthEnd.atTime(23,59,59)),
+            java.sql.Timestamp.valueOf(lastMonthEnd.atTime(23,59,59))
+        );
+
+
+        TotalFishStockInKg_label.setText(kg(currentStock));
+        setDeltaLabel(TotalFishStockInKG_increaseOrDecreasePercentageVsLastMonth_label,
+                      pctChange(currentStock, stockLastMonthEnd));
+
+        // --- 3) Total Registered Fishermen (active) + MoM change ---
+        // Current count (active only)
+        double currentFishermen = queryDouble("SELECT COUNT(*) FROM fisherfolk WHERE is_active=1");
+
+        // Last month baseline:
+        // If you have fisherfolk.created_at, we can approximate "registered up to last month end"
+        double fishermenLastMonth = currentFishermen; // fallback
+        try {
+            
+            fishermenLastMonth = queryDouble(
+                "SELECT COUNT(*) FROM fisherfolk " +
+                "WHERE is_active=1 AND created_at <= ?",//created_at <= ?
+                java.sql.Timestamp.valueOf(lastMonthEnd.atTime(23,59,59))
+            );
+
+        } catch (Exception ignore) {
+            // Table may not have created_at; we’ll just show 0% change
+            fishermenLastMonth = currentFishermen;
+        }
+
+        TotalRegisteredFishermen_label.setText(String.format("%,.0f", currentFishermen));
+        setDeltaLabel(RegisteredFishermenVsLastMonth_percentageLabel,
+                      pctChange(currentFishermen, fishermenLastMonth));
+
+        // --- 4) Total Sales in ₱ (Month-to-Date) + MoM change ---
+        // Decide: revenue = Paid only? If yes, filter payment_status='Paid'.
+        boolean paidOnly = true;
+
+        String filterPaid = paidOnly ? " AND payment_status='Paid' " : " ";
+        double salesMTD = queryDouble(
+            "SELECT IFNULL(SUM(total_price),0) FROM transactions " +
+            "WHERE transaction_date >= ? AND transaction_date < ?" + filterPaid,
+            java.sql.Timestamp.valueOf(monthStart.atStartOfDay()),
+            java.sql.Timestamp.valueOf(today.plusDays(1).atStartOfDay())
+        );
+
+        double salesLastMonth = queryDouble(
+            "SELECT IFNULL(SUM(total_price),0) FROM transactions " +
+            "WHERE transaction_date >= ? AND transaction_date <= ?" + filterPaid,
+            java.sql.Timestamp.valueOf(lastMonthStart.atStartOfDay()),
+            java.sql.Timestamp.valueOf(lastMonthEnd.atTime(23,59,59))
+        );
+
+        TotalSalesInPhp_label.setText(peso(salesMTD));
+        setDeltaLabel(TotalSalesVsLastMonth_percentageLabel,
+                      pctChange(salesMTD, salesLastMonth));
+    }
+    
+    //recent landings in dashboard
+    private javafx.collections.ObservableList<LandingRow> loadRecentLandings(int limit) {
+        var list = javafx.collections.FXCollections.<LandingRow>observableArrayList();
+        String sql = """
+            SELECT f.name AS fisher_name,
+                   s.species_name,
+                   c.quantity,
+                   (c.quantity * c.price_per_kilo) AS value_php
+            FROM catch c
+            JOIN fisherfolk f ON f.fisherfolk_id = c.fisherfolk_id
+            JOIN species s    ON s.species_id     = c.species_id
+            ORDER BY c.catch_date DESC, c.catch_id DESC
+            LIMIT ?
+        """;
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps   = conn.prepareStatement(sql)) {
+            ps.setInt(1, Math.max(1, limit));
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new LandingRow(
+                            rs.getString("fisher_name"),
+                            rs.getString("species_name"),
+                            rs.getDouble("quantity"),
+                            rs.getDouble("value_php")
+                    ));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // small DTO for chart points
+    private static class Point { final String label; final double kg;
+        Point(String label, double kg){ this.label=label; this.kg=kg; }}
+
+    // 6a) Weekly: last 7 days (including today)
+    private java.util.List<Point> loadWeeklyLandingSeries() {
+        var out = new java.util.ArrayList<Point>();
+        String sql = """
+            SELECT DATE(catch_date) d, IFNULL(SUM(quantity),0) kg
+            FROM catch
+            WHERE catch_date BETWEEN CURDATE() - INTERVAL 6 DAY AND CURDATE()
+            GROUP BY DATE(catch_date)
+        """;
+        // Build a map of date->kg from DB
+        var map = new java.util.HashMap<java.time.LocalDate, Double>();
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                java.sql.Date d = rs.getDate("d");
+                map.put(d.toLocalDate(), rs.getDouble("kg"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        // Ensure all 7 days present (fill zeros)
+        var today = java.time.LocalDate.now();
+        for (int i = 6; i >= 0; i--) {
+            var day = today.minusDays(i);
+            double kg = map.getOrDefault(day, 0.0);
+            out.add(new Point(day.getMonthValue() + "/" + day.getDayOfMonth(), kg)); // e.g., 9/25
+        }
+        return out;
+    }
+
+    // 6b) Monthly: this year by month (Jan..Dec) or last 6 months; here: this year
+    private java.util.List<Point> loadMonthlyLandingSeries() {
+        var out = new java.util.ArrayList<Point>();
+        int year = java.time.LocalDate.now().getYear();
+        String sql = """
+            SELECT MONTH(catch_date) m, IFNULL(SUM(quantity),0) kg
+            FROM catch
+            WHERE YEAR(catch_date) = ?
+            GROUP BY MONTH(catch_date)
+            ORDER BY m
+        """;
+        var map = new java.util.HashMap<Integer, Double>();
+        try (var c = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    map.put(rs.getInt("m"), rs.getDouble("kg"));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        java.time.format.TextStyle style = java.time.format.TextStyle.SHORT; // JAN, FEB…
+        var locale = java.util.Locale.getDefault();
+        for (int m = 1; m <= 12; m++) {
+            double kg = map.getOrDefault(m, 0.0);
+            String label = java.time.Month.of(m).getDisplayName(style, locale);
+            out.add(new Point(label, kg));
+        }
+        return out;
+    }
+
+    private void loadMonthlyLandingsTrend() {
+        dashboardLandingsTrend_lineChart.getData().clear();
+
+        // 12-month rolling window ending this month
+        java.time.YearMonth endYM   = java.time.YearMonth.from(java.time.LocalDate.now());
+        java.time.YearMonth startYM = endYM.minusMonths(11);
+
+        // Preserve order with LinkedHashMap
+        java.util.LinkedHashMap<java.time.YearMonth, Double> totals = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < 12; i++) {
+            totals.put(startYM.plusMonths(i), 0.0);
+        }
+
+        // Query: sum kg per month within [start, end]
+        String sql = """
+            SELECT YEAR(catch_date) AS y, MONTH(catch_date) AS m, SUM(quantity) AS qty
+            FROM catch
+            WHERE catch_date >= ? AND catch_date < ?
+            GROUP BY y, m
+            ORDER BY y, m
+            """;
+
+        // start inclusive, end *exclusive* (first day of next month)
+        java.time.LocalDate start = startYM.atDay(1);
+        java.time.LocalDate end   = endYM.plusMonths(1).atDay(1);
+
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, java.sql.Date.valueOf(start));
+            ps.setDate(2, java.sql.Date.valueOf(end));
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    var ym = java.time.YearMonth.of(rs.getInt("y"), rs.getInt("m"));
+                    if (totals.containsKey(ym)) {
+                        totals.put(ym, totals.get(ym) + rs.getDouble("qty"));
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // Build axis categories from the same YearMonth keys
+        var cats = javafx.collections.FXCollections.<String>observableArrayList();
+        var fmt  = java.time.format.DateTimeFormatter.ofPattern("MMM");
+        for (var ym : totals.keySet()) cats.add(ym.format(fmt));
+        dashboardLIneChart_categAxis.setCategories(cats);
+
+        // Build series in the same order
+        var series = new javafx.scene.chart.XYChart.Series<String, Number>();
+        series.setName("This year (monthly)");
+        dashboardTrendLegend.setText("This year (monthly)");
+        for (var entry : totals.entrySet()) {
+            String label = entry.getKey().format(fmt);
+            series.getData().add(new javafx.scene.chart.XYChart.Data<>(label, entry.getValue()));
+        }
+        dashboardLandingsTrend_lineChart.getData().add(series);
+    }
+
+    private void loadWeeklyLandingsTrend() {
+        dashboardLandingsTrend_lineChart.getData().clear();
+
+        var today = java.time.LocalDate.now();
+        var start = today.minusDays(6);
+
+        // preserve order for the last 7 days
+        var totals = new java.util.LinkedHashMap<java.time.LocalDate, Double>();
+        for (int i = 0; i < 7; i++) totals.put(start.plusDays(i), 0.0);
+
+        String sql = """
+            SELECT catch_date, SUM(quantity) AS qty
+            FROM catch
+            WHERE catch_date BETWEEN ? AND ?
+            GROUP BY catch_date
+            ORDER BY catch_date
+            """;
+
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, java.sql.Date.valueOf(start));
+            ps.setDate(2, java.sql.Date.valueOf(today));
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    var d = rs.getDate("catch_date").toLocalDate();
+                    if (totals.containsKey(d)) totals.put(d, rs.getDouble("qty"));
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+
+        var cats = javafx.collections.FXCollections.<String>observableArrayList();
+        var fmt  = java.time.format.DateTimeFormatter.ofPattern("EEE");
+        for (var d : totals.keySet()) cats.add(d.format(fmt));
+        dashboardLIneChart_categAxis.setCategories(cats);
+
+        var series = new javafx.scene.chart.XYChart.Series<String, Number>();
+        series.setName("Last 7 days");
+        dashboardTrendLegend.setText("Last 7 days");
+        for (var e : totals.entrySet()) {
+            series.getData().add(new javafx.scene.chart.XYChart.Data<>(e.getKey().format(fmt), e.getValue()));
+        }
+        dashboardLandingsTrend_lineChart.getData().add(series);
+        
+    }
+
+    //top fish type in dashboard
+   // --- DASHBOARD: Top fish types (kg) ---
+    
+    private void loadDashboardTopFishTypesPie(int topN) {
+        final String sql = """
+            SELECT s.species_name, SUM(c.quantity) AS total_kg
+            FROM catch c
+            JOIN species s ON s.species_id = c.species_id
+            WHERE YEAR(c.catch_date) = YEAR(CURDATE())
+            GROUP BY s.species_name
+            ORDER BY total_kg DESC
+            LIMIT ?
+            """;
+
+        var rows = new java.util.ArrayList<javafx.scene.chart.PieChart.Data>();
+        double grand = 0.0;
+
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, topN);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("species_name");
+                    double kg   = rs.getDouble("total_kg");
+                    rows.add(new javafx.scene.chart.PieChart.Data(name, kg));
+                    grand += kg;
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+
+        var data = javafx.collections.FXCollections.<javafx.scene.chart.PieChart.Data>observableArrayList();
+        for (var r : rows) {
+            double pct = grand <= 0 ? 0.0 : r.getPieValue() / grand * 100.0;
+            String label = String.format("%s (%.1f%%, %.2f kg)", r.getName(), pct, r.getPieValue());
+            data.add(new javafx.scene.chart.PieChart.Data(label, r.getPieValue()));
+        }
+
+        
+        // Push to chart, then force CSS/layout so labels are built
+        dashboardTopFishTypesKG_piechart.setData(data);
+        
+        // ensure skin builds the label nodes
+        dashboardTopFishTypesKG_piechart.setLabelsVisible(true);
+        dashboardTopFishTypesKG_piechart.setLabelLineLength(12);
+
+        // give it enough room & force a layout
+        dashboardTopFishTypesKG_piechart.setPrefSize(280, 280);
+        dashboardTopFishTypesKG_piechart.applyCss();
+        dashboardTopFishTypesKG_piechart.layout();
+        dashboardTopFishTypesKG_piechart.setStartAngle(90);      // aesthetics
+
+
+        // now the .chart-pie-label Text nodes exist -> style/verify
+        javafx.application.Platform.runLater(() -> {
+            for (javafx.scene.Node n : dashboardTopFishTypesKG_piechart.lookupAll(".chart-pie-label")) {
+                n.setStyle("-fx-fill: #e6edf3; -fx-font-size: 12px;"); // readable on dark bg
+                n.setVisible(true);                                     // (paranoia) make sure visible
+            }
+        });
+        
+        dashboardTopFishTypesKG_piechart.setTitle(null);     // remove inner title
+        dashboardTopFishTypesKG_piechart.setLegendVisible(true);
+        
+        // Tooltips (need nodes, do it after layout)
+        final double grandTotal = grand;
+        javafx.application.Platform.runLater(() -> {
+            for (var d : dashboardTopFishTypesKG_piechart.getData()) {
+                String base = d.getName().replaceAll("\\s*\\(.*\\)$", "");
+                double pct  = grandTotal <= 0 ? 0.0 : d.getPieValue()/grandTotal*100.0;
+                var tip = new javafx.scene.control.Tooltip(
+                    String.format("%s\n%.2f kg (%.1f%%)", base, d.getPieValue(), pct));
+                if (d.getNode() != null) javafx.scene.control.Tooltip.install(d.getNode(), tip);
+            }
+        });
+        System.out.println("Pie slices: " + dashboardTopFishTypesKG_piechart.getData().size());
+
+    }
+   
+    //dashboard  data management
+    @FXML
+    private void exportALL_CSV_dashboard(ActionEvent event) {
+        exportALL_CSV(event);     // reuse
+    }
+
+    @FXML
+    private void exportALL_PDF_dashboard(ActionEvent event) {
+        exportALL_PDF(event);     // reuse
+    }
+
+    @FXML
+    private void exportALL_EXCEL_dashboard(ActionEvent event) {
+        exportALL_EXCEL(event);     // reuse
+    }
+
+
+    // ==========================================================
+    // SECTION B — initialize(): wire UI, load settings once
+    // ==========================================================
+    private void initAutoBackupUI() {
+
+        // Animate both switches’ thumbs
+        wireSwitch(autoBackupSwitch,  thumb);
+        wireSwitch(autoBackupSwitch1, thumb1);
+
+        // Mirror both buttons to the one property
+        autoBackupSwitch.selectedProperty().bindBidirectional(autoBackupEnabled);
+        autoBackupSwitch1.selectedProperty().bindBidirectional(autoBackupEnabled);
+
+        // Load settings from disk (single source)
+        var props = loadSettings();
+        boolean savedOn = Boolean.parseBoolean(props.getProperty(KEY_AUTO_ENABLED, "false"));
+        String dirStr   = props.getProperty(KEY_AUTO_DIR, "").trim();
+        backupDir = dirStr.isEmpty() ? null : java.nio.file.Paths.get(dirStr);
+
+        suppressMirror = true;
+        autoBackupEnabled.set(savedOn);
+        autoBackupSwitch.setSelected(savedOn);
+        autoBackupSwitch1.setSelected(savedOn);
+        moveThumb(thumb,  savedOn);
+        moveThumb(thumb1, savedOn);
+        suppressMirror = false;
+
+        if (savedOn) startAutoBackupScheduler();
+
+        // Single handler for both toggles (runs after user action OR programmatic changes)
+        autoBackupEnabled.addListener((obs, oldVal, enabled) -> {
+            if (suppressMirror) return;
+
+            if (enabled) {
+                // Enabling → ensure folder exists OR prompt the user
+                if (backupDir == null || !java.nio.file.Files.isDirectory(backupDir)) {
+                    var chosen = promptBackupDirectory();
+                    if (chosen == null) {
+                        // User cancelled → REVERT and DO NOT persist true
+                        suppressMirror = true;
+                        autoBackupEnabled.set(false);
+                        autoBackupSwitch.setSelected(false);
+                        autoBackupSwitch1.setSelected(false);
+                        moveThumb(thumb,  false);
+                        moveThumb(thumb1, false);
+                        suppressMirror = false;
+                        return;
+                    }
+                    backupDir = chosen;
+                }
+                // Persist only after we have a folder
+                var ok = saveSettings(true, backupDir, /*last*/ null);
+                if (!ok) {
+                    // If save failed, be conservative and turn OFF
+                    suppressMirror = true;
+                    autoBackupEnabled.set(false);
+                    autoBackupSwitch.setSelected(false);
+                    autoBackupSwitch1.setSelected(false);
+                    moveThumb(thumb,  false);
+                    moveThumb(thumb1, false);
+                    suppressMirror = false;
+                    return;
+                }
+                startAutoBackupScheduler();
+            } else {
+                stopAutoBackupScheduler();
+                saveSettings(false, backupDir, /*last*/ null);
+            }
+        });
+    }
+
+    // helper used by init
+    private void wireSwitch(javafx.scene.control.ToggleButton btn, javafx.scene.layout.Region th) {
+        btn.selectedProperty().addListener((o, wasOn, isOn) -> moveThumb(th, isOn));
+        moveThumb(th, btn.isSelected());
+    }
+    private void moveThumb(javafx.scene.layout.Region th, boolean on) {
+        var tt = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(140), th);
+        tt.setToX(on ? ON_OFFSET : 0);
+        tt.playFromStart();
+    }
+    
+    // ==========================================================
+    // SECTION C — Settings I/O (used by both Dashboard & Data Info)
+    // ==========================================================
+    private java.util.Properties loadSettings() {
+        var p = new java.util.Properties();
+        try {
+            if (java.nio.file.Files.exists(SETTINGS_FILE)) {
+                try (var in = java.nio.file.Files.newInputStream(SETTINGS_FILE)) { p.load(in); }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+        return p;
+    }
+    
+
+    private boolean saveSettings(boolean enabled, java.nio.file.Path dir, String lastIso) {
+        try {
+            if (!java.nio.file.Files.exists(SETTINGS_DIR)) {
+                java.nio.file.Files.createDirectories(SETTINGS_DIR);
+            }
+            var p = loadSettings(); // keep other keys
+            p.setProperty(KEY_AUTO_ENABLED, Boolean.toString(enabled));
+            if (dir != null) p.setProperty(KEY_AUTO_DIR, dir.toString());
+            if (lastIso != null) p.setProperty(KEY_AUTO_LAST, lastIso);
+            try (var out = java.nio.file.Files.newOutputStream(SETTINGS_FILE)) {
+                p.store(out, "Fish Landing – Settings");
+            }
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("Unable to save settings: " + ex.getMessage());
+            return false;
+        }
+    }
+    
+
+    // Folder chooser (owner picks the Data Info label's window; use any scene node we have)
+    private java.nio.file.Path promptBackupDirectory() {
+        var chooser = new javafx.stage.DirectoryChooser();
+        chooser.setTitle("Choose folder for automatic SQL backups");
+        var wnd = lastBackup_label.getScene().getWindow();
+        var f = chooser.showDialog(wnd);
+        return (f == null) ? null : f.toPath();
+    }
+    
+    // ==========================================================
+    // SECTION D — Scheduler + “last backup” label (used by both modules)
+    // ==========================================================
+    private void startAutoBackupScheduler() {
+        stopAutoBackupScheduler();
+        backupScheduler = java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+            var t = new Thread(r, "AutoBackupScheduler");
+            t.setDaemon(true);
+            return t;
+        });
+        long periodHours = 24;
+        backupScheduler.scheduleAtFixedRate(() -> {
+            try {
+                if (backupDir == null) return;
+                String ts = java.time.LocalDateTime.now()
+                        .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                var out = backupDir.resolve("fish_landing_db_" + ts + ".sql").toAbsolutePath().toString();
+
+                boolean ok = runMysqldump(out);
+                if (ok) {
+                    javafx.application.Platform.runLater(this::saveLastBackupNow);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }, 24, 24, java.util.concurrent.TimeUnit.HOURS);
+    }
+        
+    private void stopAutoBackupScheduler() {
+        if (backupScheduler != null) {
+            backupScheduler.shutdownNow();
+            backupScheduler = null;
+        }
+    }
+    
+    
+    // ==========================================================
+    // SECTION E — Manual backup / restore hook points (unchanged logic)
+    //    - call saveSettings(..., lastIso) after a successful manual backup
+    // ==========================================================
+    @FXML private void manualBackup_btn(javafx.event.ActionEvent e) {
+        var chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Save SQL Backup");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("SQL files", "*.sql"));
+        chooser.setInitialFileName("fish_landing_backup_" + nowStamp() + ".sql");
+        var out = chooser.showSaveDialog(lastBackup_label.getScene().getWindow());
+        if (out == null) return;
+
+        if (runMysqldump(out.getAbsolutePath())) {
+            saveSettings(autoBackupEnabled.get(), backupDir, nowIso());
+            saveLastBackupNow();   // <- persist and refresh label
+            showInfoWide("Backup saved to:\n" + out.getAbsolutePath());
+        } else {
+            showInfoWide("Backup failed. See logs.");
+        }
+    }
+
+    //======================for last backup label
+    // tiny helpers to read/write the single settings file
+    private java.util.Properties readSettings() {
+        var props = new java.util.Properties();
+        try {
+            if (java.nio.file.Files.exists(SETTINGS_FILE)) {
+                try (var in = java.nio.file.Files.newInputStream(SETTINGS_FILE)) {
+                    props.load(in);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return props;
+    }
+
+    private void writeSettings(java.util.Properties props) {
+        try {
+            if (!java.nio.file.Files.exists(SETTINGS_DIR)) {
+                java.nio.file.Files.createDirectories(SETTINGS_DIR);
+            }
+            try (var out = java.nio.file.Files.newOutputStream(SETTINGS_FILE)) {
+                props.store(out, "Fish Landing – Settings");
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // Formatters
+    private static final java.time.format.DateTimeFormatter LAST_FMT =
+            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    // update label from settings.properties
+    private void refreshLastBackupLabel() {
+        var props = readSettings();
+        String iso = props.getProperty(KEY_LAST_BACKUP_ISO, "").trim();
+        if (iso.isEmpty()) {
+            lastBackup_label.setText("No backups yet");
+            return;
+        }
+        try {
+            var t = java.time.LocalDateTime.parse(iso);
+            lastBackup_label.setText("Last backup: " + t.format(LAST_FMT));
+        } catch (Exception parseErr) {
+            // if file has bad value, don’t crash the UI
+            lastBackup_label.setText("Last backup: " + iso);
+        }
+    }
+    
+    // persist “now” and refresh label
+    private void saveLastBackupNow() {
+        var props = readSettings();
+        props.setProperty(KEY_LAST_BACKUP_ISO, java.time.LocalDateTime.now().toString());
+        writeSettings(props);
+        refreshLastBackupLabel();
+    }
+
+   
+    // Called by the listener inside initAutoBackupUI()
+    private void onAutoBackupToggleChanged(boolean enabled) {
+        if (enabled) {
+            // Ensure we have a backup folder; prompt if missing
+            if (backupDir == null || !java.nio.file.Files.isDirectory(backupDir)) {
+                var chosen = promptBackupDirectory();
+                if (chosen == null) {
+                    // User cancelled → revert UI & property, do NOT persist "enabled=true"
+                    suppressMirror = true;
+                    autoBackupEnabled.set(false);
+                    autoBackupSwitch.setSelected(false);
+                    autoBackupSwitch1.setSelected(false);
+                    // (optional) move thumbs visually if you don't already animate onSelection
+                    suppressMirror = false;
+                    return;
+                }
+                backupDir = chosen;
+
+                // Persist both dir and enabled in settings.properties
+                var p = readSettings();
+                p.setProperty(KEY_AUTO_DIR, backupDir.toString());
+                p.setProperty(KEY_AUTO_ENABLED, "true");
+                writeSettings(p);
+            } else {
+                // We already have a folder; just persist enabled=true
+                var p = readSettings();
+                p.setProperty(KEY_AUTO_ENABLED, "true");
+                writeSettings(p);
+            }
+
+            // Start scheduler and refresh label (shows last known backup time)
+            startAutoBackupScheduler();
+            refreshLastBackupLabel();
+
+        } else {
+            // Turn OFF: stop scheduler, persist enabled=false (keep dir & last)
+            stopAutoBackupScheduler();
+            var p = readSettings();
+            p.setProperty(KEY_AUTO_ENABLED, "false");
+            writeSettings(p);
+            // We do not clear last backup label/history here.
+        }
+    }
 
     
+    
+
+    
+
 }
