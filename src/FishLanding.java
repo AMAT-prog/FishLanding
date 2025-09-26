@@ -23,7 +23,7 @@ public class FishLanding extends Application {
     public void start(Stage primaryStage) {
 
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("Dashboardfl.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("Login.fxml")); //call fxml
             Scene scene = new Scene(root);
 
             primaryStage.setTitle("Alabat Fish Landing");

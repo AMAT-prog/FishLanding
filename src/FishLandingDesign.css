@@ -196,6 +196,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-border-radius: 3px;
 }
 
+.logIn{
+    
+    -fx-text-fill: white;
+}
+
+
 /* Give this style class to your Role ComboBox: role-combo */
 .role-combo {
   -fx-background-color: #16181d;
