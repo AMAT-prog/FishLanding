@@ -66,6 +66,7 @@ public class TransactionViewRow {
     private final double unitPrice;
     private final double totalPrice;
     private final String paymentMethod; // Cash/Credit/Bank Transfer/Other
+    private final String remarks;
     private final String paymentStatus; // Paid/Partial/Unpaid
     private final LocalDateTime txnDate;
 
@@ -73,7 +74,7 @@ public class TransactionViewRow {
     public TransactionViewRow(int transactionId, int fisherfolkId, int catchId,
                               String buyerName, String fisherfolkName, String speciesName,
                               double qtySold, double unitPrice, double totalPrice,
-                              String paymentMethod, String paymentStatus, LocalDateTime txnDate) {
+                              String paymentMethod, String remarks, String paymentStatus, LocalDateTime txnDate) {
         this.transactionId = transactionId;
         this.fisherfolkId = fisherfolkId;
         this.catchId = catchId;
@@ -84,6 +85,7 @@ public class TransactionViewRow {
         this.unitPrice = unitPrice;
         this.totalPrice = totalPrice;
         this.paymentMethod = paymentMethod;
+        this.remarks = remarks;
         this.paymentStatus = paymentStatus;
         this.txnDate = txnDate;
     }
@@ -100,6 +102,7 @@ public class TransactionViewRow {
     public double getUnitPrice() { return unitPrice; }
     public double getTotalPrice() { return totalPrice; }
     public String getPaymentMethod() { return paymentMethod; }
+    public String getRemarks() { return remarks; }
     public String getPaymentStatus() { return paymentStatus; }
     public LocalDateTime getTxnDate() { return txnDate; }
 }

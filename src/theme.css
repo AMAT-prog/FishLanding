@@ -1,0 +1,41 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 28 Sept 2025, 15:23:01
+    Author     : Anna Margarette
+*/
+
+.scroll-bar:horizontal, .scroll-bar:vertical {
+    -fx-background-color: #0d1117;   /* track background (matches your base) */
+}
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track {
+    -fx-background-color: #0d1117;   /* track area */
+    -fx-background-insets: 0;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #2d8cff;   /* scrollbar thumb (blue accent) */
+    -fx-background-radius: 5;
+    -fx-background-insets: 2;
+}
+
+.scroll-bar:horizontal .thumb:hover,
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #3797ff;   /* hover effect */
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent; /* hide arrow buttons */
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+}

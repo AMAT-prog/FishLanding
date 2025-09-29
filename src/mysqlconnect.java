@@ -252,6 +252,7 @@ public static ObservableList<Catch> getCatch() {
                    t.unit_price,
                    t.total_price,
                    t.payment_method,
+                   t.remarks,
                    t.payment_status,
                    t.transaction_date
             FROM transactions t
@@ -280,6 +281,7 @@ public static ObservableList<Catch> getCatch() {
                 rs.getDouble("unit_price"),
                 rs.getDouble("total_price"),
                 rs.getString("payment_method"),
+                rs.getString("remarks"),
                 rs.getString("payment_status"),
                 rs.getTimestamp("transaction_date") != null ? rs.getTimestamp("transaction_date").toLocalDateTime() : null
             ));
@@ -597,20 +599,6 @@ public static ObservableList<Catch> getCatch() {
         return list;
     }
 
-    //fisherfolk contributions
-//    public static java.util.List<javafx.scene.chart.XYChart.Data<String, Number>> loadFisherfolkContributions() {
-//        var list = new java.util.ArrayList<javafx.scene.chart.XYChart.Data<String, Number>>();
-//        String sql = "SELECT f.name, SUM(t.quantity_sold) AS qty_sold " +
-//                     "FROM transactions t JOIN fisherfolk f ON t.fisherfolk_id=f.fisherfolk_id " +
-//                     "WHERE t.payment_status='Paid' " +
-//                     "GROUP BY f.fisherfolk_id, f.name ORDER BY qty_sold DESC LIMIT 10";
-//        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
-//            while (rs.next()) {
-//                list.add(new javafx.scene.chart.XYChart.Data<>(rs.getString("name"), rs.getDouble("qty_sold")));
-//            }
-//        } catch (Exception e) { e.printStackTrace(); }
-//        return list;
-//    }
     // ---- Fisherfolk Contributions (from TRANSACTIONS) ----
     public static javafx.util.Pair<String, javafx.scene.chart.XYChart.Series<String, Number>>
     loadFisherfolkContrib(java.time.LocalDate start, java.time.LocalDate end, boolean paidOnly) {
@@ -665,19 +653,6 @@ public static ObservableList<Catch> getCatch() {
     }
 
     
-    //species distribution
-//    public static java.util.List<javafx.scene.chart.PieChart.Data> loadSpeciesDistribution() {
-//        var list = new java.util.ArrayList<javafx.scene.chart.PieChart.Data>();
-//        String sql = "SELECT s.species_name, SUM(c.quantity) AS total_qty " +
-//                     "FROM catch c JOIN species s ON c.species_id=s.species_id " +
-//                     "GROUP BY s.species_id, s.species_name";
-//        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
-//            while (rs.next()) {
-//                list.add(new javafx.scene.chart.PieChart.Data(rs.getString("species_name"), rs.getDouble("total_qty")));
-//            }
-//        } catch (Exception e) { e.printStackTrace(); }
-//        return list;
-//    }
     // ---- Species Distribution (from CATCH) ----
     public static javafx.util.Pair<String, javafx.collections.ObservableList<javafx.scene.chart.PieChart.Data>>
     loadSpeciesDistribution(java.time.LocalDate start, java.time.LocalDate end) {

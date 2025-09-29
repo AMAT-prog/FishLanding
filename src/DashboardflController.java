@@ -68,8 +68,13 @@ import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Optional;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 
 
@@ -818,7 +823,7 @@ public class DashboardflController implements Initializable {
                         updateVisual(row.isActive(), true);
                         showInfoFISHERMEN("Failed to update status.");
                     }
-                                ///// UPDATE FISHERFOLK(SELLER LIST) COMBO BOX IN ADD TRANSACTION/////
+                                ///// UPDATE FISHERFOLK(SELLER LISTadmi) COMBO BOX IN ADD TRANSACTION/////
                                 transacSeller_cb.setItems(mysqlconnect.loadActiveFisherfolkItems());
                                 transacSeller_cb.setConverter(new javafx.util.StringConverter<>() {
                                     @Override public String toString(FisherfolkItem f) { return f == null ? "" : f.getName(); }
@@ -843,6 +848,7 @@ public class DashboardflController implements Initializable {
                                 transacSeller_cb.setItems(allSellers);
                                 ///// UPDATE FISHERFOLK OPTIONS IN LANDINGS
                                 loadFisherfolkOptions();
+                                refreshDashboardKPIs();
                 });
             }
 
@@ -1422,7 +1428,10 @@ public class DashboardflController implements Initializable {
                                            ButtonType.OK);
                     fail.setHeaderText(null);
                     fail.showAndWait();
-                }
+                } 
+                loadSpeciesDistributionAuto(); //REPORTS - SPECIES DISTRIBUTION
+                loadCatchVolumesAuto(); //REPORTS - CATCH VOLUMES
+                
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1432,7 +1441,17 @@ public class DashboardflController implements Initializable {
                 err.setHeaderText(null);
                 err.showAndWait();
             }
-        } refreshLandingsKPIs();
+        } //pie chart errors when i try to load species distribution here
+           //case: when i try to delete landings that has still a transaction record
+          refreshLandingsKPIs();
+          refreshDashboardKPIs(); //today's landing kg
+           // load 5 most recent
+          dashboardRecentFishLanding_tv.setItems(loadRecentLandings(5));
+          loadWeeklyLandingsTrend();
+          loadMonthlyLandingsTrend();
+          dashboardLandingsTrend_monthToggle.setSelected(true);
+          //top fish type
+          loadDashboardTopFishTypesPie(4); // top-5
     }
 
     @FXML
@@ -1677,7 +1696,20 @@ public class DashboardflController implements Initializable {
         addNewLanding_popup.setVisible(false);
         landings_pane.setDisable(false);
         sideNavigation_vbox.setDisable(false);
+        
         refreshLandingsKPIs();
+        refreshDashboardKPIs(); //today's landing kg
+        loadSpeciesDistributionAuto(); //REPORTS - SPECIES DISTRIBUTION
+        loadCatchVolumesAuto(); //REPORTS - CATCH VOLUMES
+        
+         // load 5 most recent
+        dashboardRecentFishLanding_tv.setItems(loadRecentLandings(5));
+        loadWeeklyLandingsTrend();
+        loadMonthlyLandingsTrend();
+        dashboardLandingsTrend_monthToggle.setSelected(true);
+        //top fish type
+        loadDashboardTopFishTypesPie(4); // top-5
+        
     }
     
     private LocalTime parseOptionalTime(String text) {
@@ -2021,7 +2053,8 @@ public class DashboardflController implements Initializable {
             } else {
                 showInfoFISHERMEN("Failed to delete. Please try again.");
             }
-        }
+        } refreshDashboardKPIs(); //total no.of registered fishermen
+          loadFisherfolkOptions(); // UPDATE FISHERFOLK OPTIONS IN LANDINGS
     }
 
     @FXML
@@ -2155,9 +2188,10 @@ public class DashboardflController implements Initializable {
                 ex.printStackTrace();
                 showInfoWide("Error updating: " + ex.getMessage());
             }
-        }
+        } refreshDashboardKPIs(); //total no.of registered fishermen
+          loadFisherfolkOptions(); // UPDATE FISHERFOLK OPTIONS IN LANDINGS
     }
-
+    
     private String safeTrim(String t) {
         if (t == null) return null;
         String s = t.trim();
@@ -2526,7 +2560,7 @@ public class DashboardflController implements Initializable {
         transacBuyer_tf.setText(sel.getBuyerName());
         transacQuantity_tf.setText(String.format("%.2f", sel.getQtySold()));
         transacUnitPrice_tf.setText(String.format("%.2f", sel.getUnitPrice()));
-        transacRemarks_ta.setText(""); // you can load actual remarks if your view includes it
+        transacRemarks_ta.setText(sel.getRemarks()); // you can load actual remarks if your view includes it
         transacPaymentMethod_cb.getSelectionModel().select(sel.getPaymentMethod());
         transacPaymentStatus_cb.getSelectionModel().select(sel.getPaymentStatus());
 
@@ -2580,6 +2614,9 @@ public class DashboardflController implements Initializable {
             }
         }
         refreshLandingsKPIs();
+        refreshDashboardKPIs(); //total sales (fully paid)
+        loadSalesSeries(); //REPORTS - SALES TREND
+        loadFisherfolkContribAuto(); //REPORTS - FISHERFOLK CONTRIBS
     }
 
     @FXML
@@ -2871,6 +2908,9 @@ public class DashboardflController implements Initializable {
         }
         refreshTransactionsTable();
         refreshLandingsKPIs();
+        refreshDashboardKPIs(); //total sales (fully paid)
+        loadSalesSeries(); //REPORTS - SALES TREND
+        loadFisherfolkContribAuto(); //REPORTS - FISHERFOLK CONTRIBS
     }
     ////////////////////////////////////////////////////////////////////////////end of transaction & sales
     
@@ -3187,6 +3227,7 @@ public class DashboardflController implements Initializable {
     }
     ////////////////////////////////////////////////////////////////////////////end Dock Logs
     ////////////////////////////////////////////////////////////////////////////REPORTS & ANALYTICS
+    
     private void loadSalesSeries() {
         var start = dpStart.getValue();
         var end   = dpEnd.getValue();
@@ -3458,6 +3499,8 @@ public class DashboardflController implements Initializable {
 
         speciesData.remove(sel); // reflects immediately
         showInfoSpecies("Species deleted.");
+        
+        loadSpeciesOptions(); //on adding catches/landings
     }
 
     @FXML
@@ -3566,6 +3609,7 @@ public class DashboardflController implements Initializable {
         }
         sideNavigation_vbox.setDisable(false);
         species_pane.setDisable(false);
+        loadSpeciesOptions(); //on adding catches/landings
     }
     ////////////////////////////////////////////////////////////////////////////end of species
     ////////////////////////////////////////////////////////////////////////////ACCOUNT PROFILE
@@ -4098,6 +4142,7 @@ public class DashboardflController implements Initializable {
         a.setHeaderText(null); a.showAndWait();
     }
 // ==== EXPORT HELPERS =========================================================
+   
 
     private static class TableSpec {
         final String name, sql;
@@ -4880,7 +4925,42 @@ public class DashboardflController implements Initializable {
         }
     }
 
-    
+     @FXML
+    private void LOGout_btn(ActionEvent event) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirm Logout");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Are you sure you want to log out?");
+
+        // Show the dialog and wait for response
+        Optional<ButtonType> result = confirm.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Load Login.fxml
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
+                Parent root = loader.load();
+
+                Stage loginStage = new Stage();
+                loginStage.setScene(new Scene(root));
+                loginStage.setTitle("Alabat Fish Landing");
+                loginStage.show();
+
+                // Close the current Dashboard window
+                Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                currentStage.close();
+
+                // Reset session (optional)
+                LoginController.currentUserId = null;
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Alert a = new Alert(Alert.AlertType.ERROR, "Unable to log out: " + ex.getMessage(), ButtonType.OK);
+                a.showAndWait();
+            }
+        }
+    }
+
     
 
     
