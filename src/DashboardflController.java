@@ -77,7 +77,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 
-
 /**
  * FXML Controller class
  *
@@ -4622,7 +4621,7 @@ public class DashboardflController implements Initializable {
                 if (d.getNode() != null) javafx.scene.control.Tooltip.install(d.getNode(), tip);
             }
         });
-        System.out.println("Pie slices: " + dashboardTopFishTypesKG_piechart.getData().size());
+//        System.out.println("Pie slices: " + dashboardTopFishTypesKG_piechart.getData().size());
 
     }
    
