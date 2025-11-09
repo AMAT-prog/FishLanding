@@ -2,6 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -79,11 +80,11 @@ public static ObservableList<Catch> getCatch() {
     return list;
 }
 
-        //FISHERMEN RECORDS
+        //FISHERMEN RECORDS in mysqlconnect.java
     public static javafx.collections.ObservableList<FisherfolkRecord> loadFisherfolk() {
         var list = javafx.collections.FXCollections.<FisherfolkRecord>observableArrayList();
         String sql = "SELECT fisherfolk_id, name, age, gender, contact_number, address, " +
-                     "boat_name, license_number, is_active " +
+                     "gear, is_active " +
                      "FROM fisherfolk ORDER BY name ASC";
         try (var conn = mysqlconnect.ConnectDb();
              var ps = conn.prepareStatement(sql);
@@ -97,8 +98,9 @@ public static ObservableList<Catch> getCatch() {
                     rs.getString("gender"),
                     rs.getString("contact_number"),
                     rs.getString("address"),
-                    rs.getString("boat_name"),
-                    rs.getString("license_number"),
+                    rs.getString("gear"),
+//                    rs.getString("boat_name"),
+//                    rs.getString("license_number"),
                     rs.getBoolean("is_active")
                 ));
             }
@@ -236,46 +238,42 @@ public static ObservableList<Catch> getCatch() {
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+    
+    public static ObservableList<TransactionViewRow> loadTransactionsView() {
+    var list = FXCollections.<TransactionViewRow>observableArrayList();
+    String sql = """
+        SELECT
+            t.transaction_id,
+            t.consumer_id,
+            COALESCE(t.species_id, ca.species_id) AS species_id,
+            t.buyer_name,
+            csm.name AS consumer_name,
+            sp.species_name,
+            t.quantity_sold,
+            t.unit_price,
+            t.total_price,
+            t.payment_method,
+            t.remarks,
+            t.payment_status,
+            t.transaction_date
+        FROM transactions t
+        LEFT JOIN consumers csm ON csm.consumer_id = t.consumer_id
+        LEFT JOIN catch ca      ON ca.catch_id     = t.catch_id         -- legacy support
+        LEFT JOIN species sp    ON sp.species_id   = COALESCE(t.species_id, ca.species_id)
+        ORDER BY t.transaction_date DESC
+        """;
+    try (var conn = ConnectDb();
+         var ps = conn.prepareStatement(sql);
+         var rs = ps.executeQuery()) {
 
-    //TRANSACTION AND SALES
-    public static javafx.collections.ObservableList<TransactionViewRow> loadTransactionsView() {
-        var list = javafx.collections.FXCollections.<TransactionViewRow>observableArrayList();
-
-        String sql = """
-            SELECT t.transaction_id,
-                   t.fisherfolk_id,
-                   t.catch_id,
-                   t.buyer_name,
-                   f.name AS fisherfolk_name,
-                   s.species_name,
-                   t.quantity_sold,
-                   t.unit_price,
-                   t.total_price,
-                   t.payment_method,
-                   t.remarks,
-                   t.payment_status,
-                   t.transaction_date
-            FROM transactions t
-            JOIN fisherfolk f ON t.fisherfolk_id = f.fisherfolk_id
-            JOIN catch c ON t.catch_id = c.catch_id
-            JOIN species s ON c.species_id = s.species_id
-            ORDER BY t.transaction_date DESC
-            """;
-
-        try (java.sql.Connection conn = ConnectDb();
-             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
-             java.sql.ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                java.sql.Timestamp ts = rs.getTimestamp("transaction_date");
-                java.time.LocalDateTime ldt = ts != null ? ts.toLocalDateTime() : null;
-
-                list.add(new TransactionViewRow(
+        while (rs.next()) {
+            var ts = rs.getTimestamp("transaction_date");
+            list.add(new TransactionViewRow(
                 rs.getInt("transaction_id"),
-                rs.getInt("fisherfolk_id"),
-                rs.getInt("catch_id"),
+                rs.getInt("consumer_id"),
+                rs.getInt("species_id"),                 // << use the selected species_id
                 rs.getString("buyer_name"),
-                rs.getString("fisherfolk_name"),
+                rs.getString("consumer_name"),
                 rs.getString("species_name"),
                 rs.getDouble("quantity_sold"),
                 rs.getDouble("unit_price"),
@@ -283,13 +281,13 @@ public static ObservableList<Catch> getCatch() {
                 rs.getString("payment_method"),
                 rs.getString("remarks"),
                 rs.getString("payment_status"),
-                rs.getTimestamp("transaction_date") != null ? rs.getTimestamp("transaction_date").toLocalDateTime() : null
+                ts != null ? ts.toLocalDateTime() : null
             ));
+        }
+    } catch (Exception e) { e.printStackTrace(); }
+    return list;
+}
 
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
 
     public static boolean deleteTransactionById(int id) {
         String sql = "DELETE FROM transactions WHERE transaction_id=?";
@@ -302,10 +300,10 @@ public static ObservableList<Catch> getCatch() {
     
     //on adding/updating transactions
     // 1) Load active fisherfolk for the Seller combo
-    // ALSO USED ON DOCKING LOGS (for getting boatname)
+    // ALSO USED ON DOCKING LOGS (for getting boatname->gear)
     public static javafx.collections.ObservableList<FisherfolkItem> loadActiveFisherfolkItems() {
         var list = javafx.collections.FXCollections.<FisherfolkItem>observableArrayList();
-        String sql = "SELECT fisherfolk_id, name, boat_name FROM fisherfolk WHERE is_active=1 ORDER BY name";
+        String sql = "SELECT fisherfolk_id, name, gear FROM fisherfolk WHERE is_active=1 ORDER BY name";
         try (java.sql.Connection c = ConnectDb();
              java.sql.PreparedStatement ps = c.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {
@@ -313,83 +311,109 @@ public static ObservableList<Catch> getCatch() {
                 list.add(new FisherfolkItem(
                     rs.getInt("fisherfolk_id"),
                     rs.getString("name"),
-                    rs.getString("boat_name")
+                    rs.getString("gear")
                 ));
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 
-
-    // 2) Load catch options by fisher (remaining > 0) from the view v_catch_available
-    public static javafx.collections.ObservableList<CatchOption> loadCatchOptionsByFisher(int fisherId) {
+    
+    // B) Catch options (available stock) — no fisher name in label
+    public static javafx.collections.ObservableList<CatchOption> loadCatchOptionsAvailable() {
         var list = javafx.collections.FXCollections.<CatchOption>observableArrayList();
         String sql = """
-            SELECT catch_id, fisherfolk_id, species_id, species_name, price_per_kilo,
-                   remaining_qty, catch_date
-            FROM v_catch_available
-            WHERE fisherfolk_id = ? AND remaining_qty > 0
-            ORDER BY catch_date DESC, species_name
+            SELECT c.catch_id, c.fisherfolk_id, c.species_id, s.species_name,
+                   c.price_per_kilo,
+                   (c.quantity - IFNULL(SUM(t.quantity_sold),0)) AS remaining_qty,
+                   c.catch_date
+            FROM catch c
+            JOIN species s ON s.species_id = c.species_id
+            LEFT JOIN transactions t ON t.catch_id = c.catch_id
+            GROUP BY c.catch_id, c.fisherfolk_id, c.species_id, s.species_name,
+                     c.price_per_kilo, c.quantity, c.catch_date
+            HAVING remaining_qty > 0
+            ORDER BY c.catch_date DESC, s.species_name
             """;
-        try (java.sql.Connection c = ConnectDb();
-             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, fisherId);
-            try (java.sql.ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new CatchOption(
-                        rs.getInt("catch_id"),
-                        rs.getInt("fisherfolk_id"),
-                        rs.getInt("species_id"),
-                        rs.getString("species_name"),
-                        rs.getDouble("price_per_kilo"),
-                        rs.getDouble("remaining_qty"),
-                        rs.getDate("catch_date").toLocalDate()
-                    ));
-                }
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new CatchOption(
+                    rs.getInt("catch_id"),
+                    rs.getInt("fisherfolk_id"),
+                    rs.getInt("species_id"),
+                    rs.getString("species_name"),
+                    rs.getDouble("price_per_kilo"),
+                    rs.getDouble("remaining_qty"),
+                    rs.getDate("catch_date").toLocalDate()
+                ));
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 
-    // 3) INSERT transaction (total_price is generated; do NOT insert it)
-    public static boolean insertTransaction(String buyer, int fisherId, int catchId,
-                                            double qty, double unitPrice,
-                                            String payMethod, String payStatus, String remarks) {
-        String sql = """
-            INSERT INTO transactions
-                (buyer_name, fisherfolk_id, catch_id,
-                 quantity_sold, unit_price, payment_method, payment_status, remarks)
-            VALUES (?,?,?,?,?,?,?,?)
-            """;
-        try (java.sql.Connection c = ConnectDb();
-             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, buyer);
-            ps.setInt(2, fisherId);
-            ps.setInt(3, catchId);
-            ps.setBigDecimal(4, java.math.BigDecimal.valueOf(qty));
-            ps.setBigDecimal(5, java.math.BigDecimal.valueOf(unitPrice));
-            ps.setString(6, payMethod);
-            ps.setString(7, payStatus);
-            ps.setString(8, remarks);
-            return ps.executeUpdate() == 1;
-        } catch (Exception e) { e.printStackTrace(); return false; }
-    }
+   public static boolean insertTransactionByConsumer(int consumerId, int speciesId,
+                                                  double qty, double unitPrice,
+                                                  String payMethod, String payStatus,
+                                                  String remarks, String buyerText) {
+    String sql = """
+        INSERT INTO transactions
+            (consumer_id, species_id, catch_id,
+             buyer_name, quantity_sold, unit_price,
+             payment_method, payment_status, remarks)
+        VALUES (
+          ?, ?, 
+          (SELECT catch_id 
+             FROM catch 
+            WHERE species_id = ? 
+            ORDER BY catch_date DESC 
+            LIMIT 1),
+          ?, ?, ?, ?, ?, ?
+        )
+        """;
+    try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+        ps.setInt(1, consumerId);        // consumer_id
+        ps.setInt(2, speciesId);         // species_id
+        ps.setInt(3, speciesId);         // for the subquery (catch_id)
+        ps.setString(4, buyerText);
+        ps.setBigDecimal(5, java.math.BigDecimal.valueOf(qty));
+        ps.setBigDecimal(6, java.math.BigDecimal.valueOf(unitPrice));
+        ps.setString(7, payMethod);
+        ps.setString(8, payStatus);
+        ps.setString(9, remarks);
 
-    // 4) UPDATE transaction (do not allow changing catch_id here to keep it simple)
-    public static boolean updateTransaction(int txnId, String buyer,
-                                            double qty, double unitPrice,
-                                            String payMethod, String payStatus, String remarks) {
+        ps.executeUpdate();
+        return true;
+    } catch (java.sql.SQLException e) {
+        // If DB oversell trigger fires, message will contain our text
+        if (e.getMessage() != null 
+                && e.getMessage().toLowerCase().contains("quantity exceeds remaining stock")) {
+            System.out.println("DB rejected oversell: " + e.getMessage());
+            return false;
+        }
+        e.printStackTrace();
+        return false;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+
+
+    // update while keeping same species/catch linkage
+    public static boolean updateTransactionKeepBuyer(int txnId, String buyer,
+                                                     double qty, double unitPrice,
+                                                     String payMethod, String payStatus, String remarks) {
         String sql = """
             UPDATE transactions
                SET buyer_name=?, quantity_sold=?, unit_price=?,
                    payment_method=?, payment_status=?, remarks=?
              WHERE transaction_id=?
             """;
-        try (java.sql.Connection c = ConnectDb();
-             java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
             ps.setString(1, buyer);
-            ps.setBigDecimal(2, java.math.BigDecimal.valueOf(qty));
-            ps.setBigDecimal(3, java.math.BigDecimal.valueOf(unitPrice));
+            ps.setBigDecimal(2, BigDecimal.valueOf(qty));
+            ps.setBigDecimal(3, BigDecimal.valueOf(unitPrice));
             ps.setString(4, payMethod);
             ps.setString(5, payStatus);
             ps.setString(6, remarks);
@@ -397,6 +421,8 @@ public static ObservableList<Catch> getCatch() {
             return ps.executeUpdate() == 1;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
+
+
     
     public static double sumSoldForCatchExcluding(int txnId, int catchId) {
         String sql = "SELECT IFNULL(SUM(quantity_sold),0) AS sold_qty " +
@@ -426,13 +452,75 @@ public static ObservableList<Catch> getCatch() {
         } catch (Exception e) { e.printStackTrace(); }
         return 0.0;
     }
+    
+    //transaction (on selecting consumer/buyer) load consumer
+    public static javafx.collections.ObservableList<ConsumerItem> loadActiveConsumers() {
+        var list = javafx.collections.FXCollections.<ConsumerItem>observableArrayList();
+        String sql = "SELECT consumer_id, name, contact FROM consumers WHERE is_active=1 ORDER BY name";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new ConsumerItem(
+                    rs.getInt("consumer_id"),
+                    rs.getString("name"),
+                    rs.getString("contact")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+    
+      //on fish type options on the sales (fish type combo box)
+    public static ObservableList<InventoryOption> loadInventoryOptionsAvailable() {
+        var list = FXCollections.<InventoryOption>observableArrayList();
+        String sql = """
+            SELECT species_id, species_name, balance_qty, selling_price
+            FROM v_inventory
+            WHERE balance_qty > 0
+            ORDER BY species_name
+            """;
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new InventoryOption(
+                    rs.getInt("species_id"),
+                    rs.getString("species_name"),
+                    rs.getDouble("balance_qty"),
+                    rs.getDouble("selling_price")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+   
+   //Oversell check (species-based)
+   public static double speciesPurchasedQty(int speciesId) {
+        String sql = "SELECT IFNULL(SUM(quantity),0) FROM catch WHERE species_id=?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, speciesId);
+            try (var rs = ps.executeQuery()) { if (rs.next()) return rs.getDouble(1); }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+    public static double speciesSoldQtyExcluding(int speciesId, Integer excludeTxnId) {
+        String sql = (excludeTxnId == null)
+            ? "SELECT IFNULL(SUM(quantity_sold),0) FROM transactions WHERE species_id=?"
+            : "SELECT IFNULL(SUM(quantity_sold),0) FROM transactions WHERE species_id=? AND transaction_id<>?";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, speciesId);
+            if (excludeTxnId != null) ps.setInt(2, excludeTxnId);
+            try (var rs = ps.executeQuery()) { if (rs.next()) return rs.getDouble(1); }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+
+
+
 
     //DOCKING LOGS
     // Load logs with fisher name + boat (for the table)
     public static javafx.collections.ObservableList<DockLogViewRow> loadDockLogsView() {
         var list = javafx.collections.FXCollections.<DockLogViewRow>observableArrayList();
         String sql = """
-            SELECT dl.log_id, dl.fisherfolk_id, f.name AS fisher_name, f.boat_name,
+            SELECT dl.log_id, dl.fisherfolk_id, f.name AS fisher_name, f.gear,
                    dl.docking_date, dl.arrival_time, dl.departure_time, dl.remarks
             FROM docking_logs dl
             JOIN fisherfolk f ON dl.fisherfolk_id = f.fisherfolk_id
@@ -446,7 +534,8 @@ public static ObservableList<Catch> getCatch() {
                     rs.getInt("log_id"),
                     rs.getInt("fisherfolk_id"),
                     rs.getString("fisher_name"),
-                    rs.getString("boat_name"),
+                    rs.getString("gear"),
+//                    rs.getString("boat_name"),
                     rs.getDate("docking_date").toLocalDate(),
                     rs.getTime("arrival_time").toLocalTime(),
                     rs.getTime("departure_time") == null ? null : rs.getTime("departure_time").toLocalTime(),
@@ -599,58 +688,87 @@ public static ObservableList<Catch> getCatch() {
         return list;
     }
 
-    // ---- Fisherfolk Contributions (from TRANSACTIONS) ----
+    // ---- Fisherfolk Contributions (from TRANSACTIONS via catch) ----
     public static javafx.util.Pair<String, javafx.scene.chart.XYChart.Series<String, Number>>
     loadFisherfolkContrib(java.time.LocalDate start, java.time.LocalDate end, boolean paidOnly) {
 
         var series = new javafx.scene.chart.XYChart.Series<String, Number>();
         String label = "";
 
-        String labelSql = """
-            SELECT DATE_FORMAT(MIN(t.transaction_date),'%M %Y') AS s,
-                   DATE_FORMAT(MAX(t.transaction_date),'%M %Y') AS e
-            FROM transactions t
-            WHERE t.transaction_date BETWEEN ? AND ?
-              """ + (paidOnly ? "AND t.payment_status='Paid'" : "") + """
-        """;
+        // Build the common JOIN skeleton once
+        String joinCore = """
+            FROM fisherfolk f
+            LEFT JOIN catch c
+                   ON c.fisherfolk_id = f.fisherfolk_id
+            LEFT JOIN transactions t
+                   ON t.catch_id = c.catch_id
+            """;
 
+        // Build dynamic filters (these go into the ON/WHERE context for t.* safely)
+        StringBuilder filters = new StringBuilder(" WHERE 1=1 ");
+        if (paidOnly) {
+            filters.append(" AND t.payment_status = 'Paid' ");
+        }
+        boolean hasStart = (start != null);
+        boolean hasEnd   = (end   != null);
+        if (hasStart) filters.append(" AND t.transaction_date >= ? ");
+        if (hasEnd)   filters.append(" AND t.transaction_date <  ? "); // next-day exclusive
+
+        // 1) Label query: show MIN/MAX range of t.transaction_date with same filters
+        String labelSql = """
+            SELECT
+              DATE_FORMAT(MIN(t.transaction_date),'%M %Y') AS s,
+              DATE_FORMAT(MAX(t.transaction_date),'%M %Y') AS e
+            """ + joinCore + filters.toString();
+
+        // 2) Data query: sum total_price per fisherfolk with same filters
         String dataSql = """
-            SELECT f.name, SUM(t.quantity_sold) AS qty
-            FROM transactions t
-            JOIN fisherfolk f ON f.fisherfolk_id = t.fisherfolk_id
-            WHERE t.transaction_date BETWEEN ? AND ?
-              """ + (paidOnly ? "AND t.payment_status='Paid'" : "") + """
+            SELECT
+              f.fisherfolk_id,
+              f.name,
+              COALESCE(SUM(t.total_price), 0) AS total_sales
+            """ + joinCore + filters.toString() + """
             GROUP BY f.fisherfolk_id, f.name
-            ORDER BY qty DESC
-            LIMIT 12
-        """;
+            ORDER BY total_sales DESC
+            """;
 
         try (var conn = ConnectDb()) {
+            // --- label
             try (var ps = conn.prepareStatement(labelSql)) {
-                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
-                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+                int idx = 1;
+                if (hasStart) ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                if (hasEnd)   ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay())); // exclusive
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        String s = rs.getString("s"), e = rs.getString("e");
-                        label = s != null && e != null && !s.equals(e) ? (s + " — " + e) : (s != null ? s : "");
+                        String s = rs.getString("s");
+                        String e = rs.getString("e");
+                        label = (s != null && e != null && !s.equals(e)) ? (s + " — " + e)
+                               : (s != null ? s : "");
                     }
                 }
             }
+
+            // --- data
             try (var ps = conn.prepareStatement(dataSql)) {
-                ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
-                ps.setTimestamp(2, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay().minusSeconds(1)));
+                int idx = 1;
+                if (hasStart) ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                if (hasEnd)   ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay())); // exclusive
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        series.getData().add(new javafx.scene.chart.XYChart.Data<>(
-                            rs.getString("name"), rs.getDouble("qty")));
+                        String fisherName = rs.getString("name");
+                        double totalSales = rs.getDouble("total_sales");
+                        series.getData().add(new javafx.scene.chart.XYChart.Data<>(fisherName, totalSales));
                     }
                 }
             }
-        } catch (Exception ex) { ex.printStackTrace(); }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         series.setName(paidOnly ? "Top Fisherfolk (Paid sales)" : "Top Fisherfolk (All sales)");
         return new javafx.util.Pair<>(label, series);
     }
+
 
     
     // ---- Species Distribution (from CATCH) ----
@@ -703,24 +821,6 @@ public static ObservableList<Catch> getCatch() {
         return new javafx.util.Pair<>(label, data);
     }
 
-    //catch volume
-//    public static java.util.Map<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>> loadCatchVolumes() {
-//        // Map<species, List<Data<month, qty>>>
-//        var map = new java.util.LinkedHashMap<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>>();
-//        String sql = "SELECT DATE_FORMAT(c.catch_date,'%Y-%m') ym, s.species_name, SUM(c.quantity) total_qty " +
-//                     "FROM catch c JOIN species s ON c.species_id=s.species_id " +
-//                     "GROUP BY ym, s.species_name ORDER BY ym, s.species_name";
-//        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
-//            while (rs.next()) {
-//                String species = rs.getString("species_name");
-//                String month = rs.getString("ym");
-//                double qty = rs.getDouble("total_qty");
-//                map.computeIfAbsent(species, k -> new java.util.ArrayList<>())
-//                   .add(new javafx.scene.chart.XYChart.Data<>(month, qty));
-//            }
-//        } catch (Exception e) { e.printStackTrace(); }
-//        return map;
-//    }
     // ---- Catch Volumes (STACKED by species, grouped by month) ----
     public static javafx.util.Pair<String, java.util.Map<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>>>
     loadCatchVolumes(java.time.LocalDate start, java.time.LocalDate end) {
@@ -920,6 +1020,226 @@ public static ObservableList<Catch> getCatch() {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+
+    // ---------- CONSUMERS in mysqlconnect.java ----------
+
+    public static javafx.collections.ObservableList<ConsumerRecord> loadConsumers() {
+        var list = javafx.collections.FXCollections.<ConsumerRecord>observableArrayList();
+        String sql = "SELECT consumer_id, name, contact, address, is_active FROM consumers ORDER BY name ASC";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new ConsumerRecord(
+                    rs.getInt("consumer_id"),
+                    rs.getString("name"),
+                    rs.getString("contact"),
+                    rs.getString("address"),
+                    rs.getBoolean("is_active")
+                ));
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+        return list;
+    }
+
+    public static boolean insertConsumer(String name, String contact, String address) {
+        String sql = "INSERT INTO consumers (name, contact, address, is_active) VALUES (?, ?, ?, 1)";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            if (contact != null) ps.setString(2, contact); else ps.setNull(2, java.sql.Types.VARCHAR);
+            if (address != null) ps.setString(3, address); else ps.setNull(3, java.sql.Types.VARCHAR);
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) { ex.printStackTrace(); return false; }
+    }
+
+    public static boolean updateConsumer(int id, String name, String contact, String address) {
+        String sql = "UPDATE consumers SET name=?, contact=?, address=? WHERE consumer_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            if (contact != null) ps.setString(2, contact); else ps.setNull(2, java.sql.Types.VARCHAR);
+            if (address != null) ps.setString(3, address); else ps.setNull(3, java.sql.Types.VARCHAR);
+            ps.setInt(4, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) { ex.printStackTrace(); return false; }
+    }
+
+    public static boolean deleteConsumerById(int id) {
+        String sql = "DELETE FROM consumers WHERE consumer_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) { ex.printStackTrace(); return false; }
+    }
+
+    public static boolean updateConsumerActive(int id, boolean active) {
+        String sql = "UPDATE consumers SET is_active=? WHERE consumer_id=?";
+        try (var conn = mysqlconnect.ConnectDb();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, active);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) { ex.printStackTrace(); return false; }
+    }
+
+    /** If transactions has consumer_id FK (recommended), we use that.
+     *  If not yet migrated, we fallback to buyer_name match. */
+//    public static javafx.collections.ObservableList<TransactionRecord> getTransactionsByConsumer(int consumerId) {
+//        var list = javafx.collections.FXCollections.<TransactionRecord>observableArrayList();
+//
+//        String sqlFk = """
+//            SELECT t.transaction_id, t.transaction_date, t.catch_id,
+//                   t.quantity_sold, t.unit_price, t.total_price,
+//                   t.payment_method, t.payment_status, t.remarks
+//            FROM transactions t
+//            WHERE t.consumer_id = ?
+//            ORDER BY t.transaction_date DESC
+//        """;
+//
+//        String sqlFallback = """
+//            SELECT t.transaction_id, t.transaction_date, t.catch_id,
+//                   t.quantity_sold, t.unit_price, t.total_price,
+//                   t.payment_method, t.payment_status, t.remarks
+//            FROM transactions t
+//            JOIN consumers c ON c.name = t.buyer_name
+//            WHERE c.consumer_id = ?
+//            ORDER BY t.transaction_date DESC
+//        """;
+//
+//        String sqlToUse = sqlFk;
+//        try (var conn = mysqlconnect.ConnectDb()) {
+//            // probe if consumer_id exists on transactions
+//            try (var chk = conn.getMetaData().getColumns(null, null, "transactions", "consumer_id")) {
+//                if (!chk.next()) sqlToUse = sqlFallback;
+//            }
+//            try (var ps = conn.prepareStatement(sqlToUse)) {
+//                ps.setInt(1, consumerId);
+//                try (var rs = ps.executeQuery()) {
+//                    while (rs.next()) {
+//                        list.add(new TransactionRecord(
+//                            rs.getInt("transaction_id"),
+//                            rs.getTimestamp("transaction_date").toLocalDateTime(),
+//                            rs.getInt("catch_id"),
+//                            rs.getBigDecimal("quantity_sold").doubleValue(),
+//                            rs.getBigDecimal("unit_price").doubleValue(),
+//                            rs.getBigDecimal("total_price").doubleValue(),
+//                            rs.getString("payment_method"),
+//                            rs.getString("payment_status"),
+//                            rs.getString("remarks")
+//                        ));
+//                    }
+//                }
+//            }
+//        } catch (Exception ex) { ex.printStackTrace(); }
+//        return list;
+//    }
+//
+ 
+    /** Count dependencies to protect deletes. Uses consumer_id if present, else buyer_name link. */
+    public static int countTransactionsByConsumer(int consumerId) {
+        String sqlFk = "SELECT COUNT(*) FROM transactions WHERE consumer_id = ?";
+        String sqlFallback = "SELECT COUNT(*) FROM transactions t JOIN consumers c ON c.name = t.buyer_name WHERE c.consumer_id = ?";
+
+        try (var conn = mysqlconnect.ConnectDb()) {
+            String sql = sqlFk;
+            try (var chk = conn.getMetaData().getColumns(null, null, "transactions", "consumer_id")) {
+                if (!chk.next()) sql = sqlFallback;
+            }
+            try (var ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, consumerId);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+        return -1; // error
+    }
+    
+    ////// INVENTORY
+    public static javafx.collections.ObservableList<InventoryRow> loadInventoryView() {
+        var list = javafx.collections.FXCollections.<InventoryRow>observableArrayList();
+        String sql = """
+    SELECT species_id,
+           species_name,
+           purchased_qty,
+           sold_qty,
+           balance_qty,
+           selling_price,
+           last_purchase_price,
+           avg_purchase_price,
+           updated_at
+    FROM v_inventory
+    ORDER BY species_name
+""";
+
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql); var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                java.sql.Timestamp ts = rs.getTimestamp("updated_at");
+                list.add(new InventoryRow(
+                    rs.getInt("species_id"),
+                    rs.getString("species_name"),
+                    rs.getDouble("purchased_qty"),
+                    rs.getDouble("sold_qty"),
+                    rs.getDouble("balance_qty"),
+                    rs.getDouble("last_purchase_price"),
+                    rs.getDouble("avg_purchase_price"),
+                    rs.getDouble("selling_price"),
+                    ts != null ? ts.toLocalDateTime() : null
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+
+    public static boolean updateInventoryKnobs(int speciesId, double sellingPrice, double restockThreshold) {
+        String sql = "INSERT INTO inventory (species_id, selling_price, restock_threshold) " +
+                     "VALUES (?,?,?) " +
+                     "ON DUPLICATE KEY UPDATE selling_price=VALUES(selling_price), restock_threshold=VALUES(restock_threshold)";
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, speciesId);
+            ps.setBigDecimal(2, java.math.BigDecimal.valueOf(sellingPrice));
+            ps.setBigDecimal(3, java.math.BigDecimal.valueOf(restockThreshold));
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    
+    // Upsert selling price (edit in UI)
+    public static boolean upsertInventorySellingPrice(
+            int speciesId,
+            double sellingPrice,
+            Double lastPurchasePriceOrNull,
+            Double avgPurchasePriceOrNull,
+            Double restockThresholdOrNull
+    ) {
+        String sql = """
+            INSERT INTO inventory (species_id, selling_price, last_purchase_price, avg_purchase_price, restock_threshold, updated_at)
+            VALUES (?,?,?,?,?, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE
+                selling_price = VALUES(selling_price),
+                last_purchase_price = VALUES(last_purchase_price),
+                avg_purchase_price = VALUES(avg_purchase_price),
+                restock_threshold = VALUES(restock_threshold),
+                updated_at = CURRENT_TIMESTAMP
+            """;
+        try (var c = ConnectDb(); var ps = c.prepareStatement(sql)) {
+            ps.setInt(1, speciesId);
+            ps.setBigDecimal(2, java.math.BigDecimal.valueOf(sellingPrice));
+            if (lastPurchasePriceOrNull == null) ps.setNull(3, java.sql.Types.DECIMAL);
+            else ps.setBigDecimal(3, java.math.BigDecimal.valueOf(lastPurchasePriceOrNull));
+            if (avgPurchasePriceOrNull == null) ps.setNull(4, java.sql.Types.DECIMAL);
+            else ps.setBigDecimal(4, java.math.BigDecimal.valueOf(avgPurchasePriceOrNull));
+            if (restockThresholdOrNull == null) ps.setNull(5, java.sql.Types.DECIMAL);
+            else ps.setBigDecimal(5, java.math.BigDecimal.valueOf(restockThresholdOrNull));
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
 

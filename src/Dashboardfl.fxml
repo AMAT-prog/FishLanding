@@ -10,6 +10,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
@@ -71,7 +72,7 @@
                   </HBox>
                   <HBox prefHeight="5.0" prefWidth="207.0">
                      <children>
-                        <ToggleButton fx:id="landings_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#landings_btn" prefHeight="29.0" prefWidth="232.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="LANDINGS" textFill="WHITE" toggleGroup="$sideNav">
+                        <ToggleButton fx:id="landings_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#landings_btn" prefHeight="29.0" prefWidth="232.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="PURCHASES" textFill="WHITE" toggleGroup="$sideNav">
                            <graphic>
                               <ImageView fitHeight="21.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -90,7 +91,7 @@
                   </HBox>
                   <HBox prefHeight="0.0" prefWidth="207.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css">
                      <children>
-                        <ToggleButton fx:id="fishermen_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#fishermen_btn" prefHeight="29.0" prefWidth="236.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="FISHERMEN" textFill="WHITE" toggleGroup="$sideNav">
+                        <ToggleButton fx:id="fishermen_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#fishermen_btn" prefHeight="29.0" prefWidth="236.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="FISHERMEN (Supplier)" textFill="WHITE" toggleGroup="$sideNav">
                            <graphic>
                               <ImageView fitHeight="21.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -107,13 +108,51 @@
                         <Insets left="7.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </HBox>
+                  <HBox prefHeight="0.0" prefWidth="207.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css">
+                     <children>
+                        <ToggleButton fx:id="consumer_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#consumer_btn" prefHeight="29.0" prefWidth="236.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="CONSUMER (Buyer)" textFill="WHITE" toggleGroup="$sideNav">
+                           <graphic>
+                              <ImageView fitHeight="21.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/buyer.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </ToggleButton>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="7.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                  </HBox>
                   <HBox prefHeight="3.0" prefWidth="207.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css">
                      <children>
-                        <ToggleButton fx:id="sales_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#transactionSales_btn" prefHeight="29.0" prefWidth="227.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="TRANSACTION &amp; SALES" textFill="WHITE" toggleGroup="$sideNav">
+                        <ToggleButton fx:id="sales_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#transactionSales_btn" prefHeight="29.0" prefWidth="227.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="SALES" textFill="WHITE" toggleGroup="$sideNav">
                            <graphic>
                               <ImageView fitHeight="21.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@image/TRANSACTION.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </ToggleButton>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="7.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <HBox prefHeight="3.0" prefWidth="207.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css">
+                     <children>
+                        <ToggleButton fx:id="inventory_toggle" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#inventory_btn" prefHeight="29.0" prefWidth="227.0" styleClass="SIDE_btn" stylesheets="@FishLandingDesign.css" text="INVENTORY" textFill="WHITE" toggleGroup="$sideNav">
+                           <graphic>
+                              <ImageView fitHeight="21.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@image/inventory.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -223,7 +262,7 @@
                   </HBox>
                   <Button mnemonicParsing="false" onAction="#LOGout_btn" style="-fx-background-color: transparent; -fx-border-radius: 3;" text="Log out" textFill="WHITE">
                      <VBox.margin>
-                        <Insets left="70.0" top="190.0" />
+                        <Insets left="70.0" top="120.0" />
                      </VBox.margin>
                      <font>
                         <Font size="11.0" />
@@ -263,7 +302,7 @@
                                           <Font name="System Bold" size="29.0" />
                                        </font>
                                     </Label>
-                                    <Label alignment="CENTER" layoutX="1.0" layoutY="55.0" prefHeight="21.0" prefWidth="182.0" text="Today's Landings" textFill="WHITE">
+                                    <Label alignment="CENTER" layoutX="1.0" layoutY="55.0" prefHeight="21.0" prefWidth="182.0" text="Today's Purchased" textFill="WHITE">
                                        <font>
                                           <Font size="15.0" />
                                        </font>
@@ -390,7 +429,7 @@
                                     <Insets bottom="20.0" left="18.0" top="10.0" />
                                  </HBox.margin>
                                  <children>
-                                    <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="464.0" text="Recent Fish Landings" textFill="WHITE">
+                                    <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="464.0" text="Recent Purchase Transactions" textFill="WHITE">
                                        <font>
                                           <Font name="System Bold" size="18.0" />
                                        </font>
@@ -410,7 +449,7 @@
                                     <Insets bottom="20.0" left="15.0" top="10.0" />
                                  </HBox.margin>
                                  <children>
-                                    <Label layoutX="25.0" layoutY="6.0" prefHeight="57.0" prefWidth="464.0" text="Landings Trend" textFill="WHITE">
+                                    <Label layoutX="25.0" layoutY="6.0" prefHeight="57.0" prefWidth="464.0" text="Sales Trend" textFill="WHITE">
                                        <font>
                                           <Font name="System Bold" size="18.0" />
                                        </font>
@@ -467,7 +506,7 @@
                                                 <Font name="System Bold" size="15.0" />
                                              </font>
                                           </Button>
-                                          <Button mnemonicParsing="false" onAction="#dashboard_landings" prefHeight="43.0" prefWidth="272.0" style="-fx-border-color: white; -fx-border-radius: 10; -fx-background-color: transparent; -fx-border-width: 2;" text="Landings Module" textFill="WHITE">
+                                          <Button mnemonicParsing="false" onAction="#dashboard_landings" prefHeight="43.0" prefWidth="272.0" style="-fx-border-color: white; -fx-border-radius: 10; -fx-background-color: transparent; -fx-border-width: 2;" text="Purchase Module" textFill="WHITE">
                                              <font>
                                                 <Font name="System Bold" size="15.0" />
                                              </font>
@@ -587,11 +626,11 @@
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
                      <children>
-                        <HBox prefHeight="149.0" prefWidth="1037.0">
+                        <HBox prefHeight="131.0" prefWidth="1037.0">
                            <children>
-                              <Pane prefHeight="109.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                              <Pane maxHeight="-Infinity" prefHeight="110.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
                                  <HBox.margin>
-                                    <Insets bottom="10.0" left="18.0" top="30.0" />
+                                    <Insets bottom="10.0" left="18.0" top="10.0" />
                                  </HBox.margin>
                                  <children>
                                     <Label fx:id="TotalLandingsTodayKG_label" alignment="CENTER" layoutY="33.0" prefHeight="40.0" prefWidth="195.0" text="1,234" textFill="WHITE">
@@ -599,7 +638,7 @@
                                           <Font name="System Bold" size="28.0" />
                                        </font>
                                     </Label>
-                                    <Label alignment="CENTER" layoutX="13.0" layoutY="14.0" prefHeight="21.0" prefWidth="173.0" text="Total Landings today (kg)" textFill="WHITE">
+                                    <Label alignment="CENTER" layoutX="13.0" layoutY="14.0" prefHeight="21.0" prefWidth="173.0" text="Purchased today (kg)" textFill="WHITE">
                                        <font>
                                           <Font size="15.0" />
                                        </font>
@@ -617,14 +656,14 @@
                                     </ImageView>
                                  </children>
                               </Pane>
-                              <Pane prefHeight="109.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                              <Pane maxHeight="-Infinity" prefHeight="110.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
                                  <children>
                                     <Label fx:id="TotalLandingsThisMonthKG_label" alignment="CENTER" layoutX="6.0" layoutY="32.0" prefHeight="42.0" prefWidth="195.0" text="36,288" textFill="WHITE">
                                        <font>
                                           <Font name="System Bold" size="28.0" />
                                        </font>
                                     </Label>
-                                    <Label alignment="CENTER" layoutX="14.0" layoutY="13.0" prefHeight="21.0" prefWidth="185.0" text="Total Landings This Month" textFill="WHITE">
+                                    <Label alignment="CENTER" layoutX="14.0" layoutY="13.0" prefHeight="21.0" prefWidth="185.0" text="Purchased This Month" textFill="WHITE">
                                        <font>
                                           <Font size="15.0" />
                                        </font>
@@ -642,10 +681,10 @@
                                     </ImageView>
                                  </children>
                                  <HBox.margin>
-                                    <Insets bottom="10.0" left="15.0" top="30.0" />
+                                    <Insets bottom="10.0" left="15.0" top="10.0" />
                                  </HBox.margin>
                               </Pane>
-                              <Pane prefHeight="109.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                              <Pane maxHeight="-Infinity" prefHeight="110.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
                                  <children>
                                     <Label fx:id="AveragePerFisherfolkKG_label" alignment="CENTER" layoutX="2.0" layoutY="33.0" prefHeight="40.0" prefWidth="175.0" text="833" textFill="WHITE">
                                        <font>
@@ -670,17 +709,17 @@
                                     </ImageView>
                                  </children>
                                  <HBox.margin>
-                                    <Insets bottom="10.0" left="15.0" top="30.0" />
+                                    <Insets bottom="10.0" left="15.0" top="10.0" />
                                  </HBox.margin>
                               </Pane>
-                              <Pane prefHeight="109.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
+                              <Pane maxHeight="-Infinity" prefHeight="110.0" prefWidth="238.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-width: 2; -fx-border-color: #21252C;">
                                  <children>
                                     <Label fx:id="TotalSalesPHP_label" alignment="CENTER" layoutY="34.0" prefHeight="40.0" prefWidth="195.0" text="302,771" textFill="WHITE">
                                        <font>
                                           <Font name="System Bold" size="28.0" />
                                        </font>
                                     </Label>
-                                    <Label alignment="CENTER" layoutX="14.0" layoutY="16.0" prefHeight="19.0" prefWidth="143.0" text="Total Sales (PHP)" textFill="WHITE">
+                                    <Label alignment="CENTER" layoutX="14.0" layoutY="16.0" prefHeight="21.0" prefWidth="156.0" text="Total Purchased (PHP)" textFill="WHITE">
                                        <font>
                                           <Font size="15.0" />
                                        </font>
@@ -698,24 +737,24 @@
                                     </ImageView>
                                  </children>
                                  <HBox.margin>
-                                    <Insets bottom="10.0" left="15.0" top="30.0" />
+                                    <Insets bottom="10.0" left="15.0" top="10.0" />
                                  </HBox.margin>
                               </Pane>
                            </children>
                         </HBox>
-                        <HBox layoutY="147.0" prefHeight="394.0" prefWidth="1035.0">
+                        <HBox layoutY="127.0" prefHeight="414.0" prefWidth="1035.0">
                            <children>
                               <Pane prefHeight="343.0" prefWidth="966.0" styleClass="card" stylesheets="@FishLandingDesign.css">
                                  <HBox.margin>
                                     <Insets bottom="20.0" left="15.0" top="10.0" />
                                  </HBox.margin>
                                  <children>
-                                    <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="183.0" text="Recent Fish Landings" textFill="WHITE">
+                                    <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="183.0" text="Recent Fish Purchase" textFill="WHITE">
                                        <font>
                                           <Font name="System Bold" size="18.0" />
                                        </font>
                                     </Label>
-                                    <HBox alignment="CENTER_LEFT" layoutX="228.0" layoutY="29.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="489.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                                    <HBox alignment="CENTER_LEFT" layoutX="228.0" layoutY="29.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="509.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
                                        <children>
                                           <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
@@ -725,24 +764,24 @@
                                                 <Insets bottom="5.0" left="10.0" top="5.0" />
                                              </HBox.margin>
                                           </ImageView>
-                                          <TextField fx:id="filterField_fishLandings" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search fisherfolk/fish type" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                          <TextField fx:id="filterField_fishLandings" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="454.0" promptText="Search fisherfolk / fish type" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
                                           </TextField>
                                        </children>
                                     </HBox>
-                                    <TableView fx:id="catch_tv" layoutX="26.0" layoutY="68.0" prefHeight="274.0" prefWidth="693.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                    <TableView fx:id="catch_tv" layoutX="26.0" layoutY="68.0" prefHeight="306.0" prefWidth="714.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
                                        <columns>
-                                          <TableColumn fx:id="catchId_col" prefWidth="69.77776527404785" text="CATCH ID" />
-                                          <TableColumn fx:id="fisherman_col" prefWidth="134.2222442626953" text="FISHERMAN" />
-                                          <TableColumn fx:id="fishType_col" prefWidth="65.99996948242188" text="FISH TYPE" />
-                                          <TableColumn fx:id="quantity_col" prefWidth="70.66668701171875" text="QUANTITY (KG)" />
-                                          <TableColumn fx:id="price_col" prefWidth="86.6666259765625" text="PRICE/KG" />
-                                          <TableColumn fx:id="total_col" prefWidth="67.55560302734375" text="TOTAL VALUE" />
-                                          <TableColumn fx:id="dockDate_col" prefWidth="93.77777099609375" text="DATE" />
-                                          <TableColumn fx:id="dockTime_col" prefWidth="49.3333740234375" text="DOCKING TIME" />
-                                          <TableColumn fx:id="remarks_col" prefWidth="75.0" text="REMARKS" />
+                                          <TableColumn fx:id="catchId_col" prefWidth="43.3333683013916" text="ID" />
+                                          <TableColumn fx:id="fisherman_col" prefWidth="135.33335876464844" text="FISHERMAN" />
+                                          <TableColumn fx:id="fishType_col" prefWidth="92.66659545898438" text="FISH TYPE" />
+                                          <TableColumn fx:id="quantity_col" prefWidth="70.66668701171875" text="QTY (KG)" />
+                                          <TableColumn fx:id="purchase_price_col" prefWidth="101.11114501953125" text="PRICE / KG" />
+                                          <TableColumn fx:id="total_col" prefWidth="106.888916015625" text="TOTAL" />
+                                          <TableColumn fx:id="dockDate_col" prefWidth="91.33331298828125" text="DATE" />
+                                          <TableColumn fx:id="dockTime_col" minWidth="3.111083984375" prefWidth="3.111083984375" text="DOCKING TIME" visible="false" />
+                                          <TableColumn fx:id="remarks_col" prefWidth="70.0" text="REMARKS" />
                                        </columns>
                                     </TableView>
                                  </children>
@@ -822,7 +861,7 @@
                                                 <Insets top="10.0" />
                                              </VBox.margin>
                                           </Button>
-                                          <Button mnemonicParsing="false" onAction="#addLanding" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 8px;" text="Add Landing" textFill="WHITE">
+                                          <Button mnemonicParsing="false" onAction="#addLanding" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 8px;" text="Add Purchase" textFill="WHITE">
                                              <font>
                                                 <Font name="System Bold" size="15.0" />
                                              </font>
@@ -845,6 +884,9 @@
                            </children>
                         </HBox>
                      </children>
+                     <padding>
+                        <Insets bottom="5.0" />
+                     </padding>
                   </AnchorPane>
                </content>
             </ScrollPane>
@@ -852,7 +894,7 @@
                <top>
                   <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
                      <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Landing " textFill="WHITE">
+                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Purchase" textFill="WHITE">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -894,14 +936,14 @@
                               <Font name="System Italic" size="12.0" />
                            </font>
                         </Label>
-                        <Label text="Price per kilo (₱)" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <TextField fx:id="tfPricePerKilo2" prefHeight="25.0" prefWidth="290.0" promptText="e.g., 150.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Purchase Price per kilo (₱)" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <TextField fx:id="tfPurchasePricePerKilo2" prefHeight="25.0" prefWidth="290.0" promptText="e.g., 150.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <Label fx:id="errPrice2" styleClass="error" text="Enter a price &gt; 0" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
                         </Label>
-                        <Label text="Catch Date" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                        <Label text="Purchase Date" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="6" />
                         <DatePicker fx:id="dpCatchDate2" GridPane.columnIndex="0" GridPane.rowIndex="7" />
                         <Label text="Docking Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                         <TextField fx:id="tfDockingTime2" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
@@ -956,7 +998,7 @@
                   </HBox>
                </bottom>
             </BorderPane>
-            <AnchorPane fx:id="fishermen_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="532.0" prefWidth="1035.0" style="-fx-background-color: black;" visible="false">
+            <AnchorPane fx:id="fishermen_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="532.0" prefWidth="1035.0" style="-fx-background-color: black;">
                <children>
                   <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
                      <children>
@@ -980,7 +1022,7 @@
                                           <Insets bottom="5.0" left="10.0" top="5.0" />
                                        </HBox.margin>
                                     </ImageView>
-                                    <TextField fx:id="filterField_fishermen" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="570.0" promptText="Search fisherman / boat / license" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                    <TextField fx:id="filterField_fishermen" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="570.0" promptText="Search fisherman " style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
                                        <font>
                                           <Font size="14.0" />
                                        </font>
@@ -989,14 +1031,13 @@
                               </HBox>
                               <TableView fx:id="fishermen_tv" layoutX="26.0" layoutY="68.0" prefHeight="425.0" prefWidth="761.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
                                  <columns>
-                                    <TableColumn fx:id="name_col" prefWidth="142.88889122009277" text="NAME" />
-                                    <TableColumn fx:id="age_col" prefWidth="74.44439697265625" text="AGE " />
-                                    <TableColumn fx:id="gender_col" prefWidth="81.55552673339844" text="GENDER" />
-                                    <TableColumn fx:id="contact_col" prefWidth="89.11114501953125" text="CONTACT" />
-                                    <TableColumn fx:id="address_col" prefWidth="101.77780151367188" text="ADDRESS" />
-                                    <TableColumn fx:id="boat_col" prefWidth="85.111083984375" text="BOAT" />
-                                    <TableColumn fx:id="license_col" prefWidth="85.111083984375" text="LICENSE #" />
-                                    <TableColumn fx:id="status_col" prefWidth="106.888916015625" text="STATUS" />
+                                    <TableColumn fx:id="name_col" prefWidth="228.6666316986084" text="NAME" />
+                                    <TableColumn fx:id="age_col" prefWidth="53.99995422363281" text="AGE " />
+                                    <TableColumn fx:id="gender_col" prefWidth="73.77783203125" text="GENDER" />
+                                    <TableColumn fx:id="contact_col" prefWidth="96.2222900390625" text="CONTACT" />
+                                    <TableColumn fx:id="address_col" prefWidth="127.33334350585938" text="ADDRESS" />
+                                    <TableColumn fx:id="gear_col" prefWidth="92.0" text="GEAR" />
+                                    <TableColumn fx:id="status_col" prefWidth="93.11114501953125" text="STATUS" />
                                  </columns>
                               </TableView>
                            </children>
@@ -1045,25 +1086,17 @@
                                           <Insets top="10.0" />
                                        </VBox.margin>
                                     </Button>
-                                    <Button mnemonicParsing="false" onAction="#viewTransaction" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW TRANSACTION" textFill="WHITE">
+                                    <Button mnemonicParsing="false" onAction="#viewCatches" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW TRANSACTIONS" textFill="WHITE">
                                        <font>
-                                          <Font name="System Bold" size="15.0" />
+                                          <Font name="System Bold" size="14.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets top="30.0" />
                                        </VBox.margin>
                                     </Button>
-                                    <Button mnemonicParsing="false" onAction="#viewCatches" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW CATCHES" textFill="WHITE">
-                                       <font>
-                                          <Font name="System Bold" size="15.0" />
-                                       </font>
-                                       <VBox.margin>
-                                          <Insets top="5.0" />
-                                       </VBox.margin>
-                                    </Button>
                                     <Button mnemonicParsing="false" onAction="#viewDockLogs" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW DOCK LOGS" textFill="WHITE">
                                        <font>
-                                          <Font name="System Bold" size="15.0" />
+                                          <Font name="System Bold" size="14.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets top="5.0" />
@@ -1089,7 +1122,7 @@
                <center>
                   <TabPane fx:id="history_tabpane">
                      <tabs>
-                        <Tab text="Catches">
+                        <Tab text="Transactions">
                            <content>
                               <TableView fx:id="catch_tv1">
                                  <columns>
@@ -1098,19 +1131,6 @@
                                     <TableColumn fx:id="quantity_col1" prefWidth="87.3333740234375" text="Quantity" />
                                     <TableColumn fx:id="price_col1" prefWidth="96.6666259765625" text="Price/kg" />
                                     <TableColumn fx:id="total_col1" prefWidth="56.0" text="Total" />
-                                 </columns>
-                              </TableView>
-                           </content>
-                        </Tab>
-                        <Tab text="Transactions">
-                           <content>
-                              <TableView fx:id="txn_tv">
-                                 <columns>
-                                    <TableColumn fx:id="buyer_col" prefWidth="186.6667022705078" text="Buyer" />
-                                    <TableColumn fx:id="qtySold_col" prefWidth="82.66659545898438" text="Qty Sold" />
-                                    <TableColumn fx:id="unitPrice_col" prefWidth="118.6666259765625" text="Unit Price" />
-                                    <TableColumn fx:id="totalPrice_col" prefWidth="121.333251953125" text="Total Price" />
-                                    <TableColumn fx:id="status_col1" prefWidth="100.0" text="Status" />
                                  </columns>
                               </TableView>
                            </content>
@@ -1145,7 +1165,7 @@
                   </HBox>
                </top>
             </BorderPane>
-            <BorderPane fx:id="addNewFisherfolk_popup" layoutX="300.0" layoutY="106.0" prefHeight="449.0" prefWidth="851.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
+            <BorderPane fx:id="addNewFisherfolk_popup" layoutX="300.0" layoutY="106.0" prefHeight="484.0" prefWidth="735.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
                <top>
                   <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
                      <children>
@@ -1161,7 +1181,7 @@
                   </HBox>
                </top>
                <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="376.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="376.0" prefWidth="580.0" vgap="12" BorderPane.alignment="CENTER">
                      <padding>
                         <Insets bottom="10" left="20" right="20" top="10" />
                      </padding>
@@ -1177,27 +1197,25 @@
                               <Font name="System Italic" size="12.0" />
                            </font>
                         </Label>
-                        <Label text="Gender" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                        <ComboBox fx:id="gender_cb" promptText="Select gender" GridPane.rowIndex="4" />
-                        <TextField fx:id="age_tf" prefHeight="25.0" prefWidth="279.0" promptText="e.g., 40" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                        <Label text="Gender" textFill="WHITE" GridPane.columnIndex="1" />
+                        <ComboBox fx:id="gender_cb" prefHeight="25.0" prefWidth="275.0" promptText="Select gender" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="address_tf" GridPane.rowIndex="4" />
+                        <TextField fx:id="age_tf" minWidth="-Infinity" prefHeight="25.0" prefWidth="264.0" promptText="e.g., 40" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <GridPane.margin>
                               <Insets right="250.0" />
                            </GridPane.margin>
                         </TextField>
-                        <TextField fx:id="address_tf" GridPane.rowIndex="7" />
-                        <TextField fx:id="contact_tf" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                        <TextField fx:id="Boat_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="11" />
-                        <TextField fx:id="LicenseNumber_tf" GridPane.columnIndex="1" GridPane.rowIndex="11" />
-                        <Label text="License Number" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                        <Label fx:id="gender_err" styleClass="error" text="Please select gender" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                        <TextField fx:id="contact_tf" GridPane.rowIndex="7" />
+                        <TextField fx:id="Gear_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="11" />
+                        <Label fx:id="gender_err" styleClass="error" text="Please select gender" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
                         </Label>
                         <Label text="Age" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label text="Address" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                        <Label text="Contact Number" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <Label text="Boat Name" textFill="WHITE" GridPane.rowIndex="9" />
+                        <Label text="Address" textFill="WHITE" GridPane.rowIndex="3" />
+                        <Label text="Contact Number" textFill="WHITE" GridPane.rowIndex="6" />
+                        <Label text="Gear" textFill="WHITE" GridPane.rowIndex="9" />
                      </children>
                      <rowConstraints>
                         <RowConstraints />
@@ -1216,7 +1234,7 @@
                   </GridPane>
                </center>
                <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="817.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
+                  <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="706.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
                      <children>
                         <Button onAction="#btnCancel_onAddFisherfolk" text="Cancel" />
                         <Button onAction="#btnClear_onAddFisherfolk" text="Clear" />
@@ -1231,7 +1249,7 @@
                   </HBox>
                </bottom>
             </BorderPane>
-            <ScrollPane fx:id="transactionANDsales_pane" layoutX="224.0" layoutY="121.0" prefHeight="542.0" prefWidth="1038.0" style="-fx-background-color: transparent;">
+            <ScrollPane fx:id="transactionANDsales_pane" layoutX="224.0" layoutY="121.0" prefHeight="542.0" prefWidth="1038.0" style="-fx-background-color: transparent;" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
                      <children>
@@ -1337,24 +1355,23 @@
                                                 <Insets bottom="5.0" left="10.0" top="5.0" />
                                              </HBox.margin>
                                           </ImageView>
-                                          <TextField fx:id="filterField_transactions" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search Buyer / Fisherfolk" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                          <TextField fx:id="filterField_transactions" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search Buyer / Species" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
                                           </TextField>
                                        </children>
                                     </HBox>
-                                    <TableView fx:id="transaction_tv" layoutX="26.0" layoutY="68.0" prefHeight="274.0" prefWidth="693.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                    <TableView fx:id="transaction_tv" layoutX="26.0" layoutY="68.0" prefHeight="328.0" prefWidth="693.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
                                        <columns>
                                           <TableColumn fx:id="transacBuyer_col" prefWidth="69.77776527404785" text="BUYER" />
-                                          <TableColumn fx:id="transacFisherfolk_col" prefWidth="104.44444274902344" text="FISHERFOLK" />
-                                          <TableColumn fx:id="transacFishType_col" prefWidth="77.99993896484375" text="FISH TYPE" />
+                                          <TableColumn fx:id="transacFishType_col" prefWidth="77.99993896484375" text="SPECIES" />
                                           <TableColumn fx:id="transacQuantity_col" prefWidth="73.1112060546875" text="QUANTITY (KG)" />
                                           <TableColumn fx:id="transacPricePerUnit_col" prefWidth="65.77777099609375" text="PRICE/KG" />
                                           <TableColumn fx:id="transacTotalValue_col" prefWidth="90.66677856445312" text="TOTAL VALUE" />
-                                          <TableColumn fx:id="transacPaymentMethod_col" prefWidth="83.99990844726562" text="PAYMENT METHOD" />
-                                          <TableColumn fx:id="transacStatus_col" prefWidth="67.77777099609375" text="STATUS" />
-                                          <TableColumn fx:id="transacDate_col" prefWidth="58.88885498046875" text="DATE" />
+                                          <TableColumn fx:id="transacPaymentMethod_col" prefWidth="137.33343505859375" text="PAYMENT METHOD" />
+                                          <TableColumn fx:id="transacStatus_col" prefWidth="79.9998779296875" text="STATUS" />
+                                          <TableColumn fx:id="transacDate_col" prefWidth="98.6666259765625" text="DATE" />
                                        </columns>
                                     </TableView>
                                     <HBox layoutX="467.0" layoutY="28.0" prefHeight="27.0" prefWidth="270.0">
@@ -1513,9 +1530,9 @@
                         <ColumnConstraints percentWidth="50.0" />
                      </columnConstraints>
                      <children>
-                        <Label text="Seller Name (Fisherfolk)" textFill="WHITE" />
-                        <ComboBox fx:id="transacSeller_cb" prefHeight="25.0" prefWidth="373.0" promptText="Select Seller" GridPane.rowIndex="1" />
-                        <Label fx:id="Seller_err" styleClass="error" text="Please select seller" textFill="#ff7e7e" GridPane.rowIndex="2">
+                        <Label text="Buyer Name" textFill="WHITE" />
+                        <ComboBox fx:id="transacConsumer_cb" prefHeight="25.0" prefWidth="372.0" promptText="Select buyer" GridPane.rowIndex="1" />
+                        <Label fx:id="Buyer_err" styleClass="error" text="Please select buyer or add new buyer if name don't exist on list" textFill="#ff7e7e" GridPane.rowIndex="2">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -1560,17 +1577,10 @@
                         <TextField fx:id="transacUnitPrice_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="13" />
                         <Label text="Payment Method" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Label text="Payment Status" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <TextField fx:id="transacBuyer_tf" prefHeight="25.0" prefWidth="392.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Buyer Name" textFill="WHITE" GridPane.columnIndex="1" />
                         <Label text="Total Amount" textFill="WHITE" GridPane.rowIndex="16" />
                         <ComboBox fx:id="transacPaymentMethod_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Payment Method" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <ComboBox fx:id="transacPaymentStatus_cb" prefHeight="25.0" prefWidth="394.0" promptText="Select Payment Status" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                        <TextArea fx:id="transacRemarks_ta" prefHeight="50.0" prefWidth="363.0" GridPane.columnIndex="1" GridPane.rowIndex="13" />
-                        <Label fx:id="Buyer_err" styleClass="error" text="Please enter buyer name" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
+                        <TextArea fx:id="transacRemarks_ta" prefHeight="60.0" prefWidth="363.0" GridPane.columnIndex="1" GridPane.rowIndex="11" GridPane.rowSpan="5" />
                         <Label fx:id="PMethod_err" styleClass="error" text="Please select payment method" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
                            <font>
                               <Font name="System Italic" size="12.0" />
@@ -1591,6 +1601,11 @@
                               <Font name="System Italic" size="12.0" />
                            </font>
                         </Label>
+                        <Hyperlink alignment="CENTER" contentDisplay="CENTER" onAction="#addNewBuyer_onTransact" prefHeight="24.0" prefWidth="101.0" text="Add new buyer" textFill="#0f74c7" underline="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Hyperlink>
                      </children>
                      <rowConstraints>
                         <RowConstraints />
@@ -1718,7 +1733,7 @@
                                                 <Insets bottom="5.0" left="10.0" top="5.0" />
                                              </HBox.margin>
                                           </ImageView>
-                                          <TextField fx:id="filterField_dockLogs" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search Fisherfolk / Boat Name" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                          <TextField fx:id="filterField_dockLogs" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="431.0" promptText="Search Fisherfolk " style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
@@ -1727,12 +1742,12 @@
                                     </HBox>
                                     <TableView fx:id="dockLogs_tv" layoutX="26.0" layoutY="68.0" prefHeight="274.0" prefWidth="693.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
                                        <columns>
-                                          <TableColumn fx:id="dockLogFisherfolk_col" prefWidth="123.33332252502441" text="FISHERFOLK" />
-                                          <TableColumn fx:id="dockLogBoat_col" prefWidth="95.77775573730469" text="BOAT" />
-                                          <TableColumn fx:id="dockLogDate_col" prefWidth="109.11112976074219" text="DOCKING DATE" />
-                                          <TableColumn fx:id="dockLogArrival_col" prefWidth="83.11114501953125" text="ARRIVAL" />
-                                          <TableColumn fx:id="dockLogDeparture_col" prefWidth="88.4444580078125" text="DEPARTURE" />
-                                          <TableColumn fx:id="dockLogRemarks_col" prefWidth="198.2222900390625" text="REMARKS" />
+                                          <TableColumn fx:id="dockLogFisherfolk_col" prefWidth="189.9999485015869" text="FISHERFOLK" />
+                                          <TableColumn fx:id="dockLogGear_col" prefWidth="96.66671752929688" text="GEAR" />
+                                          <TableColumn fx:id="dockLogDate_col" prefWidth="101.33326721191406" text="DOCKING DATE" />
+                                          <TableColumn fx:id="dockLogArrival_col" prefWidth="87.33340454101562" text="ARRIVAL" />
+                                          <TableColumn fx:id="dockLogDeparture_col" prefWidth="84.00015258789062" text="DEPARTURE" />
+                                          <TableColumn fx:id="dockLogRemarks_col" prefWidth="141.333251953125" text="REMARKS" />
                                        </columns>
                                     </TableView>
                                  </children>
@@ -1889,8 +1904,8 @@
                         </Label>
                         <Label text="Remarks" textFill="WHITE" GridPane.rowIndex="10" />
                         <Label text="Departure Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <Label text="Boat Name" textFill="WHITE" GridPane.columnIndex="1" />
-                        <Label fx:id="dockLogBoatName_label" prefHeight="47.0" prefWidth="377.0" style="-fx-background-color: white;" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="Gear" textFill="WHITE" GridPane.columnIndex="1" />
+                        <Label fx:id="dockLogGear_label" prefHeight="47.0" prefWidth="377.0" style="-fx-background-color: white;" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <GridPane.margin>
                               <Insets />
                            </GridPane.margin>
@@ -2582,6 +2597,283 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </ScrollPane>
+            <AnchorPane fx:id="consumer_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="542.0" prefWidth="1045.0" style="-fx-background-color: black;" visible="false">
+               <children>
+                  <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
+                     <children>
+                        <Pane prefHeight="343.0" prefWidth="966.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="15.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label layoutX="24.0" layoutY="6.0" prefHeight="57.0" prefWidth="139.0" text="Buyer List" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" layoutX="173.0" layoutY="23.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="612.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                                 <children>
+                                    <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/search.png" />
+                                       </image>
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" left="10.0" top="5.0" />
+                                       </HBox.margin>
+                                    </ImageView>
+                                    <TextField fx:id="filterField_consumer" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="570.0" promptText="Search buyer" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="consumer_tv" layoutX="26.0" layoutY="68.0" prefHeight="425.0" prefWidth="761.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                 <columns>
+                                    <TableColumn fx:id="consumerName_col" prefWidth="296.6666774749756" text="NAME" />
+                                    <TableColumn fx:id="consumerContact_col" prefWidth="142.0" text="CONTACT" />
+                                    <TableColumn fx:id="consumerAddress_col" prefWidth="156.66677856445312" text="ADDRESS" />
+                                    <TableColumn fx:id="consumerStatus_col" prefWidth="166.6666259765625" text="STATUS" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </Pane>
+                        <Pane prefHeight="512.0" prefWidth="382.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                           <HBox.margin>
+                              <Insets bottom="20.0" left="10.0" right="8.0" top="10.0" />
+                           </HBox.margin>
+                           <children>
+                              <Label alignment="CENTER" layoutX="9.0" layoutY="15.0" prefHeight="34.0" prefWidth="195.0" text="Quick Actions" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets top="25.0" />
+                                 </padding>
+                              </Label>
+                              <VBox layoutX="19.0" layoutY="72.0" prefHeight="393.0" prefWidth="173.0">
+                                 <children>
+                                    <HBox prefHeight="3.0" prefWidth="173.0">
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <Button mnemonicParsing="false" onAction="#deleteConsumer" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #7b0606; -fx-background-radius: 8px;" text="Delete" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="15.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="15.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#updateConsumer" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0e6902; -fx-background-radius: 8px;" text="Update" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="15.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#addConsumer" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 8px;" text="Add" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="15.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#viewTransaction_Consumer" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="VIEW TRANSACTION" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="15.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="30.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#export_consumer_list" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: #0F74C7; -fx-border-radius: 5px; -fx-border-width: 2;" text="Export Buyer List" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="15.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="30.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </Pane>
+                     </children>
+                  </HBox>
+               </children>
+            </AnchorPane>
+            <BorderPane fx:id="addNewConsumer_popup" layoutX="324.0" layoutY="148.0" prefHeight="384.0" prefWidth="604.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
+               <top>
+                  <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Buyer" textFill="WHITE">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="12" left="20" right="20" top="16" />
+                     </padding>
+                  </HBox>
+               </top>
+               <center>
+                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="286.0" prefWidth="430.0" vgap="12" BorderPane.alignment="CENTER">
+                     <padding>
+                        <Insets bottom="10" left="20" right="20" top="10" />
+                     </padding>
+                     <columnConstraints>
+                        <ColumnConstraints />
+                     </columnConstraints>
+                     <children>
+                        <Label text="Buyer Name" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <TextField fx:id="consumerName_tf" prefHeight="25.0" prefWidth="392.0" GridPane.rowIndex="1" />
+                        <Label fx:id="Consumer_err" styleClass="error" text="Enter name of buyer/consumer" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="consumerAddress_tf" GridPane.rowIndex="4" />
+                        <TextField fx:id="consumerContact" GridPane.rowIndex="7" />
+                        <Label text="Address" textFill="WHITE" GridPane.rowIndex="3" />
+                        <Label text="Contact Number" textFill="WHITE" GridPane.rowIndex="6" />
+                     </children>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
+                  </GridPane>
+               </center>
+               <bottom>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="706.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
+                     <children>
+                        <Button onAction="#btnCancel_onAddConsumer" text="Cancel" />
+                        <Button onAction="#btnClear_onAddConsumer" text="Clear" />
+                        <Button defaultButton="true" onAction="#btnSave_onAddConsumer" styleClass="primary" text="Save" />
+                     </children>
+                     <padding>
+                        <Insets bottom="16" left="20" right="20" top="12" />
+                     </padding>
+                     <BorderPane.margin>
+                        <Insets />
+                     </BorderPane.margin>
+                  </HBox>
+               </bottom>
+            </BorderPane>
+            <ScrollPane fx:id="inventory_pane" layoutX="225.0" layoutY="120.0" prefHeight="552.0" prefWidth="1047.0" style="-fx-background-color: transparent;" visible="false">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0" style="-fx-background-color: black;">
+                     <children>
+                        <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
+                           <children>
+                              <Pane prefHeight="543.0" prefWidth="829.0" styleClass="card" stylesheets="@FishLandingDesign.css">
+                                 <HBox.margin>
+                                    <Insets bottom="20.0" left="15.0" top="10.0" />
+                                 </HBox.margin>
+                                 <children>
+                                    <Label layoutX="24.0" layoutY="-4.0" prefHeight="32.0" prefWidth="184.0" styleClass="chart-title" stylesheets="@reports-analytics.css" text="Inventory " textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="18.0" />
+                                       </font>
+                                    </Label>
+                                    <TableView fx:id="inventory_tv" layoutX="29.0" layoutY="69.0" prefHeight="426.0" prefWidth="786.0" styleClass="dark-table" stylesheets="@FishLandingDesign.css">
+                                       <columns>
+                                          <TableColumn fx:id="inventoryFishType_col" prefWidth="172.22226905822754" text="Fish Type" />
+                                          <TableColumn fx:id="inventoryStock_col" prefWidth="90.66659545898438" text="Stock" />
+                                          <TableColumn fx:id="inventorySold_col" prefWidth="76.0" text="Sold" />
+                                          <TableColumn fx:id="inventoryBalance_col" prefWidth="91.333251953125" text="Balance Qty" />
+                                          <TableColumn fx:id="inventoryLastPurchasePrice_col" prefWidth="123.33331298828125" text="Last Purchase Price" />
+                                          <TableColumn fx:id="inventorySellingPrice_col" prefWidth="111.333251953125" text="Selling Price" />
+                                          <TableColumn fx:id="inventoryLastUpdate_col" prefWidth="120.66668701171875" text="Last Update" />
+                                       </columns>
+                                    </TableView>
+                                    <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="36.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="777.0" styleClass="search-container1" stylesheets="@FishLandingDesign.css">
+                                       <children>
+                                          <ImageView fitHeight="18.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@image/search.png" />
+                                             </image>
+                                             <HBox.margin>
+                                                <Insets bottom="5.0" left="10.0" top="5.0" />
+                                             </HBox.margin>
+                                          </ImageView>
+                                          <TextField fx:id="filterField_inventory" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="738.0" promptText="Search fish type" style="-fx-background-color: TRANSPARENT;" styleClass="search-textbox" stylesheets="@FishLandingDesign.css">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </TextField>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding>
+                              </Pane>
+                           </children>
+                        </HBox>
+                        <Pane layoutX="854.0" layoutY="6.0" prefHeight="521.0" prefWidth="170.0" style="-fx-background-color: #1E2128; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #21252C; -fx-border-width: 2;">
+                           <children>
+                              <Label alignment="CENTER" layoutX="1.0" layoutY="15.0" prefHeight="39.0" prefWidth="174.0" text="Quick Actions" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <VBox layoutX="10.0" layoutY="54.0" prefHeight="436.0" prefWidth="152.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#deleteInventory" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #7b0606; -fx-background-radius: 5px;" text="Delete" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#editInventory" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0e6902; -fx-background-radius: 5px;" text="Edit" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#addInventory" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: #0F74C7; -fx-background-radius: 5px;" text="Add " textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#btnExport_INVENTORY" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5px;" text="Export List" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets top="20.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </Pane>
                      </children>
                   </AnchorPane>
                </content>

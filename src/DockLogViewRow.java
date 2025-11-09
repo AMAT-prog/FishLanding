@@ -16,18 +16,20 @@ public class DockLogViewRow {
     private final int logId;
     private final int fisherfolkId;
     private final String fisherfolkName;
-    private final String boatName;
+    private final String gear;
+//    private final String boatName;
     private final LocalDate dockingDate;
     private final LocalTime arrivalTime;
     private final LocalTime departureTime; // may be null
     private final String remarks;
 
-    public DockLogViewRow(int logId, int fisherfolkId, String fisherfolkName, String boatName,
+    public DockLogViewRow(int logId, int fisherfolkId, String fisherfolkName, String gear,
                           LocalDate dockingDate, LocalTime arrivalTime, LocalTime departureTime, String remarks) {
         this.logId = logId;
         this.fisherfolkId = fisherfolkId;
         this.fisherfolkName = fisherfolkName;
-        this.boatName = boatName;
+        this.gear = gear;
+//        this.boatName = boatName;
         this.dockingDate = dockingDate;
         this.arrivalTime = arrivalTime;
         this.departureTime = departureTime;
@@ -37,7 +39,8 @@ public class DockLogViewRow {
     public int getLogId() { return logId; }
     public int getFisherfolkId() { return fisherfolkId; }
     public String getFisherfolkName() { return fisherfolkName; }
-    public String getBoatName() { return boatName; }
+    public String getGear() { return gear; }
+//    public String getBoatName() { return boatName; }
     public LocalDate getDockingDate() { return dockingDate; }
     public LocalTime getArrivalTime() { return arrivalTime; }
     public LocalTime getDepartureTime() { return departureTime; }

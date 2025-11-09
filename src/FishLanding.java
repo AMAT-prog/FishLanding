@@ -26,23 +26,23 @@ public class FishLanding extends Application {
     public void start(Stage primaryStage) {
 
         //////////////////////////////////////////////////////////// 4 days ///////////////////////////////////////////////////
-        if (TrialManager.isTrialExpired()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Trial Expired");
-            alert.setHeaderText("Your trial period has ended.");
-            alert.setContentText("Please contact the developer to activate the full version.");
-            alert.showAndWait();
-            Platform.exit();
-            return;
-        } else {
-            long daysLeft = TrialManager.getDaysLeft();
+//        if (TrialManager.isTrialExpired()) {
+//            Alert alert = new Alert(Alert.AlertType.ERROR);
+//            alert.setTitle("Trial Expired");
+//            alert.setHeaderText("Your trial period has ended.");
+//            alert.setContentText("Please contact the developer to activate the full version.");
+//            alert.showAndWait();
+//            Platform.exit();
+//            return;
+//        } else {
+//            long daysLeft = TrialManager.getDaysLeft();
             try {
                 Parent loginRoot = FXMLLoader.load(getClass().getResource("Login.fxml"));
                 showScaled(primaryStage, loginRoot, "Alabat Fish Landing");
             } catch (IOException ex) {
                 Logger.getLogger(FishLanding.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+//        }
 
         //////////////////////////////////////////////// 5 minutes //////////////////////////////////////////////////////////
 //        if (TrialManager.isTrialExpired()) {

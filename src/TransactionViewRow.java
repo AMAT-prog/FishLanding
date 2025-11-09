@@ -7,79 +7,37 @@
  *
  * @author User
  */
-// TransactionViewRow.java  (a UI-friendly row with fisher+species names)
-//import java.time.LocalDateTime;
-//
-//public class TransactionViewRow {
-//    private final int id;
-//    private final String buyerName;
-//    private final String fisherfolkName;
-//    private final String speciesName;  // fish type from catch->species
-//    private final double qtySold;
-//    private final double unitPrice;
-//    private final double totalPrice;
-//    private final String paymentMethod; // Cash/Credit/Bank Transfer/Other
-//    private final String paymentStatus; // Paid/Partial/Unpaid
-//    private final LocalDateTime txnDate;
-//
-//    public TransactionViewRow(int id, String buyerName, String fisherfolkName, String speciesName,
-//                              double qtySold, double unitPrice, double totalPrice,
-//                              String paymentMethod, String paymentStatus, LocalDateTime txnDate) {
-//        this.id = id;
-//        this.buyerName = buyerName;
-//        this.fisherfolkName = fisherfolkName;
-//        this.speciesName = speciesName;
-//        this.qtySold = qtySold;
-//        this.unitPrice = unitPrice;
-//        this.totalPrice = totalPrice;
-//        this.paymentMethod = paymentMethod;
-//        this.paymentStatus = paymentStatus;
-//        this.txnDate = txnDate;
-//    }
-//
-//    public int getId() { return id; }
-//    public String getBuyerName() { return buyerName; }
-//    public String getFisherfolkName() { return fisherfolkName; }
-//    public String getSpeciesName() { return speciesName; }
-//    public double getQtySold() { return qtySold; }
-//    public double getUnitPrice() { return unitPrice; }
-//    public double getTotalPrice() { return totalPrice; }
-//    public String getPaymentMethod() { return paymentMethod; }
-//    public String getPaymentStatus() { return paymentStatus; }
-//    public LocalDateTime getTxnDate() { return txnDate; }
-//}
-//
-
-import java.time.LocalDateTime;
-
 public class TransactionViewRow {
-    // --- Raw IDs (needed for updates/deletes/joins) ---
     private final int transactionId;
-    private final int fisherfolkId;
-    private final int catchId;
+    private final int consumerId;
+//    private final int catchId;
+    private final int speciesId;
 
-    // --- Display fields for the UI ---
     private final String buyerName;
-    private final String fisherfolkName;
-    private final String speciesName;  // fish type (catch → species)
+    private final String consumerName;
+    // removed: private final String fisherfolkName;
+    private final String speciesName;
+
     private final double qtySold;
     private final double unitPrice;
     private final double totalPrice;
-    private final String paymentMethod; // Cash/Credit/Bank Transfer/Other
-    private final String remarks;
-    private final String paymentStatus; // Paid/Partial/Unpaid
-    private final LocalDateTime txnDate;
 
-    // --- Constructor ---
-    public TransactionViewRow(int transactionId, int fisherfolkId, int catchId,
-                              String buyerName, String fisherfolkName, String speciesName,
+    private final String paymentMethod;
+    private final String remarks;
+    private final String paymentStatus;
+    private final java.time.LocalDateTime txnDate;
+
+    public TransactionViewRow(int transactionId, int consumerId, int speciesId,
+                              String buyerName, String consumerName, String speciesName,
                               double qtySold, double unitPrice, double totalPrice,
-                              String paymentMethod, String remarks, String paymentStatus, LocalDateTime txnDate) {
+                              String paymentMethod, String remarks, String paymentStatus,
+                              java.time.LocalDateTime txnDate) {
         this.transactionId = transactionId;
-        this.fisherfolkId = fisherfolkId;
-        this.catchId = catchId;
+        this.consumerId = consumerId;
+//        this.catchId = catchId;
+        this.speciesId = speciesId;
         this.buyerName = buyerName;
-        this.fisherfolkName = fisherfolkName;
+        this.consumerName = consumerName;
         this.speciesName = speciesName;
         this.qtySold = qtySold;
         this.unitPrice = unitPrice;
@@ -90,19 +48,18 @@ public class TransactionViewRow {
         this.txnDate = txnDate;
     }
 
-    // --- Getters ---
     public int getTransactionId() { return transactionId; }
-    public int getFisherfolkId()  { return fisherfolkId; }
-    public int getCatchId()       { return catchId; }
-
-    public String getBuyerName() { return buyerName; }
-    public String getFisherfolkName() { return fisherfolkName; }
-    public String getSpeciesName() { return speciesName; }
-    public double getQtySold() { return qtySold; }
-    public double getUnitPrice() { return unitPrice; }
+    public int getConsumerId()    { return consumerId; }
+//    public int getCatchId()       { return catchId; }
+    public int getSpeciesId() { return speciesId; }
+    public String getBuyerName()  { return buyerName; }
+    public String getConsumerName(){ return consumerName; }
+    public String getSpeciesName(){ return speciesName; }
+    public double getQtySold()    { return qtySold; }
+    public double getUnitPrice()  { return unitPrice; }
     public double getTotalPrice() { return totalPrice; }
-    public String getPaymentMethod() { return paymentMethod; }
-    public String getRemarks() { return remarks; }
-    public String getPaymentStatus() { return paymentStatus; }
-    public LocalDateTime getTxnDate() { return txnDate; }
+    public String getPaymentMethod(){ return paymentMethod; }
+    public String getRemarks()    { return remarks; }
+    public String getPaymentStatus(){ return paymentStatus; }
+    public java.time.LocalDateTime getTxnDate(){ return txnDate; }
 }

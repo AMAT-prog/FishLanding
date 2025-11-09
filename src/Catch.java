@@ -23,7 +23,7 @@ public class Catch {
     private String speciesName;
 
     private double quantity;
-    private double pricePerKilo;
+    private double purchasePricePerKilo;
     private double totalValue;     // quantity * pricePerKilo
     private LocalDate catchDate;
     private LocalTime dockingTime;
@@ -36,7 +36,7 @@ public class Catch {
         int catchId,
         int fisherfolkId, String fisherfolkName,
         int speciesId,    String speciesName,
-        double quantity, double pricePerKilo, double totalValue,
+        double quantity, double purchasePricePerKilo, double totalValue,
         LocalDate catchDate, LocalTime dockingTime, String remarks
     ) {
         this.catchId = catchId;
@@ -45,7 +45,8 @@ public class Catch {
         this.speciesId = speciesId;
         this.speciesName = speciesName;
         this.quantity = quantity;
-        this.pricePerKilo = pricePerKilo;
+        this.purchasePricePerKilo = purchasePricePerKilo;
+//        this.pricePerKilo = pricePerKilo;
         this.totalValue = totalValue;
         this.catchDate = catchDate;
         this.dockingTime = dockingTime;
@@ -59,7 +60,8 @@ public class Catch {
     public int getSpeciesId() { return speciesId; }
     public String getSpeciesName() { return speciesName; }
     public double getQuantity() { return quantity; }
-    public double getPricePerKilo() { return pricePerKilo; }
+    public double getPurchasePricePerKilo() { return purchasePricePerKilo; }
+//    public double getPricePerKilo() { return pricePerKilo; }
     public double getTotalValue() { return totalValue; }
     public LocalDate getCatchDate() { return catchDate; }
     public LocalTime getDockingTime() { return dockingTime; }
@@ -73,7 +75,8 @@ public class Catch {
     public void setSpeciesId(int speciesId) { this.speciesId = speciesId; }
     public void setSpeciesName(String speciesName) { this.speciesName = speciesName; }
     public void setQuantity(double quantity) { this.quantity = quantity; }
-    public void setPricePerKilo(double pricePerKilo) { this.pricePerKilo = pricePerKilo; }
+    public void setPurchasePricePerKilo(double purchasePricePerKilo) { this.purchasePricePerKilo = purchasePricePerKilo; }
+//    public void setPricePerKilo(double pricePerKilo) { this.pricePerKilo = pricePerKilo; }
     public void setTotalValue(double totalValue) { this.totalValue = totalValue; }
     public void setCatchDate(LocalDate catchDate) { this.catchDate = catchDate; }
     public void setDockingTime(LocalTime dockingTime) { this.dockingTime = dockingTime; }

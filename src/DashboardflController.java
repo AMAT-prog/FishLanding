@@ -101,9 +101,10 @@ public class DashboardflController implements Initializable {
     @FXML
     private TableColumn<Catch, Double> quantity_col;
     @FXML
-    private TableColumn<Catch, Double> price_col;
+    private TableColumn<Catch, Number> purchase_price_col;
+//    private TableColumn<Catch, Double> price_col;
     @FXML
-    private TableColumn<Catch, Double> total_col;
+    private TableColumn<Catch, Number> total_col;
     @FXML
     private TableColumn<Catch, LocalDate> dockDate_col;
     @FXML
@@ -129,7 +130,8 @@ public class DashboardflController implements Initializable {
     @FXML
     private Label errQuantity2;
     @FXML
-    private TextField tfPricePerKilo2;
+    private TextField tfPurchasePricePerKilo2;
+//    private TextField tfPricePerKilo2;
     @FXML
     private Label errPrice2;
     @FXML
@@ -168,9 +170,10 @@ public class DashboardflController implements Initializable {
     @FXML
     private TableColumn<FisherfolkRecord, String> address_col;
     @FXML
-    private TableColumn<FisherfolkRecord, String> boat_col;
-    @FXML
-    private TableColumn<FisherfolkRecord, String> license_col;
+    private TableColumn<FisherfolkRecord, String> gear_col;
+
+//    private TableColumn<FisherfolkRecord, String> boat_col;
+//    private TableColumn<FisherfolkRecord, String> license_col;
     // status is a Button/Toggle column (use TableColumn<FisherfolkRecord, FisherfolkRecord>)
     @FXML
     private TableColumn<FisherfolkRecord, FisherfolkRecord> status_col; 
@@ -186,15 +189,16 @@ public class DashboardflController implements Initializable {
     @FXML
     private Label gender_err;
     @FXML
-    private TextField Boat_tf;
-    @FXML
     private TextField contact_tf;
     @FXML
     private TextField fisherfolk_tf;
     @FXML
-    private TextField LicenseNumber_tf;
-    @FXML
     private TextField address_tf;
+    @FXML
+    private TextField Gear_tf;
+//    private TextField Boat_tf;
+//    private TextField LicenseNumber_tf;
+    
 
     /**
      * Initializes the controller class.
@@ -213,25 +217,33 @@ public class DashboardflController implements Initializable {
     //for philippine currency (peso)
     private static final java.util.Locale LOCALE_PH = java.util.Locale.forLanguageTag("en-PH");
     // or: new java.util.Locale("en","PH")
-    
-    //TRANSACTION & SALES
+
+    // === TRANSACTION & SALES STATE ===
     private javafx.collections.ObservableList<TransactionViewRow> transData;
     private javafx.collections.transformation.FilteredList<TransactionViewRow> transFiltered;
     private javafx.collections.transformation.SortedList<TransactionViewRow> transSorted;
     private static final java.time.format.DateTimeFormatter TS_FMT =
-        java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+            java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    //for adding/updating transaction
-    private javafx.collections.ObservableList<FisherfolkItem> allSellers;
+    // NEW: consumers list
+    private javafx.collections.ObservableList<ConsumerItem> allConsumers;
+
     // mode flags
     private boolean transactionUpdateMode = false;
     private Integer editingTransactionId = null;
-    private CatchOption currentCatchOpt = null;
+    
+//    private InventoryOption currentInventoryOpt = null;
+
     // peso formatter
     private static final java.text.NumberFormat PHP = java.text.NumberFormat.getCurrencyInstance(LOCALE_PH);
     static { PHP.setCurrency(java.util.Currency.getInstance("PHP")); }
-    private Integer updateCatchId = null; // set when entering update mode
 
+    private Integer updateSpeciesId = null;   // used in update mode
+
+//    //for adding/updating transaction
+//    private javafx.collections.ObservableList<FisherfolkItem> allSellers;
+
+    
     //DOCKING LOGS
     private javafx.collections.ObservableList<DockLogViewRow> dockData;
     private javafx.collections.transformation.FilteredList<DockLogViewRow> dockFiltered;
@@ -309,6 +321,19 @@ public class DashboardflController implements Initializable {
     }
     // settings.properties keys (same file)
     private static final String KEY_LAST_BACKUP_ISO = "autoBackup.lastIso";
+    
+    ////=====CONSUMER====////
+    // data pipes (like Fisherfolk)
+    private javafx.collections.ObservableList<ConsumerRecord> consumerData;
+    private javafx.collections.transformation.FilteredList<ConsumerRecord> consumerFiltered;
+    private javafx.collections.transformation.SortedList<ConsumerRecord> consumerSorted;
+    private Integer editingConsumerId = null;  // null = add mode, non-null = update mode
+
+    ////=====INVENTORY STATE=====////
+    private javafx.collections.ObservableList<InventoryRow> invData;
+    private javafx.collections.transformation.FilteredList<InventoryRow> invFiltered;
+    private javafx.collections.transformation.SortedList<InventoryRow> invSorted;
+
 
 
     @FXML
@@ -327,18 +352,13 @@ public class DashboardflController implements Initializable {
     private TableColumn<CatchRecord, Number> price_col1;
     @FXML
     private TableColumn<CatchRecord, Number> total_col1;
-    @FXML
-    private TableView<TransactionRecord> txn_tv;
-    @FXML
-    private TableColumn<TransactionRecord, String> buyer_col;
-    @FXML
-    private TableColumn<TransactionRecord, Number> qtySold_col;
-    @FXML
-    private TableColumn<TransactionRecord, Number> unitPrice_col;
-    @FXML
-    private TableColumn<TransactionRecord, Number> totalPrice_col;
-    @FXML
-    private TableColumn<TransactionRecord, String> status_col1;
+    
+//    private TableView<TransactionRecord> txn_tv;
+//    private TableColumn<TransactionRecord, String> buyer_col;
+//    private TableColumn<TransactionRecord, Number> qtySold_col;
+//    private TableColumn<TransactionRecord, Number> unitPrice_col;
+//    private TableColumn<TransactionRecord, Number> totalPrice_col;
+//    private TableColumn<TransactionRecord, String> status_col1;
     @FXML
     private TableView<DockLogRecord> dock_tv;
     @FXML
@@ -349,6 +369,7 @@ public class DashboardflController implements Initializable {
     private TableColumn<DockLogRecord, LocalTime> departure_col;
     @FXML
     private TableColumn<DockLogRecord, String> remarks_col1;
+   
     
     @FXML
     private ScrollPane transactionANDsales_pane;
@@ -368,8 +389,6 @@ public class DashboardflController implements Initializable {
     private TableView<TransactionViewRow> transaction_tv;
     @FXML
     private TableColumn<TransactionViewRow, String> transacBuyer_col;
-    @FXML
-    private TableColumn<TransactionViewRow, String> transacFisherfolk_col;
     @FXML
     private TableColumn<TransactionViewRow, String> transacFishType_col;
     @FXML
@@ -401,10 +420,9 @@ public class DashboardflController implements Initializable {
     
     @FXML 
     private BorderPane addNewTransaction_popup;
+//    private ComboBox<FisherfolkItem> transacSeller_cb;
     @FXML 
-    private ComboBox<FisherfolkItem> transacSeller_cb;
-    @FXML 
-    private ComboBox<CatchOption> transacFishType_cb;
+    private ComboBox<InventoryOption> transacFishType_cb;
     @FXML 
     private ComboBox<String> transacPaymentMethod_cb;
     @FXML 
@@ -413,12 +431,10 @@ public class DashboardflController implements Initializable {
     private TextField transacQuantity_tf;
     @FXML
     private TextField transacUnitPrice_tf;
-    @FXML
-    private TextField transacBuyer_tf;
+//    private TextField transacBuyer_tf;
     @FXML
     private TextArea transacRemarks_ta;
-    @FXML
-    private Label Seller_err;
+//    private Label Seller_err;
     @FXML
     private Label FishType_err;
     @FXML
@@ -435,6 +451,7 @@ public class DashboardflController implements Initializable {
     private Label transacRemainingQuantity_label;
     @FXML
     private Label price_err;
+    
     @FXML
     private ScrollPane dockingLogs_pane;
     @FXML
@@ -447,8 +464,9 @@ public class DashboardflController implements Initializable {
     private TableView<DockLogViewRow> dockLogs_tv;
     @FXML
     private TableColumn<DockLogViewRow, String> dockLogFisherfolk_col;
+//    private TableColumn<DockLogViewRow, String> dockLogBoat_col;
     @FXML
-    private TableColumn<DockLogViewRow, String> dockLogBoat_col;
+    private TableColumn<DockLogViewRow, String> dockLogGear_col;
     @FXML
     private TableColumn<DockLogViewRow, java.time.LocalDate> dockLogDate_col;
     @FXML
@@ -472,7 +490,8 @@ public class DashboardflController implements Initializable {
     @FXML
     private Label dockLogArrivalTime_err;
     @FXML
-    private Label dockLogBoatName_label;
+    private Label dockLogGear_label;
+//    private Label dockLogBoatName_label;
     @FXML
     private DatePicker dockLogDate_dp;
     @FXML
@@ -672,7 +691,62 @@ public class DashboardflController implements Initializable {
     private Label TotalSalesPHP_label;
     @FXML
     private Label TotalSalesPHP_rateVsLastMonth;
-
+    
+    @FXML
+    private AnchorPane consumer_pane;
+    @FXML
+    private TextField filterField_consumer;
+    @FXML
+    private TableView<ConsumerRecord> consumer_tv;
+    @FXML
+    private TableColumn<ConsumerRecord, String> consumerName_col;
+    @FXML
+    private TableColumn<ConsumerRecord, String> consumerContact_col;
+    @FXML
+    private TableColumn<ConsumerRecord, String> consumerAddress_col;
+    @FXML
+    private TableColumn<ConsumerRecord, ConsumerRecord> consumerStatus_col;
+    @FXML
+    private BorderPane addNewConsumer_popup;
+    @FXML
+    private TextField consumerName_tf;
+    @FXML
+    private Label Consumer_err;
+    @FXML
+    private TextField consumerAddress_tf;
+    @FXML
+    private TextField consumerContact;
+    
+    @FXML
+    private ToggleButton consumer_toggle;
+    @FXML
+    private ComboBox<ConsumerItem> transacConsumer_cb;
+    
+    @FXML
+    private ToggleButton inventory_toggle;
+    @FXML
+    private ScrollPane inventory_pane;
+    @FXML
+    private TableView<InventoryRow> inventory_tv;
+    @FXML
+    private TableColumn<InventoryRow, String> inventoryFishType_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> inventoryStock_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> inventorySold_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> inventoryBalance_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> inventoryLastPurchasePrice_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> inventorySellingPrice_col;
+    @FXML
+    private TableColumn<InventoryRow, java.time.LocalDateTime> inventoryLastUpdate_col;
+    @FXML
+    private TextField filterField_inventory;
+    
+    
+    
     private void wireNav() {
         // Default selection
         sideNav.selectToggle(dashboard_toggle);
@@ -687,7 +761,9 @@ public class DashboardflController implements Initializable {
         dashboard_pane.setVisible(false);
         landings_pane.setVisible(false);
         fishermen_pane.setVisible(false);
+        consumer_pane.setVisible(false);
         transactionANDsales_pane.setVisible(false);
+        inventory_pane.setVisible(false);
         dockingLogs_pane.setVisible(false);
         reportsANDanalytics_pane.setVisible(false);
         species_pane.setVisible(false);
@@ -704,6 +780,9 @@ public class DashboardflController implements Initializable {
     @FXML private void fishermen_btn(ActionEvent e) {
         showSection(fishermen_toggle, fishermen_pane);
     }
+    @FXML private void consumer_btn(ActionEvent e) {
+        showSection(consumer_toggle, consumer_pane);
+    }
     @FXML private void transactionSales_btn(ActionEvent e) {
         showSection(sales_toggle, transactionANDsales_pane);
     }
@@ -715,6 +794,10 @@ public class DashboardflController implements Initializable {
     }
     @FXML private void species_btn(ActionEvent e) {
         showSection(species_toggle, species_pane);
+    }
+    @FXML
+    private void inventory_btn(ActionEvent event) {
+        showSection(inventory_toggle, inventory_pane);
     }
     @FXML private void accountProfile_btn(ActionEvent e) {
         showSection(account_toggle, accountProfile_pane);
@@ -776,8 +859,9 @@ public class DashboardflController implements Initializable {
         gender_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getGender()));
         contact_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getContactNumber()));
         address_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getAddress()));
-        boat_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBoatName()));
-        license_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getLicenseNumber()));
+        gear_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getGear()));
+//        boat_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBoatName()));
+//        license_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getLicenseNumber()));
 
         // status toggle button cell
         status_col.setCellValueFactory(c -> new javafx.beans.property.ReadOnlyObjectWrapper<>(c.getValue()));
@@ -822,32 +906,32 @@ public class DashboardflController implements Initializable {
                         updateVisual(row.isActive(), true);
                         showInfoFISHERMEN("Failed to update status.");
                     }
-                                ///// UPDATE FISHERFOLK(SELLER LISTadmi) COMBO BOX IN ADD TRANSACTION/////
-                                transacSeller_cb.setItems(mysqlconnect.loadActiveFisherfolkItems());
-                                transacSeller_cb.setConverter(new javafx.util.StringConverter<>() {
-                                    @Override public String toString(FisherfolkItem f) { return f == null ? "" : f.getName(); }
-                                    @Override public FisherfolkItem fromString(String s) { return null; }
-                                });
-                                // when seller changes -> reload catch options for that seller
-                                transacSeller_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
-                                    if (sel != null) {
-                                        var opts = mysqlconnect.loadCatchOptionsByFisher(sel.getId());
-                                        transacFishType_cb.setItems(opts);
-                                    } else {
-                                        transacFishType_cb.getItems().clear();
-                                    }
-                                    transacFishType_cb.getSelectionModel().clearSelection();
-                                    currentCatchOpt = null;
-                                    transacRemainingQuantity_label.setText("");
-                                    if (!transactionUpdateMode) transacUnitPrice_tf.clear();
-                                    updateTotalLabel();
-                                    hideErrors();
-                                });
-                                allSellers = mysqlconnect.loadActiveFisherfolkItems();
-                                transacSeller_cb.setItems(allSellers);
-                                ///// UPDATE FISHERFOLK OPTIONS IN LANDINGS
-                                loadFisherfolkOptions();
-                                refreshDashboardKPIs();
+//                                ///// UPDATE FISHERFOLK(SELLER LISTadmi) COMBO BOX IN ADD TRANSACTION/////
+//                                transacSeller_cb.setItems(mysqlconnect.loadActiveFisherfolkItems());
+//                                transacSeller_cb.setConverter(new javafx.util.StringConverter<>() {
+//                                    @Override public String toString(FisherfolkItem f) { return f == null ? "" : f.getName(); }
+//                                    @Override public FisherfolkItem fromString(String s) { return null; }
+//                                });
+//                                // when seller changes -> reload catch options for that seller
+//                                transacSeller_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
+//                                    if (sel != null) {
+//                                        var opts = mysqlconnect.loadCatchOptionsByFisher(sel.getId());
+//                                        transacFishType_cb.setItems(opts);
+//                                    } else {
+//                                        transacFishType_cb.getItems().clear();
+//                                    }
+//                                    transacFishType_cb.getSelectionModel().clearSelection();
+//                                    currentCatchOpt = null;
+//                                    transacRemainingQuantity_label.setText("");
+//                                    if (!transactionUpdateMode) transacUnitPrice_tf.clear();
+//                                    updateTotalLabel();
+//                                    hideErrors();
+//                                });
+//                                allSellers = mysqlconnect.loadActiveFisherfolkItems();
+//                                transacSeller_cb.setItems(allSellers);
+//                                ///// UPDATE FISHERFOLK OPTIONS IN LANDINGS
+//                                loadFisherfolkOptions();
+//                                refreshDashboardKPIs();
                 });
             }
 
@@ -897,8 +981,8 @@ public class DashboardflController implements Initializable {
             fisherFiltered.setPredicate(rec -> {
                 if (q.isEmpty()) return true;
                 return (rec.getName() != null && rec.getName().toLowerCase().contains(q)) ||
-                       (rec.getBoatName() != null && rec.getBoatName().toLowerCase().contains(q)) ||
-                       (rec.getLicenseNumber() != null && rec.getLicenseNumber().toLowerCase().contains(q)) ||
+//                       (rec.getBoatName() != null && rec.getBoatName().toLowerCase().contains(q)) ||
+//                       (rec.getLicenseNumber() != null && rec.getLicenseNumber().toLowerCase().contains(q)) ||
                        (rec.getContactNumber() != null && rec.getContactNumber().toLowerCase().contains(q)) ||
                        (rec.getAddress() != null && rec.getAddress().toLowerCase().contains(q));
             });
@@ -929,16 +1013,16 @@ public class DashboardflController implements Initializable {
         setCurrencyPeso(total_col1);
         setDateFormat(catchDate_col, "yyyy-MM-dd");
 
-        // ===== TRANSACTIONS =====
-        buyer_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBuyerName()));
-        qtySold_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQtySold()));
-        unitPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getUnitPrice()));
-        totalPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getTotalPrice()));
-        status_col1.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getStatus()));
-
-        setNumeric2dp(qtySold_col);
-        setCurrencyPeso(unitPrice_col);
-        setCurrencyPeso(totalPrice_col);
+//        // ===== TRANSACTIONS =====
+//        buyer_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBuyerName()));
+//        qtySold_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQtySold()));
+//        unitPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getUnitPrice()));
+//        totalPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getTotalPrice()));
+//        status_col1.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getStatus()));
+//
+//        setNumeric2dp(qtySold_col);
+//        setCurrencyPeso(unitPrice_col);
+//        setCurrencyPeso(totalPrice_col);
 
         // ===== DOCK LOGS =====
         dockDate_col1.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getDockingDate()));
@@ -951,13 +1035,13 @@ public class DashboardflController implements Initializable {
         setTimeFormat(departure_col, "HH:mm");
         
         catch_tv1.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        txn_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+//        txn_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         dock_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         ////TRANSACTION & SALES
         // column factories
-        transacBuyer_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBuyerName()));
-        transacFisherfolk_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFisherfolkName()));
+//        transacBuyer_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBuyerName()));
+//        transacFisherfolk_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFisherfolkName()));
         transacFishType_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
         transacQuantity_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQtySold()));
         transacPricePerUnit_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getUnitPrice()));
@@ -965,7 +1049,12 @@ public class DashboardflController implements Initializable {
         transacPaymentMethod_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPaymentMethod()));
         transacStatus_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPaymentStatus()));
         transacDate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getTxnDate()));
-
+        transacBuyer_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty((c.getValue().getConsumerName() != null && !c.getValue().getConsumerName().isBlank())
+            ? c.getValue().getConsumerName()
+            : c.getValue().getBuyerName()
+                )
+            );
+        
         // formatting
         setNumeric2dp(transacQuantity_col);
         setCurrencyPeso(transacPricePerUnit_col);
@@ -980,6 +1069,7 @@ public class DashboardflController implements Initializable {
         transSorted = new javafx.collections.transformation.SortedList<>(transFiltered);
         transSorted.comparatorProperty().bind(transaction_tv.comparatorProperty());
         transaction_tv.setItems(transSorted);
+System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size());
 
         // search
         filterField_transactions.textProperty().addListener((o, ov, nv) -> applyTransFilters());
@@ -1004,38 +1094,28 @@ public class DashboardflController implements Initializable {
         // fill static combos
         transacPaymentMethod_cb.getItems().setAll("Cash","Credit","Bank Transfer","Other");
         transacPaymentStatus_cb.getItems().setAll("Paid","Partial","Unpaid");
+        
+        // NEW: consumer list
+        allConsumers = mysqlconnect.loadActiveConsumers();
+        transacConsumer_cb.setItems(allConsumers);
+        transacConsumer_cb.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(ConsumerItem c) { return c == null ? "" : c.getName(); }
+            @Override public ConsumerItem fromString(String s) { return null; }
+        });
 
         // seller list
-        transacSeller_cb.setItems(mysqlconnect.loadActiveFisherfolkItems());
-        transacSeller_cb.setConverter(new javafx.util.StringConverter<>() {
-            @Override public String toString(FisherfolkItem f) { return f == null ? "" : f.getName(); }
-            @Override public FisherfolkItem fromString(String s) { return null; }
-        });
-
-        // when seller changes -> reload catch options for that seller
-        transacSeller_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
-            if (sel != null) {
-                var opts = mysqlconnect.loadCatchOptionsByFisher(sel.getId());
-                transacFishType_cb.setItems(opts);
-            } else {
-                transacFishType_cb.getItems().clear();
-            }
-            transacFishType_cb.getSelectionModel().clearSelection();
-            currentCatchOpt = null;
-            transacRemainingQuantity_label.setText("");
-            if (!transactionUpdateMode) transacUnitPrice_tf.clear();
-            updateTotalLabel();
-            hideErrors();
-        });
+        
 
         // nice label in fish type combo is provided by CatchOption.toString()
 
         // when fish type (catch) changes -> set unit price & remaining
+        // Catch list now shows ALL available catches with remaining > 0 across all fisherfolk
+        transacFishType_cb.setItems(mysqlconnect.loadInventoryOptionsAvailable());
+        // When user picks a species from inventory, show current selling price + balance
         transacFishType_cb.getSelectionModel().selectedItemProperty().addListener((o, ov, sel) -> {
-            currentCatchOpt = sel;
             if (sel != null) {
-                transacUnitPrice_tf.setText(String.format("%.2f", sel.getPricePerKilo()));
-                transacRemainingQuantity_label.setText(String.format("%.2f kg available", sel.getRemainingQty()));
+                transacUnitPrice_tf.setText(String.format("%.2f", sel.getSellingPrice()));
+                transacRemainingQuantity_label.setText(String.format("%.2f kg available", sel.getBalanceQty()));
             } else {
                 transacUnitPrice_tf.clear();
                 transacRemainingQuantity_label.setText("");
@@ -1044,6 +1124,7 @@ public class DashboardflController implements Initializable {
             hideErrors();
         });
 
+       
         // live total computation
         transacQuantity_tf.textProperty().addListener((o,ov,nv) -> updateTotalLabel());
         transacUnitPrice_tf.textProperty().addListener((o,ov,nv) -> updateTotalLabel());
@@ -1054,14 +1135,14 @@ public class DashboardflController implements Initializable {
 
         // start hidden
         addNewTransaction_popup.setVisible(false);
-        
-        allSellers = mysqlconnect.loadActiveFisherfolkItems();
-        transacSeller_cb.setItems(allSellers);
+//        
+//        allSellers = mysqlconnect.loadActiveFisherfolkItems();
+//        transacSeller_cb.setItems(allSellers);
 
         //DOCKING LOGS
         // columns
         dockLogFisherfolk_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFisherfolkName()));
-        dockLogBoat_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getBoatName()));
+        dockLogGear_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getGear()));
         dockLogDate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getDockingDate()));
         dockLogArrival_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getArrivalTime()));
         dockLogDeparture_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getDepartureTime()));
@@ -1094,7 +1175,7 @@ public class DashboardflController implements Initializable {
         //show boat name when choosing fisherfolk in cb
         dockLogFisherfolk_cb.getSelectionModel().selectedItemProperty().addListener((o, a, b) -> {
             var fi = (FisherfolkItem) b;
-            dockLogBoatName_label.setText(fi == null || fi.getBoatName() == null ? "—" : fi.getBoatName());
+            dockLogGear_label.setText(fi == null || fi.getGear() == null ? "—" : fi.getGear());
         });
 
         //REPORTS & ANALYTICS
@@ -1201,7 +1282,7 @@ public class DashboardflController implements Initializable {
         //landing trends in dashboard//
         // Axis labels
         dashboardLIneChart_categAxis.setLabel("Period");
-        dashboardLineChart_numAxis.setLabel("Kg landed");
+        dashboardLineChart_numAxis.setLabel("Kg Sold");
 
         // Style the toggles with CSS
         dashboardLandingsTrend_WeekToggle.getStyleClass().add("toggle-pill");
@@ -1233,22 +1314,154 @@ public class DashboardflController implements Initializable {
         initAutoBackupUI();        // <-- new unified wiring + load settings + start scheduler if needed
         refreshLastBackupLabel();  // <-- shows “Last backup …” if any
         
+        
+        // ---------- CONSUMERS (INSIDE initialize) ----------
+
+        // load data
+        consumerData = mysqlconnect.loadConsumers();
+
+        // columns
+        consumerName_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getName()));
+        consumerContact_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getContact()));
+        consumerAddress_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getAddress()));
+
+        // status toggle (same pattern as Fisherfolk)
+        consumerStatus_col.setCellValueFactory(c -> new javafx.beans.property.ReadOnlyObjectWrapper<>(c.getValue()));
+        consumerStatus_col.setCellFactory(col -> new javafx.scene.control.TableCell<>() {
+
+            private final javafx.scene.control.ToggleButton toggle = new javafx.scene.control.ToggleButton();
+            private final javafx.scene.control.Label label = new javafx.scene.control.Label();
+            private final javafx.scene.layout.StackPane track = new javafx.scene.layout.StackPane();
+            private final javafx.scene.shape.Circle thumb = new javafx.scene.shape.Circle(9);
+            private final javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(2);
+
+            {
+                toggle.getStyleClass().addAll("switch", "toggle-button");
+                label.getStyleClass().add("status-label");
+                track.getStyleClass().add("switch-track");
+                thumb.getStyleClass().add("switch-thumb");
+
+                track.setPickOnBounds(false);
+                var switchGraphic = new javafx.scene.layout.StackPane(track, thumb);
+                toggle.setGraphic(switchGraphic);
+                toggle.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+
+                box.setAlignment(javafx.geometry.Pos.CENTER);
+                box.getChildren().setAll(label, toggle);
+
+                toggle.setOnAction(e -> {
+                    var row = getTableView().getItems().get(getIndex());
+                    boolean newActive = toggle.isSelected();
+                    boolean ok = mysqlconnect.updateConsumerActive(row.getConsumerId(), newActive);
+                    if (ok) {
+                        row.setActive(newActive);
+                        updateVisual(newActive, true);
+                    } else {
+                        toggle.setSelected(row.isActive());
+                        updateVisual(row.isActive(), true);
+                        showInfoConsumers("Failed to update status.");
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(ConsumerRecord item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    toggle.setSelected(item.isActive());
+                    updateVisual(item.isActive(), false);
+                    setGraphic(box);
+                }
+            }
+
+            private void updateVisual(boolean active, boolean animate) {
+                label.setText(active ? "Active" : "Inactive");
+                label.getStyleClass().removeAll("on");
+                if (active) label.getStyleClass().add("on");
+
+                toggle.getStyleClass().remove("on");
+                if (active) toggle.getStyleClass().add("on");
+
+                double toX = active ? 44 - 18 - 4 : 4;
+                if (!animate) { thumb.setTranslateX(toX); return; }
+                var tl = new javafx.animation.Timeline(
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(160),
+                        new javafx.animation.KeyValue(thumb.translateXProperty(), toX, javafx.animation.Interpolator.EASE_BOTH)
+                    )
+                );
+                tl.play();
+            }
+        });
+
+        // filter pipeline
+        consumerFiltered = new javafx.collections.transformation.FilteredList<>(consumerData, p -> true);
+        filterField_consumer.textProperty().addListener((obs, ov, nv) -> {
+            String q = (nv == null) ? "" : nv.trim().toLowerCase();
+            consumerFiltered.setPredicate(rec -> {
+                if (q.isEmpty()) return true;
+                return (rec.getName() != null && rec.getName().toLowerCase().contains(q))
+                    || (rec.getContact() != null && rec.getContact().toLowerCase().contains(q))
+                    || (rec.getAddress() != null && rec.getAddress().toLowerCase().contains(q));
+            });
+        });
+        consumerSorted = new javafx.collections.transformation.SortedList<>(consumerFiltered);
+        consumerSorted.comparatorProperty().bind(consumer_tv.comparatorProperty());
+        consumer_tv.setItems(consumerSorted);
+
+        // popup default state
+        addNewConsumer_popup.setVisible(false);
+        hideConsumerErrors();
+
+        
+        //// INVENTORY
+        inventoryFishType_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
+        inventoryStock_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getPurchasedQty()));
+        inventorySold_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getSoldQty()));
+        inventoryBalance_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getBalanceQty()));
+        inventoryLastPurchasePrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getLastPurchasePrice()));
+        inventorySellingPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getSellingPrice()));
+        inventoryLastUpdate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getUpdatedAt()));
+
+        setNumeric2dp(inventoryStock_col);
+        setNumeric2dp(inventorySold_col);
+        setNumeric2dp(inventoryBalance_col);
+        setCurrencyPeso(inventoryLastPurchasePrice_col);
+        setCurrencyPeso(inventorySellingPrice_col);
+        setDateTimeFormat(inventoryLastUpdate_col, "yyyy-MM-dd HH:mm");
+
+        //load data
+        invData = mysqlconnect.loadInventoryView();
+        
+        // filtered + sorted chain
+        invFiltered = new FilteredList<>(invData, r -> true);
+        invSorted   = new SortedList<>(invFiltered);
+        invSorted.comparatorProperty().bind(inventory_tv.comparatorProperty());
+        inventory_tv.setItems(invSorted);
+
+        // search box
+        filterField_inventory.textProperty().addListener((obs, oldV, newV) -> applyInventoryFilters());
+
 
     }
         
     ////////////////////////////////////////////////////////////////////////////end of initialization
     
-    ////////////////////////////////////////////////////////////////////////////LANDINGS
+    ////////////////////////////////////////////////////////////////////////////LANDINGS -> PURCHASES
     public  void LANDINGS_SEARCH(){ 
         catchId_col.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getCatchId()).asObject());
         fisherman_col.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFisherfolkName()));
         fishType_col.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getSpeciesName()));
         quantity_col.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getQuantity()).asObject());
-        price_col.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPricePerKilo()).asObject());
-        total_col.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getTotalValue()).asObject());
+        purchase_price_col.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPurchasePricePerKilo()));
+        total_col.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getTotalValue()));
         dockDate_col.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getCatchDate()));
         dockTime_col.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getDockingTime()));
         remarks_col.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRemarks()));
+        
+        setCurrencyPeso(purchase_price_col);
+        setCurrencyPeso(total_col);
     
         CATCHdataList = mysqlconnect.getCatch(); 
      
@@ -1399,7 +1612,7 @@ public class DashboardflController implements Initializable {
 
         // confirm deletion
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-                                  "Are you sure you want to delete this landing record?",
+                                  "Are you sure you want to delete this purchase record?",
                                   ButtonType.YES, ButtonType.NO);
         confirm.setHeaderText(null);
         confirm.showAndWait();
@@ -1417,7 +1630,7 @@ public class DashboardflController implements Initializable {
                     LANDINGS_SEARCH(); //reload table
     //                catch_tv.getItems().remove(selected); // remove from UI
                     Alert success = new Alert(Alert.AlertType.INFORMATION, 
-                                              "Landing record deleted successfully.", 
+                                              "Purchase record deleted successfully.", 
                                               ButtonType.OK);
                     success.setHeaderText(null);
                     success.showAndWait();
@@ -1451,6 +1664,7 @@ public class DashboardflController implements Initializable {
           dashboardLandingsTrend_monthToggle.setSelected(true);
           //top fish type
           loadDashboardTopFishTypesPie(4); // top-5
+          refreshInventoryTable();
     }
 
     @FXML
@@ -1471,7 +1685,7 @@ public class DashboardflController implements Initializable {
 
         // numeric fields
         tfQuantity2.setText(String.valueOf(sel.getQuantity()));
-        tfPricePerKilo2.setText(String.valueOf(sel.getPricePerKilo()));
+        tfPurchasePricePerKilo2.setText(String.valueOf(sel.getPurchasePricePerKilo()));
 
         // date
         dpCatchDate2.setValue(sel.getCatchDate());
@@ -1499,6 +1713,8 @@ public class DashboardflController implements Initializable {
         addNewLanding_popup.setVisible(true);
         landings_pane.setDisable(true);
         sideNavigation_vbox.setDisable(true);
+        
+        dpCatchDate2.setValue(LocalDate.now());
     }
     
     @FXML
@@ -1511,7 +1727,7 @@ public class DashboardflController implements Initializable {
         cbFisherfolk2.getSelectionModel().clearSelection();
         cbSpecies2.getSelectionModel().clearSelection();
         tfQuantity2.clear();
-        tfPricePerKilo2.clear();
+        tfPurchasePricePerKilo2.clear();
         tfDockingTime2.clear();  
         dpCatchDate2.setValue(null);
         taRemarks2.clear();
@@ -1526,7 +1742,7 @@ public class DashboardflController implements Initializable {
         cbFisherfolk2.getSelectionModel().clearSelection();
         cbSpecies2.getSelectionModel().clearSelection();
         tfQuantity2.clear();
-        tfPricePerKilo2.clear();
+        tfPurchasePricePerKilo2.clear();
         tfDockingTime2.clear();  // optional
         dpCatchDate2.setValue(null);
         taRemarks2.clear();
@@ -1560,8 +1776,8 @@ public class DashboardflController implements Initializable {
     }
 
     // 4) Validate price_per_kilo > 0
-    Double pricePerKilo = parsePositiveDouble(tfPricePerKilo2.getText());
-    if (pricePerKilo == null) {
+    Double purchasePricePerKilo = parsePositiveDouble(tfPurchasePricePerKilo2.getText());
+    if (purchasePricePerKilo == null) {
         errPrice2.setVisible(true);
         valid = false;
     }
@@ -1611,12 +1827,12 @@ public class DashboardflController implements Initializable {
     fisher = cbFisherfolk2.getValue();
     species   = cbSpecies2.getValue();
     quantity       = parsePositiveDouble(tfQuantity2.getText());
-    pricePerKilo   = parsePositiveDouble(tfPricePerKilo2.getText());
+    purchasePricePerKilo   = parsePositiveDouble(tfPurchasePricePerKilo2.getText());
     catchDate   = dpCatchDate2.getValue();
     dockingTime = parseOptionalTime(tfDockingTime2.getText()); // implement as before
     remarks        = normalizeEmptyToNull(taRemarks2.getText());
 
-    if (fisher == null || species == null || quantity == null || pricePerKilo == null || catchDate == null) {
+    if (fisher == null || species == null || quantity == null || purchasePricePerKilo == null || catchDate == null) {
         return; // validation already showed labels; stop
     }
 
@@ -1638,7 +1854,7 @@ public class DashboardflController implements Initializable {
         ps.setInt(1, fisher.getId());
         ps.setInt(2, species.getId());
         ps.setBigDecimal(3, java.math.BigDecimal.valueOf(quantity));
-        ps.setBigDecimal(4, java.math.BigDecimal.valueOf(pricePerKilo));
+        ps.setBigDecimal(4, java.math.BigDecimal.valueOf(purchasePricePerKilo));
         ps.setDate(5, java.sql.Date.valueOf(catchDate));
 
         if (dockingTime != null) {
@@ -1662,9 +1878,9 @@ public class DashboardflController implements Initializable {
         if (rows > 0) {
             // Success
             if (editingCatchId == null) {
-                showInfo("Landing saved.");
+                showInfo("Purchased saved.");
             } else {
-                showInfo("Landing updated.");
+                showInfo("Purchased updated.");
             }
 
             // Close popup, clear form, and reload table
@@ -1673,7 +1889,7 @@ public class DashboardflController implements Initializable {
             cbFisherfolk2.getSelectionModel().clearSelection();
             cbSpecies2.getSelectionModel().clearSelection();
             tfQuantity2.clear();
-            tfPricePerKilo2.clear();
+            tfPurchasePricePerKilo2.clear();
             tfDockingTime2.clear();  
             dpCatchDate2.setValue(null);
             taRemarks2.clear();
@@ -1686,7 +1902,6 @@ public class DashboardflController implements Initializable {
         } else {
             showInfo("No changes were applied.");
         }
-
     } catch (Exception ex) {
         ex.printStackTrace();
         showInfo("Error: " + ex.getMessage());
@@ -1708,6 +1923,8 @@ public class DashboardflController implements Initializable {
         dashboardLandingsTrend_monthToggle.setSelected(true);
         //top fish type
         loadDashboardTopFishTypesPie(4); // top-5
+        refreshInventoryTable();
+        
         
     }
     
@@ -1748,11 +1965,11 @@ public class DashboardflController implements Initializable {
     private void exportLandings(ActionEvent event) {
         // Ask where to save
         var chooser = new javafx.stage.FileChooser();
-        chooser.setTitle("Export Landings (Excel)");
+        chooser.setTitle("Export Purchased (Excel)");
         chooser.getExtensionFilters().add(
             new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
         );
-        String base = "landings_" + java.time.LocalDate.now();
+        String base = "purchased_" + java.time.LocalDate.now();
         chooser.setInitialFileName(base + ".xlsx");
 
         var file = chooser.showSaveDialog(TotalLandingsTodayKG_label.getScene().getWindow());
@@ -1780,15 +1997,15 @@ public class DashboardflController implements Initializable {
              var ps = c.prepareStatement(sql);
              var rs = ps.executeQuery()) {
 
-            var sh = wb.createSheet("Landings");
+            var sh = wb.createSheet("Purchased");
 
             // header style
             var bold = wb.createFont(); bold.setBold(true);
             var head = wb.createCellStyle(); head.setFont(bold);
 
             String[] headers = {
-                "Catch ID","Fisherfolk","Species","Quantity (kg)",
-                "Price / kg","Total Value","Catch Date","Docking Time","Remarks"
+                "Purchase ID","Fisherfolk","Species","Quantity (kg)",
+                "Purchase Price / kg","Total Value","Date","Docking Time","Remarks"
             };
             int r = 0;
             var hr = sh.createRow(r++);
@@ -1820,7 +2037,7 @@ public class DashboardflController implements Initializable {
             try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
 
             // success message
-            showInfoWide("Landings exported to:\n" + file.getAbsolutePath());
+            showInfoWide("Purchased exported to:\n" + file.getAbsolutePath());
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -1912,19 +2129,27 @@ public class DashboardflController implements Initializable {
         double avgThisMonth = (monthDistinctFishers == 0) ? 0 : (monthKg / monthDistinctFishers);
         double avgPrevMonth = (prevMonthDistinctFishers == 0) ? 0 : (prevMonthKg / prevMonthDistinctFishers);
 
-        // --- total sales in PHP (from TRANSACTIONS, monthly) ---
-        double salesMonth = qd("""
-            SELECT IFNULL(SUM(total_price),0)
-            FROM transactions
-            WHERE YEAR(transaction_date)=YEAR(CURDATE())
-              AND MONTH(transaction_date)=MONTH(CURDATE())
+//        // --- total sales in PHP (from TRANSACTIONS, monthly) ---
+//        double salesMonth = qd("""
+//            SELECT IFNULL(SUM(total_price),0)
+//            FROM transactions
+//            WHERE YEAR(transaction_date)=YEAR(CURDATE())
+//              AND MONTH(transaction_date)=MONTH(CURDATE())
+//        """);
+
+// --- total sales in PHP (from CATCH - PURCHASES, monthly) ---
+        double purchaseMonth = qd("""
+            SELECT IFNULL(SUM(total_value),0)
+            FROM catch
+            WHERE YEAR(catch_date)=YEAR(CURDATE())
+              AND MONTH(catch_date)=MONTH(CURDATE())
         """);
 
-        double salesPrevMonth = qd("""
-            SELECT IFNULL(SUM(total_price),0)
-            FROM transactions
-            WHERE YEAR(transaction_date)=YEAR(CURDATE() - INTERVAL 1 MONTH)
-              AND MONTH(transaction_date)=MONTH(CURDATE() - INTERVAL 1 MONTH)
+        double purchasePrevMonth = qd("""
+            SELECT IFNULL(SUM(total_value),0)
+            FROM catch
+            WHERE YEAR(catch_date)=YEAR(CURDATE() - INTERVAL 1 MONTH)
+              AND MONTH(catch_date)=MONTH(CURDATE() - INTERVAL 1 MONTH)
         """);
 
         // --- Update labels ---
@@ -1941,8 +2166,8 @@ public class DashboardflController implements Initializable {
         setDeltaLabel(AveragePerFisherfolkKG_rateThisMonth, pctDelta(avgThisMonth, avgPrevMonth));
 
         // 4) Total sales in PHP (this month)
-        TotalSalesPHP_label.setText(peso1(salesMonth));
-        setDeltaLabel(TotalSalesPHP_rateVsLastMonth, pctDelta(salesMonth, salesPrevMonth));
+        TotalSalesPHP_label.setText(peso1(purchaseMonth));
+        setDeltaLabel(TotalSalesPHP_rateVsLastMonth, pctDelta(purchaseMonth, purchasePrevMonth));
     }
 
     ////////////////////////////////////////////////////////////////////////////end of Landings
@@ -1959,8 +2184,9 @@ public class DashboardflController implements Initializable {
         age_tf.clear();
         contact_tf.clear();
         address_tf.clear();
-        Boat_tf.clear();
-        LicenseNumber_tf.clear();
+        Gear_tf.clear();
+//        Boat_tf.clear();
+//        LicenseNumber_tf.clear();
     }
 
     private void exitFisherPopup() {
@@ -2073,8 +2299,9 @@ public class DashboardflController implements Initializable {
         age_tf.setText(sel.getAge() == null ? "" : String.valueOf(sel.getAge()));
         contact_tf.setText(nullToEmpty(sel.getContactNumber()));
         address_tf.setText(nullToEmpty(sel.getAddress()));
-        Boat_tf.setText(nullToEmpty(sel.getBoatName()));
-        LicenseNumber_tf.setText(nullToEmpty(sel.getLicenseNumber()));
+        Gear_tf.setText(nullToEmpty(sel.getGear()));
+//        Boat_tf.setText(nullToEmpty(sel.getBoatName()));
+//        LicenseNumber_tf.setText(nullToEmpty(sel.getLicenseNumber()));
 
         addNewFisherfolk_popup.setVisible(true);
         fishermen_pane.setDisable(true);
@@ -2123,8 +2350,9 @@ public class DashboardflController implements Initializable {
         Integer age = parsePositiveIntOrNull(age_tf.getText()); // optional
         String contact = safeTrim(contact_tf.getText());         // optional
         String address = safeTrim(address_tf.getText());         // optional
-        String boat = safeTrim(Boat_tf.getText());               // optional
-        String license = safeTrim(LicenseNumber_tf.getText());   // optional
+        String gear = safeTrim(Gear_tf.getText());
+//        String boat = safeTrim(Boat_tf.getText());               // optional
+//        String license = safeTrim(LicenseNumber_tf.getText());   // optional
 
         if (!valid) return;
 
@@ -2132,8 +2360,8 @@ public class DashboardflController implements Initializable {
         if (editingFisherId == null) {
             // INSERT (default is_active = 1 for new)
             final String sql = "INSERT INTO fisherfolk " +
-                    "(name, gender, age, contact_number, address, boat_name, license_number, is_active) " +
-                    "VALUES (?,?,?,?,?,?,?,1)";
+                    "(name, gender, age, contact_number, address, gear, is_active) " +
+                    "VALUES (?,?,?,?,?,?,1)";
             try (var conn = mysqlconnect.ConnectDb();
                  var ps = conn.prepareStatement(sql)) {
 
@@ -2142,8 +2370,9 @@ public class DashboardflController implements Initializable {
                 if (age != null) ps.setInt(3, age); else ps.setNull(3, java.sql.Types.INTEGER);
                 if (contact != null) ps.setString(4, contact); else ps.setNull(4, java.sql.Types.VARCHAR);
                 if (address != null) ps.setString(5, address); else ps.setNull(5, java.sql.Types.VARCHAR);
-                if (boat != null) ps.setString(6, boat); else ps.setNull(6, java.sql.Types.VARCHAR);
-                if (license != null) ps.setString(7, license); else ps.setNull(7, java.sql.Types.VARCHAR);
+                if (gear != null) ps.setString(6, gear); else ps.setNull(6, java.sql.Types.VARCHAR);
+//                if (boat != null) ps.setString(6, boat); else ps.setNull(6, java.sql.Types.VARCHAR);
+//                if (license != null) ps.setString(7, license); else ps.setNull(7, java.sql.Types.VARCHAR);
 
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
@@ -2161,7 +2390,7 @@ public class DashboardflController implements Initializable {
         } else {
             // UPDATE (do not touch is_active here)
             final String sql = "UPDATE fisherfolk SET " +
-                    "name=?, gender=?, age=?, contact_number=?, address=?, boat_name=?, license_number=? " +
+                    "name=?, gender=?, age=?, contact_number=?, address=?, gear=? " +
                     "WHERE fisherfolk_id=?";
             try (var conn = mysqlconnect.ConnectDb();
                  var ps = conn.prepareStatement(sql)) {
@@ -2171,8 +2400,9 @@ public class DashboardflController implements Initializable {
                 if (age != null) ps.setInt(3, age); else ps.setNull(3, java.sql.Types.INTEGER);
                 if (contact != null) ps.setString(4, contact); else ps.setNull(4, java.sql.Types.VARCHAR);
                 if (address != null) ps.setString(5, address); else ps.setNull(5, java.sql.Types.VARCHAR);
-                if (boat != null) ps.setString(6, boat); else ps.setNull(6, java.sql.Types.VARCHAR);
-                if (license != null) ps.setString(7, license); else ps.setNull(7, java.sql.Types.VARCHAR);
+                if (gear != null) ps.setString(6, gear); else ps.setNull(6, java.sql.Types.VARCHAR);
+//                if (boat != null) ps.setString(6, boat); else ps.setNull(6, java.sql.Types.VARCHAR);
+//                if (license != null) ps.setString(7, license); else ps.setNull(7, java.sql.Types.VARCHAR);
                 ps.setInt(8, editingFisherId);
 
                 int rows = ps.executeUpdate();
@@ -2225,7 +2455,7 @@ public class DashboardflController implements Initializable {
 
         // load all 3 lists
         catch_tv1.setItems(mysqlconnect.getCatchesByFisher(fisherId));
-        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
+//        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
         dock_tv.setItems(mysqlconnect.getDockLogsByFisher(fisherId));
 
         // resize columns after data is loaded
@@ -2241,7 +2471,6 @@ public class DashboardflController implements Initializable {
         
     }
   
-    @FXML
     private void viewTransaction(ActionEvent event) {
         FisherfolkRecord sel = fishermen_tv.getSelectionModel().getSelectedItem();
         if (sel == null) {
@@ -2253,7 +2482,7 @@ public class DashboardflController implements Initializable {
 
         // load all 3 lists
         catch_tv1.setItems(mysqlconnect.getCatchesByFisher(fisherId));
-        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
+//        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
         dock_tv.setItems(mysqlconnect.getDockLogsByFisher(fisherId));
 
         // resize columns after data is loaded
@@ -2281,7 +2510,7 @@ public class DashboardflController implements Initializable {
 
         // load all 3 lists
         catch_tv1.setItems(mysqlconnect.getCatchesByFisher(fisherId));
-        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
+//        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
         dock_tv.setItems(mysqlconnect.getDockLogsByFisher(fisherId));
         
         // resize columns after data is loaded
@@ -2337,8 +2566,9 @@ public class DashboardflController implements Initializable {
                 row.createCell(c++).setCellValue(f.getGender());
                 row.createCell(c++).setCellValue(f.getContactNumber());
                 row.createCell(c++).setCellValue(f.getAddress());
-                row.createCell(c++).setCellValue(f.getBoatName());
-                row.createCell(c++).setCellValue(f.getLicenseNumber());
+                row.createCell(c++).setCellValue(f.getGear());
+//                row.createCell(c++).setCellValue(f.getBoatName());
+//                row.createCell(c++).setCellValue(f.getLicenseNumber());
                 row.createCell(c++).setCellValue(f.isActive() ? "Active" : "Inactive");
             }
             for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
@@ -2472,9 +2702,9 @@ public class DashboardflController implements Initializable {
             var head = wb.createCellStyle(); head.setFont(bold);
 
             String[] headers = {
-                "ID","DateTime","Buyer","Fisherfolk","Fish Type","Qty",
-                "Unit Price","Total","Payment Method","Status"
+                "ID","DateTime","Buyer","Fish Type","Qty","Unit Price","Total","Payment Method","Status"
             };
+            
             int r = 0;
             var hr = sh.createRow(r++);
             for (int i = 0; i < headers.length; i++) {
@@ -2485,8 +2715,9 @@ public class DashboardflController implements Initializable {
                 var row = sh.createRow(r++); int c = 0;
                 row.createCell(c++).setCellValue(x.getTransactionId());
                 row.createCell(c++).setCellValue(x.getTxnDate() == null ? "" : x.getTxnDate().toString());
-                row.createCell(c++).setCellValue(x.getBuyerName());
-                row.createCell(c++).setCellValue(x.getFisherfolkName());
+                row.createCell(c++).setCellValue(x.getConsumerName()!=null && !x.getConsumerName().isBlank() ? x.getConsumerName() : x.getBuyerName());
+//                row.createCell(c++).setCellValue(x.getBuyerName());
+//                row.createCell(c++).setCellValue(x.getFisherfolkName());
                 row.createCell(c++).setCellValue(x.getSpeciesName());
                 row.createCell(c++).setCellValue(x.getQtySold());
                 row.createCell(c++).setCellValue(x.getUnitPrice());
@@ -2509,32 +2740,31 @@ public class DashboardflController implements Initializable {
     @FXML
     private void addTransaction(ActionEvent event) {
         Quantity_err.setText("Please enter quantity");
-        
         transactionUpdateMode = false;
         editingTransactionId = null;
+        hideErrors();
 
         // clear fields
-        hideErrors();
-        transacBuyer_tf.clear();
+//        if (transacBuyer_tf != null) transacBuyer_tf.clear();
         transacUnitPrice_tf.clear();
         transacQuantity_tf.clear();
         transacRemarks_ta.clear();
         transacRemainingQuantity_label.setText("");
         transacTotalAmount_label.setText(PHP.format(0));
 
-        // combos fresh
-        transacSeller_cb.getSelectionModel().clearSelection();
-        transacFishType_cb.getItems().clear();
+        // combos
+        transacConsumer_cb.getSelectionModel().clearSelection();
+        transacFishType_cb.setItems(mysqlconnect.loadInventoryOptionsAvailable()); // refresh live stock
+
         transacPaymentMethod_cb.getSelectionModel().clearSelection();
         transacPaymentStatus_cb.getSelectionModel().clearSelection();
 
-        // editable everything
-        transacSeller_cb.setDisable(false);
+        // editable fields
+        transacConsumer_cb.setDisable(false);
         transacFishType_cb.setDisable(false);
         transacUnitPrice_tf.setEditable(true);
 
         addNewTransaction_popup.setVisible(true);
-        // disable background panes 
         sideNavigation_vbox.setDisable(true);
         transactionANDsales_pane.setDisable(true);
     }
@@ -2543,47 +2773,56 @@ public class DashboardflController implements Initializable {
     @FXML
     private void updatePaymentStatus(ActionEvent event) {
         Quantity_err.setText("Please enter quantity");
-       
-        var sel = transaction_tv.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            showInfoWide("Please select a transaction to update.");
-            return;
+
+        TransactionViewRow sel = transaction_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { 
+            showInfoWide("Please select a transaction to update."); 
+            return; 
         }
 
         transactionUpdateMode = true;
         editingTransactionId = sel.getTransactionId();
-        updateCatchId = sel.getCatchId();  // <-- keep the catch id for validation
+        updateSpeciesId = sel.getSpeciesId();       // <-- species-based, not catch
         hideErrors();
 
-        // Pre-fill fields
-        transacBuyer_tf.setText(sel.getBuyerName());
+        // Pre-fill editable fields
         transacQuantity_tf.setText(String.format("%.2f", sel.getQtySold()));
         transacUnitPrice_tf.setText(String.format("%.2f", sel.getUnitPrice()));
-        transacRemarks_ta.setText(sel.getRemarks()); // you can load actual remarks if your view includes it
+        transacRemarks_ta.setText(sel.getRemarks());
         transacPaymentMethod_cb.getSelectionModel().select(sel.getPaymentMethod());
         transacPaymentStatus_cb.getSelectionModel().select(sel.getPaymentStatus());
 
-        // Seller + FishType (lock them; show current)
-        // We need to put the single item into combos so user sees them.
-        transacSeller_cb.getItems().setAll(new FisherfolkItem(0, sel.getFisherfolkName())); // id not used while locked
-        transacSeller_cb.getSelectionModel().select(0);
-        transacSeller_cb.setDisable(true);
+        // Lock Consumer (show current)
+        transacConsumer_cb.getItems().setAll(new ConsumerItem(sel.getConsumerId(), sel.getConsumerName()));
+        transacConsumer_cb.getSelectionModel().select(0);
+        transacConsumer_cb.setDisable(true);
 
-        transacFishType_cb.getItems().setAll(
-            new CatchOption(0, 0, 0, sel.getSpeciesName(), sel.getUnitPrice(), 0, 
-                            sel.getTxnDate() != null ? sel.getTxnDate().toLocalDate() : null));
+        // Lock Fish Type (show current)
+        // Compute remaining for display (excluding this txn so the balance looks honest in edit)
+        double purchased = mysqlconnect.speciesPurchasedQty(updateSpeciesId);
+        double soldElse  = mysqlconnect.speciesSoldQtyExcluding(updateSpeciesId, editingTransactionId);
+        double remaining = Math.max(0, purchased - soldElse);
+
+        InventoryOption locked = new InventoryOption(
+            updateSpeciesId,
+            sel.getSpeciesName(),
+            remaining,
+            sel.getUnitPrice() // can also fetch inventory.selling_price 
+        );
+
+        transacFishType_cb.getItems().setAll(locked);
         transacFishType_cb.getSelectionModel().select(0);
         transacFishType_cb.setDisable(true);
 
-        // Remaining label is informational only in update mode
-        transacRemainingQuantity_label.setText("");
-
+        transacRemainingQuantity_label.setText(String.format("%.2f kg available", remaining));
         updateTotalLabel();
-        
+
         addNewTransaction_popup.setVisible(true);
         sideNavigation_vbox.setDisable(true);
         transactionANDsales_pane.setDisable(true);
     }
+
+
 
 
     @FXML
@@ -2616,6 +2855,8 @@ public class DashboardflController implements Initializable {
         refreshDashboardKPIs(); //total sales (fully paid)
         loadSalesSeries(); //REPORTS - SALES TREND
         loadFisherfolkContribAuto(); //REPORTS - FISHERFOLK CONTRIBS
+        
+        refreshInventoryTable();
     }
 
     @FXML
@@ -2653,29 +2894,31 @@ public class DashboardflController implements Initializable {
         transFiltered.setPredicate(row -> {
             if (row == null) return false;
 
-            // search buyer/fisherfolk
+            // text search
             if (!query.isEmpty()) {
-                String buyer  = row.getBuyerName() == null ? "" : row.getBuyerName().toLowerCase();
-                String fisher = row.getFisherfolkName() == null ? "" : row.getFisherfolkName().toLowerCase();
-                if (!(buyer.contains(query) || fisher.contains(query))) return false;
+                String buyer = (row.getConsumerName() != null && !row.getConsumerName().isBlank())
+                                 ? row.getConsumerName() : row.getBuyerName();
+                String buyerL = buyer == null ? "" : buyer.toLowerCase();
+                String speciesL = row.getSpeciesName() == null ? "" : row.getSpeciesName().toLowerCase();
+                if (!(buyerL.contains(query) || speciesL.contains(query))) return false;
             }
 
-            // status filter
+            // status filter (unchanged)
             if (statusFilter != null) {
                 String ps = row.getPaymentStatus();
                 if (ps == null || !ps.equalsIgnoreCase(statusFilter)) return false;
             }
 
-            // date range (use LocalDate part of timestamp)
+            // date range (unchanged)
             if (startDate != null || endDate != null) {
                 if (row.getTxnDate() == null) return false;
                 var d = row.getTxnDate().toLocalDate();
                 if (startDate != null && d.isBefore(startDate)) return false;
                 if (endDate   != null && d.isAfter(endDate))     return false;
             }
-
             return true;
         });
+
 
         updateTransHeaderKpis(); // recalc totals after filtering
     }
@@ -2729,7 +2972,7 @@ public class DashboardflController implements Initializable {
     }
 
     private void hideErrors() {
-        Seller_err.setVisible(false);
+//        Seller_err.setVisible(false);
         FishType_err.setVisible(false);
         Buyer_err.setVisible(false);
         PMethod_err.setVisible(false);
@@ -2749,11 +2992,16 @@ public class DashboardflController implements Initializable {
     }
     
     private void restoreAddModeCombos() {
-        // restore full sellers list
-        allSellers = mysqlconnect.loadActiveFisherfolkItems();
-        transacSeller_cb.setItems(allSellers);
-        transacSeller_cb.setDisable(false);
-        transacSeller_cb.getSelectionModel().clearSelection();
+//        // restore full sellers list
+//        allSellers = mysqlconnect.loadActiveFisherfolkItems();
+//        transacSeller_cb.setItems(allSellers);
+//        transacSeller_cb.setDisable(false);
+//        transacSeller_cb.getSelectionModel().clearSelection();
+        
+        allConsumers = mysqlconnect.loadActiveConsumers();
+        transacConsumer_cb.setItems(allConsumers);
+        transacConsumer_cb.setDisable(false);
+        transacConsumer_cb.getSelectionModel().clearSelection();
 
         // fish types list is empty until a seller is chosen
         transacFishType_cb.getItems().clear();
@@ -2767,13 +3015,13 @@ public class DashboardflController implements Initializable {
         sideNavigation_vbox.setDisable(false);
         
         // unlock
-        transacSeller_cb.setDisable(false);
+        transacConsumer_cb.setDisable(false);
         transacFishType_cb.setDisable(false);
 
         // clear selections/fields for next Add
-        transacSeller_cb.getSelectionModel().clearSelection();
+        transacConsumer_cb.getSelectionModel().clearSelection();
         transacFishType_cb.getItems().clear();       // will repopulate after seller is picked
-        transacBuyer_tf.clear();
+//        transacBuyer_tf.clear();
         transacQuantity_tf.clear();
         transacUnitPrice_tf.clear();
         transacRemarks_ta.clear();
@@ -2784,7 +3032,7 @@ public class DashboardflController implements Initializable {
 
         transactionUpdateMode = false;
         editingTransactionId = null;
-        currentCatchOpt = null;
+        updateSpeciesId = null;
     }
 
 
@@ -2799,7 +3047,7 @@ public class DashboardflController implements Initializable {
     private void btnClear_onAddTransaction(ActionEvent event) {
         if (transactionUpdateMode) {
             // In update, maybe keep combos locked but clear editable fields
-            transacBuyer_tf.clear();
+//            transacBuyer_tf.clear();
             transacQuantity_tf.clear();
             transacUnitPrice_tf.clear();
             transacRemarks_ta.clear();
@@ -2815,10 +3063,6 @@ public class DashboardflController implements Initializable {
     private void btnSave_onAddTransaction(ActionEvent event) {
         hideErrors();
 
-        // validate common fields
-        String buyer = transacBuyer_tf.getText() == null ? "" : transacBuyer_tf.getText().trim();
-        if (buyer.isEmpty()) { Buyer_err.setVisible(true); return; }
-
         String pm = transacPaymentMethod_cb.getValue();
         if (pm == null || pm.isBlank()) { PMethod_err.setVisible(true); return; }
 
@@ -2832,85 +3076,101 @@ public class DashboardflController implements Initializable {
         if (unit <= 0) { price_err.setVisible(true); return; }
 
         String remarks = transacRemarks_ta.getText();
-
         boolean ok;
 
         if (!transactionUpdateMode) {
-            // ADD: need valid seller + catch
-            FisherfolkItem seller = transacSeller_cb.getValue();
-            if (seller == null) { Seller_err.setVisible(true); return; }
+            // ADD
+            ConsumerItem consumer = transacConsumer_cb.getValue();
+            if (consumer == null) { Buyer_err.setText("Please select a consumer"); Buyer_err.setVisible(true); return; }
 
-            CatchOption co = transacFishType_cb.getValue();
-            if (co == null) { FishType_err.setVisible(true); return; }
+            InventoryOption io = transacFishType_cb.getValue();
+            if (io == null) { FishType_err.setVisible(true); return; }
 
-            // client-side oversell check
-            if (qty > co.getRemainingQty() + 1e-6) {
-                Quantity_err.setText("Quantity exceeds remaining.");
+            // oversell check (species-based)
+            double purchased = mysqlconnect.speciesPurchasedQty(io.getSpeciesId());
+            double sold      = mysqlconnect.speciesSoldQtyExcluding(io.getSpeciesId(), null);
+            double remaining = purchased - sold;
+
+            if (qty > remaining + 1e-6) {
+                Quantity_err.setText("Quantity exceeds remaining (" + String.format("%.2f", remaining) + " kg left).");
                 Quantity_err.setVisible(true);
                 return;
             }
 
-            ok = mysqlconnect.insertTransaction(
-                    buyer, seller.getId(), co.getCatchId(),
-                    qty, unit, pm, ps, remarks
-                    
+            String buyerText = consumer.getName(); // safe non-null for legacy column
+            ok = mysqlconnect.insertTransactionByConsumer(
+                    consumer.getId(), io.getSpeciesId(),
+                    qty, unit, pm, ps, remarks, buyerText
             );
-                
-                restoreAddModeCombos();
-                exitTransactionPopup();
-                
+
         } else {
-            // UPDATE: keep catch the same (locked)
-            if (editingTransactionId == null || updateCatchId == null) {
+            // UPDATE (keep species the same)
+            if (editingTransactionId == null || updateSpeciesId == null) {
                 showInfoWide("No transaction selected.");
                 return;
             }
 
-            // validate against remaining (excluding this transaction)
-            int txnId   = editingTransactionId;
-            int catchId = updateCatchId;
+            // oversell check, excluding THIS txn's qty
+            double purchased = mysqlconnect.speciesPurchasedQty(updateSpeciesId);
+            double soldElse  = mysqlconnect.speciesSoldQtyExcluding(updateSpeciesId, editingTransactionId);
+            double remaining = purchased - soldElse;
 
-            double newQty = d(transacQuantity_tf);
-
-            double catchQty     = mysqlconnect.getCatchQuantity(catchId);
-            double soldElse     = mysqlconnect.sumSoldForCatchExcluding(txnId, catchId);
-            double remaining    = catchQty - soldElse; // what the user may still take
-
-            if (newQty > remaining + 1e-9) {
+            if (qty > remaining + 1e-6) {
                 Quantity_err.setText("Exceeds remaining (" + String.format("%.2f", remaining) + " kg left).");
                 Quantity_err.setVisible(true);
                 return;
             }
 
-            ok = mysqlconnect.updateTransaction(
-                    editingTransactionId, buyer, newQty, unit, pm, ps, remarks
+            // Keep buyer_name aligned with the (locked) consumer combo if present
+            ConsumerItem selectedConsumer = transacConsumer_cb.getValue();
+            String buyerText = (selectedConsumer != null && selectedConsumer.getName() != null)
+                    ? selectedConsumer.getName()
+                    : "Unknown Buyer";
+
+            ok = mysqlconnect.updateTransactionKeepBuyer(
+                    editingTransactionId, buyerText, qty, unit, pm, ps, remarks
             );
         }
-        
+
         if (ok) {
             showInfoWide(transactionUpdateMode ? "Transaction updated." : "Transaction added.");
-            // reset error label back to default text for next time
             Quantity_err.setText("Please enter quantity");
-
             addNewTransaction_popup.setVisible(false);
             refreshTransactionsTable();
 
-            // reset flags and UI state
             transactionUpdateMode = false;
             editingTransactionId = null;
-            updateCatchId = null;
+            updateSpeciesId = null;
 
-            restoreAddModeCombos();
             exitTransactionPopup();
         } else {
             showInfoWide("Save failed. Please check your inputs.");
         }
-        refreshTransactionsTable();
-        refreshLandingsKPIs();
-        refreshDashboardKPIs(); //total sales (fully paid)
-        loadSalesSeries(); //REPORTS - SALES TREND
-        loadFisherfolkContribAuto(); //REPORTS - FISHERFOLK CONTRIBS
+
+             // refresh KPIs/charts
+            refreshTransactionsTable();
+            refreshLandingsKPIs();
+            refreshDashboardKPIs();//total sales (fully paid)
+            loadSalesSeries(); //REPORTS - SALES TREND
+            loadFisherfolkContribAuto();//REPORTS - FISHERFOLK CONTRIBS
+            
+            refreshInventoryTable();
     }
+    
+    @FXML
+    private void addNewBuyer_onTransact(ActionEvent event) {
+        editingConsumerId = null;
+        clearConsumerForm();
+        hideConsumerErrors();
+        addNewConsumer_popup.setVisible(true);
+        consumer_pane.setDisable(true);
+        sideNavigation_vbox.setDisable(true);
+        
+        transactionANDsales_pane.setDisable(true);
+        addNewTransaction_popup.setDisable(true);
+    }
+    
+    
     ////////////////////////////////////////////////////////////////////////////end of transaction & sales
     
     ////////////////////////////////////////////////////////////////////////////DOCK LOGS
@@ -2949,7 +3209,8 @@ public class DashboardflController implements Initializable {
                 var row = sh.createRow(r++); int c = 0;
                 row.createCell(c++).setCellValue(x.getLogId());
                 row.createCell(c++).setCellValue(x.getFisherfolkName());
-                row.createCell(c++).setCellValue(x.getBoatName());
+                row.createCell(c++).setCellValue(x.getGear());
+//                row.createCell(c++).setCellValue(x.getBoatName());
                 row.createCell(c++).setCellValue(x.getDockingDate() == null ? "" : x.getDockingDate().toString());
                 row.createCell(c++).setCellValue(x.getArrivalTime() == null ? "" : x.getArrivalTime().toString());
                 row.createCell(c++).setCellValue(x.getDepartureTime() == null ? "" : x.getDepartureTime().toString());
@@ -3007,7 +3268,7 @@ public class DashboardflController implements Initializable {
         dockFiltered.setPredicate(row -> {
             // search fisherfolk or boat
             if (!q.isEmpty()) {
-                String hay = (row.getFisherfolkName() + " " + (row.getBoatName()==null?"":row.getBoatName())).toLowerCase();
+                String hay = (row.getFisherfolkName() + " " + (row.getGear()==null?"":row.getGear())).toLowerCase();
                 if (!hay.contains(q)) return false;
             }
             // date range
@@ -3038,7 +3299,8 @@ public class DashboardflController implements Initializable {
         dockLogFisherfolk_cb.setDisable(false);
         dockLogFisherfolk_cb.setItems(mysqlconnect.loadActiveFisherfolkItems()); // ObservableList<FisherfolkItem>
         dockLogFisherfolk_cb.getSelectionModel().clearSelection();
-        dockLogBoatName_label.setText("—");
+        dockLogGear_label.setText("—");
+//        dockLogBoatName_label.setText("—");
 
         // default date = today, editable
         dockLogDate_dp.setValue(java.time.LocalDate.now());
@@ -3072,13 +3334,14 @@ public class DashboardflController implements Initializable {
         hideDockErrors();
 
         // fill fields from selected row, but lock fisherfolk/date/arrival
-        var item = new FisherfolkItem(sel.getFisherfolkId(), sel.getFisherfolkName(), sel.getBoatName());
+        var item = new FisherfolkItem(sel.getFisherfolkId(), sel.getFisherfolkName(), sel.getGear());
         dockLogFisherfolk_cb.getItems().setAll(item);
         dockLogFisherfolk_cb.getSelectionModel().select(0);
         dockLogFisherfolk_cb.setDisable(true);
 
-        dockLogBoatName_label.setText(item.getBoatName() == null ? "—" : item.getBoatName());
-
+//        dockLogBoatName_label.setText(item.getBoatName() == null ? "—" : item.getBoatName());
+        dockLogGear_label.setText(item.getGear() == null ? "—" : item.getGear());
+        
         dockLogDate_dp.setValue(sel.getDockingDate());
         dockLogDate_dp.setDisable(true);
 
@@ -3114,7 +3377,8 @@ public class DashboardflController implements Initializable {
             dockLogRemarks_ta.clear();
         } else {
             dockLogFisherfolk_cb.getSelectionModel().clearSelection();
-            dockLogBoatName_label.setText("—");
+            dockLogGear_label.setText("—");
+//            dockLogBoatName_label.setText("—");
             dockLogDate_dp.setValue(java.time.LocalDate.now());
             dockLogArrivalTime_tf.clear();
             dockLogDepartureTime_tf.clear();
@@ -4140,9 +4404,8 @@ public class DashboardflController implements Initializable {
         var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING, msg, javafx.scene.control.ButtonType.OK);
         a.setHeaderText(null); a.showAndWait();
     }
-// ==== EXPORT HELPERS =========================================================
-   
 
+// ==== EXPORT HELPERS =========================================================
     private static class TableSpec {
         final String name, sql;
         TableSpec(String name, String sql) { this.name = name; this.sql = sql; }
@@ -4458,9 +4721,9 @@ public class DashboardflController implements Initializable {
 
         // Query: sum kg per month within [start, end]
         String sql = """
-            SELECT YEAR(catch_date) AS y, MONTH(catch_date) AS m, SUM(quantity) AS qty
-            FROM catch
-            WHERE catch_date >= ? AND catch_date < ?
+            SELECT YEAR(transaction_date) AS y, MONTH(transaction_date) AS m, SUM(quantity_sold) AS qty
+            FROM transactions
+            WHERE transaction_date >= ? AND transaction_date < ?
             GROUP BY y, m
             ORDER BY y, m
             """;
@@ -4513,11 +4776,11 @@ public class DashboardflController implements Initializable {
         for (int i = 0; i < 7; i++) totals.put(start.plusDays(i), 0.0);
 
         String sql = """
-            SELECT catch_date, SUM(quantity) AS qty
-            FROM catch
-            WHERE catch_date BETWEEN ? AND ?
-            GROUP BY catch_date
-            ORDER BY catch_date
+            SELECT transaction_date, SUM(quantity_sold) AS qty
+            FROM transactions
+            WHERE transaction_date BETWEEN ? AND ?
+            GROUP BY transaction_date
+            ORDER BY transaction_date
             """;
 
         try (var conn = mysqlconnect.ConnectDb();
@@ -4526,7 +4789,7 @@ public class DashboardflController implements Initializable {
             ps.setDate(2, java.sql.Date.valueOf(today));
             try (var rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    var d = rs.getDate("catch_date").toLocalDate();
+                    var d = rs.getDate("transaction_date").toLocalDate();
                     if (totals.containsKey(d)) totals.put(d, rs.getDouble("qty"));
                 }
             }
@@ -4959,6 +5222,354 @@ public class DashboardflController implements Initializable {
             }
         }
     }
+    
+    ////////////////////////////////////////////////////////////////////////////CONSUMER
+    // ---------- CONSUMERS (OUTSIDE initialize) ----------
+    private void hideConsumerErrors() {
+        Consumer_err.setVisible(false);
+    }
+    private void clearConsumerForm() {
+        consumerName_tf.clear();
+        consumerContact.clear();
+        consumerAddress_tf.clear();
+    }
+    private void exitConsumerPopup() {
+        addNewConsumer_popup.setVisible(false);
+        consumer_pane.setDisable(false);
+        sideNavigation_vbox.setDisable(false); // lock side nav when popup is open
+        clearConsumerForm();
+        hideConsumerErrors();
+        editingConsumerId = null;
+        
+        transactionANDsales_pane.setDisable(false);
+        addNewTransaction_popup.setDisable(false);
+    }
+    private void reloadConsumerTable() {
+        consumerData.setAll(mysqlconnect.loadConsumers());
+    }
+    private void showInfoConsumers(String msg) {
+        var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION, msg, javafx.scene.control.ButtonType.OK);
+        a.setHeaderText(null);
+        a.getDialogPane().setMinWidth(520);
+        a.getDialogPane().setMinHeight(160);
+        a.showAndWait();
+    }
+//    private String safeTrim(String t) {
+//        if (t == null) return null; String s = t.trim(); return s.isEmpty() ? null : s;
+//    }
+
+    @FXML
+    private void addConsumer(ActionEvent event) {
+        editingConsumerId = null;
+        clearConsumerForm();
+        hideConsumerErrors();
+        addNewConsumer_popup.setVisible(true);
+        consumer_pane.setDisable(true);
+        sideNavigation_vbox.setDisable(true);
+    }
+
+    @FXML
+    private void updateConsumer(ActionEvent event) {
+        var sel = consumer_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { showInfoConsumers("Please select a consumer to update."); return; }
+        editingConsumerId = sel.getConsumerId();
+
+        consumerName_tf.setText(sel.getName());
+        consumerContact.setText(sel.getContact());
+        consumerAddress_tf.setText(sel.getAddress());
+
+        addNewConsumer_popup.setVisible(true);
+        consumer_pane.setDisable(true);
+        sideNavigation_vbox.setDisable(true);
+    }
+
+    @FXML
+    private void deleteConsumer(ActionEvent event) {
+        var sel = consumer_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { showInfoConsumers("Please select a consumer to delete."); return; }
+
+        int id = sel.getConsumerId();
+        int txnCnt = mysqlconnect.countTransactionsByConsumer(id); // -1 on error
+
+        if (txnCnt < 0) { showInfoConsumers("Unable to check dependencies. Try again."); return; }
+        if (txnCnt > 0) {
+            var warn = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING,
+                "Cannot delete. This consumer has linked transactions (" + txnCnt + ").\n\n" +
+                "Tip: Set status to Inactive instead.",
+                javafx.scene.control.ButtonType.OK);
+            warn.setHeaderText("Delete blocked");
+            warn.showAndWait();
+            return;
+        }
+
+        var confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION,
+            "Delete this consumer permanently? This cannot be undone.",
+            javafx.scene.control.ButtonType.YES, javafx.scene.control.ButtonType.NO);
+        confirm.setHeaderText("Confirm delete");
+        confirm.showAndWait();
+
+        if (confirm.getResult() == javafx.scene.control.ButtonType.YES) {
+            boolean ok = mysqlconnect.deleteConsumerById(id);
+            if (ok) {
+                consumerData.remove(sel);
+                showInfoConsumers("Consumer deleted.");
+            } else {
+                showInfoConsumers("Failed to delete. Please try again.");
+            }
+        }
+    }
+
+    @FXML
+    private void btnSave_onAddConsumer(ActionEvent event) {
+        hideConsumerErrors();
+        String name    = safeTrim(consumerName_tf.getText());
+        String contact = safeTrim(consumerContact.getText());
+        String address = safeTrim(consumerAddress_tf.getText());
+
+        boolean valid = true;
+        if (name == null) { Consumer_err.setVisible(true); valid = false; }
+        if (!valid) return;
+
+        if (editingConsumerId == null) {
+            // INSERT
+            boolean ok = mysqlconnect.insertConsumer(name, contact, address);
+            if (ok) { showInfoConsumers("Consumer saved."); exitConsumerPopup(); reloadConsumerTable(); }
+            else    { showInfoConsumers("Error saving consumer."); }
+        } else {
+            // UPDATE
+            boolean ok = mysqlconnect.updateConsumer(editingConsumerId, name, contact, address);
+            if (ok) { showInfoConsumers("Consumer updated."); exitConsumerPopup(); reloadConsumerTable(); }
+            else    { showInfoConsumers("Error updating consumer."); }
+        }
+        
+                // after successfully saving new consumer:
+        allConsumers = mysqlconnect.loadActiveConsumers();
+        transacConsumer_cb.setItems(allConsumers);
+        // Optional: preselect the newly added name 
+
+    }
+
+    @FXML
+    private void btnClear_onAddConsumer(ActionEvent event) {
+        clearConsumerForm();
+        hideConsumerErrors();
+    }
+
+    @FXML
+    private void btnCancel_onAddConsumer(ActionEvent event) {
+        exitConsumerPopup();
+    }
+
+    @FXML
+    private void export_consumer_list(ActionEvent event) {
+        var fc = new javafx.stage.FileChooser();
+        fc.setTitle("Save Consumer List");
+        fc.getExtensionFilters().add(
+            new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
+        );
+        fc.setInitialFileName("consumers_export_" + java.time.LocalDate.now() + ".xlsx");
+        java.io.File file = fc.showSaveDialog(((javafx.scene.Node)event.getSource()).getScene().getWindow());
+        if (file == null) return;
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new java.io.File(file.getParentFile(), file.getName() + ".xlsx");
+        }
+
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Consumers");
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {"ID","Name","Contact","Address","Status"};
+            int r = 0;
+            var hr = sh.createRow(r++);
+            for (int i = 0; i < headers.length; i++) {
+                var c = hr.createCell(i);
+                c.setCellValue(headers[i]);
+                c.setCellStyle(head);
+            }
+
+            for (ConsumerRecord x : consumerSorted) {
+                var row = sh.createRow(r++);
+                int c = 0;
+                row.createCell(c++).setCellValue(x.getConsumerId());
+                row.createCell(c++).setCellValue(x.getName());
+                row.createCell(c++).setCellValue(x.getContact());
+                row.createCell(c++).setCellValue(x.getAddress());
+                row.createCell(c++).setCellValue(x.isActive() ? "Active" : "Inactive");
+            }
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoConsumers("Export failed: " + ex.getMessage());
+            return;
+        }
+
+        var path = file.getAbsolutePath();
+        var ta = new javafx.scene.control.TextArea("Exported: " + path);
+        ta.setEditable(false); ta.setWrapText(true);
+        ta.setMaxWidth(Double.MAX_VALUE); ta.setMaxHeight(Double.MAX_VALUE);
+        var alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setHeaderText("Export Success");
+        alert.getDialogPane().setContent(ta);
+        alert.getDialogPane().setMinWidth(600);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void viewTransaction_Consumer(ActionEvent event) {
+//        var sel = consumer_tv.getSelectionModel().getSelectedItem();
+//        if (sel == null) { showInfoConsumers("Please select a consumer to view transactions."); return; }
+//
+//        int consumerId = sel.getConsumerId();
+//
+//        // Preferred path: if schema has transactions.consumer_id
+//        var items = mysqlconnect.getTransactionsByConsumer(consumerId);
+//
+//        // Fallback path: if haven't added consumer_id yet,
+//        // mysqlconnect.getTransactionsByConsumer() will internally match by buyer_name = consumer.name
+//
+//        // Now show them (can reuse an existing TableView popup or tab)
+//        txn_tv.setItems(items);                         // if already have txn_tv in UI
+//        // Optionally switch to a Transactions tab/popup here
+    }
+    
+////////////////////////////////////////////////////////////////////////////////end of consumer
+////////////////////////////////////////////////////////////////////////////////INVENTORY
+    private void applyInventoryFilters() {
+        final String q = filterField_inventory.getText() == null
+                ? "" : filterField_inventory.getText().trim().toLowerCase();
+
+        invFiltered.setPredicate(row -> {
+            if (row == null) return false;
+            if (q.isEmpty()) return true;
+
+            String species = row.getSpeciesName() == null ? "" : row.getSpeciesName().toLowerCase();
+            return species.contains(q);
+        });
+    }
+
+    @FXML
+private void editInventory(ActionEvent event) {
+    var sel = inventory_tv.getSelectionModel().getSelectedItem();
+    if (sel == null) {
+        showInfoWide("Select a species to edit selling price.");
+        return;
+    }
+
+    var td = new javafx.scene.control.TextInputDialog(
+        sel.getSellingPrice() == null ? "" : String.format("%.2f", sel.getSellingPrice())
+    );
+    td.setTitle("Edit Selling Price");
+    td.setHeaderText("Species: " + sel.getSpeciesName());
+    td.setContentText("New selling price (per kg):");
+    var opt = td.showAndWait();
+    if (opt.isEmpty()) return;
+
+    try {
+        double newPrice = Double.parseDouble(opt.get().trim());
+        if (newPrice < 0) throw new NumberFormatException();
+
+        boolean ok = mysqlconnect.upsertInventorySellingPrice(
+                sel.getSpeciesId(),
+                newPrice,
+                null,   // lastPurchasePriceOrNull
+                null,   // avgPurchasePriceOrNull
+                null    // restockThresholdOrNull
+        );
+
+        if (ok) {
+            showInfoWide("Selling price updated.");
+            refreshInventoryTable();
+        } else {
+            showInfoWide("Update failed.");
+        }
+    } catch (NumberFormatException nfe) {
+        showInfoWide("Please enter a valid price.");
+    }
+}
+
+
+    private void refreshInventoryTable() {
+        var fresh = mysqlconnect.loadInventoryView();
+        if (invData == null) {
+            // safety fallback if called very early
+            invData = fresh;
+            invFiltered = new FilteredList<>(invData, r -> true);
+            invSorted = new SortedList<>(invFiltered);
+            invSorted.comparatorProperty().bind(inventory_tv.comparatorProperty());
+            inventory_tv.setItems(invSorted);
+        } else {
+            invData.setAll(fresh);
+        }
+    }
+
+
+    @FXML private void addInventory(ActionEvent e) {
+        showInfoWide("Tip: Add inventory by recording a Purchase (not here). You can set selling price by editing a row.");
+    }
+
+    @FXML private void deleteInventory(ActionEvent e) {
+        showInfoWide("Deleting inventory rows is disabled to keep totals consistent. Delete species only if necessary.");
+    }
+
+    @FXML
+    private void btnExport_INVENTORY(ActionEvent event) {
+        var fc = new javafx.stage.FileChooser();
+        fc.setTitle("Export Inventory");
+        fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+        fc.setInitialFileName("inventory_" + java.time.LocalDate.now() + ".xlsx");
+        var f = fc.showSaveDialog(inventory_pane.getScene().getWindow());
+        if (f == null) return;
+        if (!f.getName().toLowerCase().endsWith(".xlsx")) {
+            f = new java.io.File(f.getParentFile(), f.getName() + ".xlsx");
+        }
+
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            var sh = wb.createSheet("Inventory");
+            var bold = wb.createFont(); bold.setBold(true);
+            var head = wb.createCellStyle(); head.setFont(bold);
+
+            String[] headers = {
+                "Fish Type","Stock (kg)","Sold (kg)","Balance (kg)",
+                "Last Purchase Price","Selling Price","Last Update"
+            };
+            int r = 0;
+            var hr = sh.createRow(r++);
+            for (int i = 0; i < headers.length; i++) {
+                var c = hr.createCell(i);
+                c.setCellValue(headers[i]); c.setCellStyle(head);
+            }
+
+            for (var row : invSorted) { // exactly what’s visible (sorted+filtered)
+                var x = sh.createRow(r++); int c = 0;
+                x.createCell(c++).setCellValue(row.getSpeciesName());
+                x.createCell(c++).setCellValue(row.getPurchasedQty());
+                x.createCell(c++).setCellValue(row.getSoldQty());
+                x.createCell(c++).setCellValue(row.getBalanceQty());
+                
+                Double last = row.getLastPurchasePrice();
+                x.createCell(c++).setCellValue(last == null ? 0.0 : last);
+
+                Double sell = row.getSellingPrice();
+                x.createCell(c++).setCellValue(sell == null ? 0.0 : sell);
+                
+                x.createCell(c++).setCellValue(row.getUpdatedAt() == null ? "" : row.getUpdatedAt().toString());
+            }
+            for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
+
+            try (var out = new java.io.FileOutputStream(f)) { wb.write(out); }
+            showInfoWide("Exported: " + f.getAbsolutePath());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showInfoWide("Export failed: " + ex.getMessage());
+        }
+    }
+
+    
+
+    
 
     
 
