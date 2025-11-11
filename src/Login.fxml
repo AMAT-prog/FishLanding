@@ -15,6 +15,11 @@
 <?import javafx.scene.text.Font?>
 
 <StackPane prefHeight="650.0" prefWidth="1000.0" style="-fx-background-color:#0d1117;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginController">
+   <ImageView fitHeight="650.0" fitWidth="1250.0" opacity="0.5" pickOnBounds="true">
+      <image>
+         <Image url="@image/fl.jpg" />
+      </image>
+   </ImageView>
     <!-- Fixed-size login card -->
     <Pane fx:id="loginCard" maxHeight="545.0" maxWidth="394" minHeight="545.0" minWidth="394" prefHeight="545.0" prefWidth="394" style="-fx-background-color:#1E2128; -fx-background-radius:15; -fx-border-radius:15;                  -fx-border-width:2; -fx-border-color:#21252C;">
       <children>

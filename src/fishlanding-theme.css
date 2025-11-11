@@ -1,0 +1,357 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 11 Nov 2025, 19:44:20
+    Author     : Anna Margarette
+*/
+
+/***************************************************
+ * FISHLANDING THEME – BLUE & WHITE
+ ***************************************************/
+
+/* ---------- Root / Main Background ---------- */
+
+.root {
+    -fx-background-color: #F9FBFF; /* very light blue-white */
+    -fx-font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* If dashboard center is a StackPane / AnchorPane
+   give it styleClass="DASHBOARD_bg" in FXML */
+.DASHBOARD_bg {
+    /*-fx-background-image: url("/image/fl.jpg");   your fish landing photo */
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
+
+/* style class on the ScrollPane, e.g. styleClass="DASHBOARD_scroll" */
+.DASHBOARD_scroll {
+    -fx-background-color: transparent;
+}
+
+/* VERY IMPORTANT: the internal viewport */
+.DASHBOARD_scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* optional: remove that small corner square between scrollbars */
+.DASHBOARD_scroll .corner {
+    -fx-background-color: transparent;
+}
+
+
+/* Optional glass overlay pane inside dashboard
+   (styleClass="glass-panel") */
+.glass-panel {
+    -fx-background-color: rgba(255,255,255,0.45);
+    -fx-background-radius: 20;
+    -fx-padding: 15;
+}
+
+/* ---------- Top Header (title bar) ---------- */
+
+.TOP_header {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 10 25 10 25;
+    -fx-alignment: CENTER_LEFT;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 5, 0, 0, 2);
+}
+
+.TOP_header-label {
+    -fx-text-fill: #0D1B2A;       /* deep navy */
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Sidebar Navigation ---------- */
+
+.SIDE_nav {
+    /* soft blue gradient like clinic system but blue */
+    -fx-background-color: 
+        /*linear-gradient(to bottom, #A9D6F7 0%, #74B3F4 100%);*/
+
+              /*#74B3F4;*/
+    linear-gradient(to bottom, #A8C0FF 0%, #3A86FF 100%);
+    -fx-padding: 9 5 9 5;
+}
+
+/* default nav buttons */
+.SIDE_btn {
+    -fx-background-color: transparent;
+    /*-fx-text-fill: #FFFFFF;*/
+    -fx-font-size: 12px;
+    /*-fx-font-weight: normal;*/
+    -fx-cursor: hand;
+    -fx-padding: 4 6 4 6;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+    -fx-text-fill: #0D1B2A;
+    -fx-font-weight: bold;
+}
+
+/* hover state */
+.SIDE_btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* selected state – glassmorphism */
+.SIDE_btn:selected {
+    -fx-background-color: rgba(255, 255, 255, 0.28);
+    -fx-background-radius: 10;
+    -fx-text-fill: #0D1B2A;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+
+    -fx-border-color: rgba(255,255,255,0.65);
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.35), 10, 0, 0, 2);
+}
+
+
+/* icon-only buttons on the sidebar (if any) */
+.SIDE_icon_btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+}
+.SIDE_icon_btn:hover {
+    -fx-background-color: rgba(255,255,255,0.25);
+    -fx-background-radius: 100;
+}
+
+/* ---------- Dashboard Cards / Panels ---------- */
+
+.card, .CARD, .kpi-card {
+    -fx-background-color: rgba(255,255,255,0.85);
+    -fx-background-radius: 20;
+    -fx-padding: 16;
+    /* subtle neumorphism */
+    -fx-effect:
+        dropshadow(gaussian, rgba(0.25,0.25,0.25,0.25), 10, 0.4, 4, 4),
+        dropshadow(gaussian, rgba(0.9,0.9,0.9,0.9), 10, 0.4, 4, 4);
+}
+
+.kpi-title {
+    -fx-text-fill: #6C7A93;
+    -fx-font-size: 12px;
+    -fx-font-weight: semi-bold;
+}
+.kpi-value {
+    -fx-text-fill: #0D1B2A;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+.kpi-sub {
+    -fx-text-fill: #8A94A9;
+    -fx-font-size: 11px;
+}
+
+/* Up/down percentage labels */
+.kpi-up {
+    -fx-text-fill: #00B894;  /* green */
+    -fx-font-weight: bold;
+}
+.kpi-down {
+    -fx-text-fill: #E74C3C;  /* red */
+    -fx-font-weight: bold;
+}
+
+/* ---------- Tables & Scroll areas ---------- */
+
+.table-view1 {
+    -fx-background-color: transparent;
+}
+
+.table-view1 .column-header-background {
+    -fx-background-color: #E4ECFF;
+}
+
+.table-view1 .column-header, .table-view1 .column-header .label {
+    -fx-text-fill: #0D1B2A;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.table-view1 .table-row-cell {
+    -fx-background-color: transparent;
+}
+.table-view1 .table-row-cell:odd {
+    -fx-background-color: rgba(168,192,255,0.10);
+}
+.table-view1 .table-row-cell:selected {
+    -fx-background-color: rgba(58,134,255,0.25);
+}
+
+/* ---------- Buttons (generic) ---------- */
+
+.primary-btn {
+    -fx-background-color: #3A86FF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 6 16 6 16;
+    -fx-cursor: hand;
+}
+.primary-btn:hover {
+    -fx-background-color: #265DCC;
+}
+
+.outline-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #3A86FF;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-text-fill: #3A86FF;
+    -fx-font-weight: bold;
+    -fx-padding: 6 16 6 16;
+    -fx-cursor: hand;
+}
+.outline-btn:hover {
+    -fx-background-color: rgba(58,134,255,0.08);
+}
+
+/* ---------- Toggle chips (Week/Month for chart, etc.) ---------- */
+
+.toggle-chip {
+    -fx-background-color: transparent;
+    -fx-border-color: #3A86FF;
+    -fx-border-radius: 5;
+    -fx-text-fill: #6C7A93;
+    /*-fx-background-radius: 20;*/
+    -fx-padding: 5 12 5 12;
+    -fx-cursor: hand;
+}
+
+.toggle-chip:selected {
+    -fx-background-color: #3A86FF;
+    -fx-background-radius: 5;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Status labels (Paid / Partial / Unpaid) ---------- */
+
+.status-paid {
+    -fx-background-color: rgba(0,184,148,0.15);
+    -fx-text-fill: #009966;
+    -fx-background-radius: 12;
+    -fx-padding: 2 8 2 8;
+}
+.status-partial {
+    -fx-background-color: rgba(255,193,7,0.18);
+    -fx-text-fill: #C28C00;
+    -fx-background-radius: 12;
+    -fx-padding: 2 8 2 8;
+}
+.status-unpaid {
+    -fx-background-color: rgba(231,76,60,0.18);
+    -fx-text-fill: #C0392B;
+    -fx-background-radius: 12;
+    -fx-padding: 2 8 2 8;
+}
+
+/* =========================================================
+   GLASS TABLE – matches blue/white theme & cards
+   Use styleClass="glass-table" on your TableView
+   ========================================================= */
+
+/* Base table */
+.glass-table {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-table-cell-border-color: transparent;   /* we’ll draw our own divider */
+}
+
+/* Header area – frosted white with slight blue border */
+.glass-table > .column-header-background {
+    -fx-background-color: rgba(255,255,255,0.65);  /* glassy white */
+    -fx-background-radius: 16 16 0 0;
+    -fx-background-insets: 0;
+    -fx-border-color: rgba(0,0,0,0.05);
+    -fx-border-width: 0 0 1 0;
+}
+
+.glass-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 36px;                 /* header height */
+}
+
+.glass-table .column-header .label {
+    -fx-text-fill: #0F172A;         /* almost black */
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+/* Rows (use very light transparent whites so bg image still peeks through) */
+.glass-table .table-row-cell {
+    -fx-cell-size: 34px;
+    -fx-background-color: transparent;
+}
+
+.glass-table .table-row-cell:odd {
+    -fx-background-color: rgba(255,255,255,0.45);
+}
+
+.glass-table .table-row-cell:even {
+    -fx-background-color: rgba(255,255,255,0.30);
+}
+
+/* Hover */
+.glass-table .table-row-cell:hover {
+    -fx-background-color: rgba(110,193,247,0.28);  /* light theme blue */
+}
+
+/* Selection */
+.glass-table:row-selection .table-row-cell:selected {
+    -fx-background-color: #0078C8;  /* your main blue */
+}
+
+.glass-table:row-selection .table-row-cell:selected .table-cell {
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Cells */
+.glass-table .table-cell {
+    -fx-text-fill: #111827;         /* dark text for readability */
+    -fx-font-size: 11px;
+    -fx-padding: 6 10 6 10;
+    -fx-border-color: transparent transparent rgba(15,23,42,0.08) transparent;
+    -fx-border-width: 0 0 1 0;      /* subtle row divider */
+}
+
+/* Placeholder (no items) */
+.glass-table .placeholder .label {
+    -fx-text-fill: #6B7280;
+    -fx-font-style: italic;
+}
+
+/* Scrollbars – light & minimal */
+.glass-table .scroll-bar:horizontal,
+.glass-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.glass-table .scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.glass-table .scroll-bar .thumb {
+    -fx-background-color: rgba(0,120,200,0.45);  /* theme blue */
+    -fx-background-radius: 8;
+}
+
+/* Corner filler (bottom-right square) */
+.glass-table .corner {
+    -fx-background-color: transparent;
+}
+
+

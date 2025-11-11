@@ -12,7 +12,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
      -fx-border-radius: 20px;
  }
  .search-textbox{
-      -fx-text-fill: white;
+      -fx-text-fill: black;
       -fx-font-size: 12px;
  }
  
@@ -32,7 +32,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .SIDE_btn:selected {
     -fx-background-color: #262A33;
     -fx-background-radius: 5px;
-    -fx-font-size: 14px;
+    -fx-font-size: 14px; 
     -fx-font-weight: bold;
 }
 
@@ -167,7 +167,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .transaction_toggle {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-text-fill: white;        /* Dark text */
+    -fx-text-fill: black;        /* Dark text */
     -fx-font-size: 11px;
     -fx-cursor: hand;
     /*-fx-padding: 5 15 5 15;      some spacing */
@@ -175,7 +175,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 /* Selected (clicked) state */
 .transaction_toggle:selected {
     -fx-background-color: transparent;
-    -fx-border-color: transparent transparent white transparent; /* bottom border only */
+    -fx-border-color: transparent transparent black transparent; /* bottom border only */
     -fx-border-width: 0 0 2px 0;  /* only bottom border visible */
     -fx-font-size: 12px;          /* bigger font when active */
     -fx-font-weight: bold;
@@ -190,10 +190,10 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 }
 
 .textPersonalInfo{
-    -fx-border-color: transparent transparent white transparent;
-    -fx-background-color: #16181d;
+    -fx-border-color: transparent transparent black transparent;
+    -fx-background-color:  #e2e4e9;
     -fx-font-size: 12px; 
-    -fx-text-fill: white;
+    -fx-text-fill: black;
     -fx-border-radius: 3px;
 }
 
@@ -205,8 +205,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 
 /* Give this style class to your Role ComboBox: role-combo */
 .role-combo {
-  -fx-background-color: #16181d;
-  -fx-border-color: transparent transparent white transparent;
+  -fx-background-color: #e2e4e9;
+  -fx-border-color: transparent transparent black transparent;
   /*-fx-border-color: #3a3f4b;*/
   -fx-background-radius: 6;
   -fx-border-radius: 3;
@@ -215,7 +215,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 
 /* Text in the closed button cell (what you see when not expanded) */
 .role-combo .list-cell {
-  -fx-text-fill: white;
+  -fx-text-fill: black;
   -fx-font-size: 12px;
   -fx-background-color: transparent; /* keep dark */
 }
@@ -223,7 +223,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 /* If the ComboBox is set editable=true, style its internal TextField */
 .role-combo .text-field {
   -fx-background-color: transparent;
-  -fx-text-fill: white;
+  -fx-text-fill: black;
   -fx-prompt-text-fill: #94a3b8;
   -fx-font-size: 12px;
 }
@@ -233,8 +233,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .role-combo:disabled .list-cell,
 .role-combo:disabled .text-field {
   -fx-opacity: 1.0;                /* <-- stop auto-dimming */
-  -fx-text-fill: #cbd5e1;          /* softer gray for disabled text */
-  -fx-background-color: #1f232b;   /* subtle contrast when disabled */
+  -fx-text-fill: black;          /* softer gray for disabled text */
+  -fx-background-color:  #e1e4ea;   /* subtle contrast when disabled */
 }
 
 /* Popup list styling */
@@ -251,12 +251,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .combo-box-popup .list-view .list-cell:filled:selected {
   -fx-background-color: #334155;
   -fx-text-fill: white;
-}
+} 
 
 /* Optional: make the arrow visible on dark bg */
-.role-combo .arrow,
-.role-combo .arrow-button {
-  -fx-background-color: transparent;
+.role-combo .arrow {
+  -fx-background-color: black;
 }
 
 
@@ -271,8 +270,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-cursor: hand;
 
     /* OFF appearance */
-    -fx-background-color: #1f2630;     /* <-- FILLED off track */
-    -fx-border-color: #2b3a4a;
+    /*-fx-background-color: #1f2630;      <-- FILLED off track */
+    -fx-background-color:  #bfbfbf; 
+    -fx-border-color: #bfbfbf;
     -fx-border-width: 1;
     -fx-border-radius: 15;
 }
@@ -302,7 +302,10 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .switch:hover .thumb { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.40), 8, 0.3, 0, 1); }
 
 /* disabled state */
-.switch:disabled { -fx-opacity: 0.55; }
+.switch:disabled { 
+    -fx-opacity: 0.55; 
+    /*-fx-border-color: #bfbfbf;*/
+}
 
 
 /* ====== LineChart look - DASHBOARD LANDING TRENDS ====== */
@@ -324,16 +327,16 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 
 /* axes color */
 .axis {
-  -fx-tick-label-fill: white;                   /* tick text */
+  -fx-tick-label-fill: black;                   /* tick text */
 }
 .axis-label {
-  -fx-text-fill: white;                         /* big axis label */
+  -fx-text-fill: black;                         /* big axis label */
 }
 
 /* series color (amber line & points); tweak if you like */
 .default-color0.chart-series-line { -fx-stroke: #f59e0b; -fx-stroke-width: 2.5; }
 .default-color0.chart-line-symbol {
-  -fx-background-color: #f59e0b, white;
+  -fx-background-color: #f59e0b, black;
   -fx-background-insets: 0, 2;
   -fx-padding: 3px;
 }
@@ -342,6 +345,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .toggle-pill {
   -fx-background-radius: 10;
   -fx-background-color: #262A33;               /* not selected */
+  -fx-border-color: #0F74C7;
   -fx-text-fill: #E5E7EB;
   -fx-font-weight: 600;
 }
@@ -417,7 +421,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-color: transparent;
 }
 .dark1-table .scroll-bar .track {
-    -fx-background-color: #0B0F14;
+    -fx-background-color:  #ffffff;
 }
 .dark1-table .scroll-bar .thumb {
     -fx-background-color: #334155;
@@ -481,5 +485,5 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 /* legend text only (keep legend color squares from the slice fills) */
 /* Make legend text visible on dark background and keep some top padding */
 .chart-legend { -fx-background-color: transparent; -fx-padding: 8 0 0 0; }
-.chart-legend, .chart-legend-item { -fx-text-fill: #e6edf3; }
+.chart-legend, .chart-legend-item { -fx-text-fill: black; }
 

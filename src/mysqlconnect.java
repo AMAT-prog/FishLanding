@@ -1157,6 +1157,61 @@ public static ObservableList<Catch> getCatch() {
         return -1; // error
     }
     
+    public static ObservableList<TransactionViewRow> getTransactionsByConsumer(int consumerId) {
+        var list = FXCollections.<TransactionViewRow>observableArrayList();
+
+        String sql = """
+            SELECT t.transaction_id,
+                   t.consumer_id,
+                   t.species_id,
+                   t.buyer_name,
+                   csm.name AS consumer_name,
+                   sp.species_name,
+                   t.quantity_sold,
+                   t.unit_price,
+                   t.total_price,
+                   t.payment_method,
+                   t.remarks,
+                   t.payment_status,
+                   t.transaction_date
+            FROM transactions t
+            LEFT JOIN consumers csm ON csm.consumer_id = t.consumer_id
+            JOIN species sp         ON sp.species_id   = t.species_id
+            WHERE t.consumer_id = ?
+            ORDER BY t.transaction_date DESC
+            """;
+
+        try (var conn = ConnectDb();
+             var ps   = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, consumerId);
+
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    var ts = rs.getTimestamp("transaction_date");
+                    list.add(new TransactionViewRow(
+                            rs.getInt("transaction_id"),
+                            rs.getInt("consumer_id"),
+                            rs.getInt("species_id"),
+                            rs.getString("buyer_name"),
+                            rs.getString("consumer_name"),
+                            rs.getString("species_name"),
+                            rs.getDouble("quantity_sold"),
+                            rs.getDouble("unit_price"),
+                            rs.getDouble("total_price"),
+                            rs.getString("payment_method"),
+                            rs.getString("remarks"),
+                            rs.getString("payment_status"),
+                            ts != null ? ts.toLocalDateTime() : null
+                    ));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        return list;
+    }
+
+    
     ////// INVENTORY
     public static javafx.collections.ObservableList<InventoryRow> loadInventoryView() {
         var list = javafx.collections.FXCollections.<InventoryRow>observableArrayList();

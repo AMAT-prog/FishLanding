@@ -745,6 +745,29 @@ public class DashboardflController implements Initializable {
     @FXML
     private TextField filterField_inventory;
     
+    @FXML
+    private BorderPane viewConsumerHistory_popup;
+    @FXML
+    private TabPane consumerHistory_tabpane;
+    @FXML
+    private TableView<TransactionViewRow> consumerHistory_tv;
+    @FXML
+    private TableColumn<TransactionViewRow, java.time.LocalDateTime> consumerHistoryDate_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> consumerHistoryFish_col;
+    @FXML
+    private TableColumn<TransactionViewRow, Number> consumerHistoryQty_col;
+    @FXML
+    private TableColumn<TransactionViewRow, Number> consumerHistoryUnitPrice_col;
+    @FXML
+    private TableColumn<TransactionViewRow, Number> consumerHistoryTotal_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> consumerHistoryPayMethod_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> consumerHistoryPayStatus_col;
+    @FXML
+    private TableColumn<TransactionViewRow, String> consumerHistoryRemarks_col;
+    
     
     
     private void wireNav() {
@@ -1000,7 +1023,7 @@ public class DashboardflController implements Initializable {
         hideFisherErrors();
         
         //for viewing tables in fisherfolk history (catches/transactions/dock logs)
-        // ===== CATCHES =====
+        // ===== CATCHES in initialize =====
         species_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
         quantity_col1.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQuantity()));
         price_col1.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getPricePerKilo()));
@@ -1035,8 +1058,10 @@ public class DashboardflController implements Initializable {
         setTimeFormat(departure_col, "HH:mm");
         
         catch_tv1.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        catch_tv1.setPlaceholder(new Label("No transaction history"));
 //        txn_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         dock_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        dock_tv.setPlaceholder(new Label("No docking logs yet"));
 
         ////TRANSACTION & SALES
         // column factories
@@ -1069,7 +1094,6 @@ public class DashboardflController implements Initializable {
         transSorted = new javafx.collections.transformation.SortedList<>(transFiltered);
         transSorted.comparatorProperty().bind(transaction_tv.comparatorProperty());
         transaction_tv.setItems(transSorted);
-System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size());
 
         // search
         filterField_transactions.textProperty().addListener((o, ov, nv) -> applyTransFilters());
@@ -1413,6 +1437,33 @@ System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size())
         // popup default state
         addNewConsumer_popup.setVisible(false);
         hideConsumerErrors();
+        
+        // ===== CONSUMER HISTORY TABLE =====
+        consumerHistoryFish_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
+        consumerHistoryQty_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleDoubleProperty(c.getValue().getQtySold()));
+        consumerHistoryUnitPrice_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleDoubleProperty(c.getValue().getUnitPrice()));
+        consumerHistoryTotal_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleDoubleProperty(c.getValue().getTotalPrice()));
+        consumerHistoryPayMethod_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getPaymentMethod()));
+        consumerHistoryPayStatus_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getPaymentStatus()));
+        consumerHistoryRemarks_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getRemarks()));
+        consumerHistoryDate_col.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getTxnDate()));
+
+        // formatting helpers 
+        setNumeric2dp(consumerHistoryQty_col);
+        setCurrencyPeso(consumerHistoryUnitPrice_col); 
+        setCurrencyPeso(consumerHistoryTotal_col);
+        setDateTimeFormat(consumerHistoryDate_col, "yyyy-MM-dd HH:mm");
+
+        consumerHistory_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        consumerHistory_tv.setPlaceholder(new Label("No transaction history")); 
 
         
         //// INVENTORY
@@ -2444,7 +2495,7 @@ System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size())
     }
 
     @FXML
-    private void viewCatches(ActionEvent e) {
+    private void viewCatches(ActionEvent e) { 
         FisherfolkRecord sel = fishermen_tv.getSelectionModel().getSelectedItem();
         if (sel == null) {
             showInfoWide("Please select a fisherfolk to view history.");
@@ -2454,9 +2505,9 @@ System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size())
         int fisherId = sel.getFisherfolkId();
 
         // load all 3 lists
-        catch_tv1.setItems(mysqlconnect.getCatchesByFisher(fisherId));
+        catch_tv1.setItems(mysqlconnect.getCatchesByFisher(fisherId)); // purchases transactions from fisherman
 //        txn_tv.setItems(mysqlconnect.getTransactionsByFisher(fisherId));
-        dock_tv.setItems(mysqlconnect.getDockLogsByFisher(fisherId));
+        dock_tv.setItems(mysqlconnect.getDockLogsByFisher(fisherId));  // dock logs
 
         // resize columns after data is loaded
 //        autoResizeColumns(catch_tv1);
@@ -2486,14 +2537,14 @@ System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size())
         dock_tv.setItems(mysqlconnect.getDockLogsByFisher(fisherId));
 
         // resize columns after data is loaded
-//        autoResizeColumns(catch_tv1);
+//        autoResizeColumns(catch_tv1); 
 //        autoResizeColumns(txn_tv);
 //        autoResizeColumns(dock_tv);
         
         viewFisherHistory_popup.setVisible(true);
         history_tabpane.getSelectionModel().select(1); // open on "Transactions"
         
-        fishermen_pane.setDisable(true);
+        fishermen_pane.setDisable(true); 
         sideNavigation_vbox.setDisable(true);
         
     }
@@ -4405,6 +4456,8 @@ System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size())
         a.setHeaderText(null); a.showAndWait();
     }
 
+    
+
 // ==== EXPORT HELPERS =========================================================
     private static class TableSpec {
         final String name, sql;
@@ -5419,21 +5472,35 @@ System.out.println("Loaded txns: " + mysqlconnect.loadTransactionsView().size())
 
     @FXML
     private void viewTransaction_Consumer(ActionEvent event) {
-//        var sel = consumer_tv.getSelectionModel().getSelectedItem();
-//        if (sel == null) { showInfoConsumers("Please select a consumer to view transactions."); return; }
-//
-//        int consumerId = sel.getConsumerId();
-//
-//        // Preferred path: if schema has transactions.consumer_id
-//        var items = mysqlconnect.getTransactionsByConsumer(consumerId);
-//
-//        // Fallback path: if haven't added consumer_id yet,
-//        // mysqlconnect.getTransactionsByConsumer() will internally match by buyer_name = consumer.name
-//
-//        // Now show them (can reuse an existing TableView popup or tab)
-//        txn_tv.setItems(items);                         // if already have txn_tv in UI
-//        // Optionally switch to a Transactions tab/popup here
+        ConsumerRecord sel = consumer_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showInfoWide("Please select a consumer to view transaction history.");
+            return;
+        }
+
+        int consumerId = sel.getConsumerId();
+
+        // Load history for that consumer
+        consumerHistory_tv.setItems(mysqlconnect.getTransactionsByConsumer(consumerId));
+
+        // Show popup & disable background
+        viewConsumerHistory_popup.setVisible(true);
+        consumerHistory_tabpane.getSelectionModel().select(0); // first tab
+
+        consumer_pane.setDisable(true);
+        sideNavigation_vbox.setDisable(true);
     }
+
+    
+    @FXML
+    private void EXIT_consumerHistory(ActionEvent event) {
+        viewConsumerHistory_popup.setVisible(false);
+
+        consumer_pane.setDisable(false);
+        sideNavigation_vbox.setDisable(false); 
+    }
+
+    
     
 ////////////////////////////////////////////////////////////////////////////////end of consumer
 ////////////////////////////////////////////////////////////////////////////////INVENTORY
