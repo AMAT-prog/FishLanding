@@ -173,3 +173,155 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 }
 
 
+
+/* for export preview in data management*/
+/* ======================================= */
+/*   OVERLAY BACKGROUND (DIMMER)           */
+/* ======================================= */
+.popup-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.55); /* dark semi-transparent */
+    -fx-padding: 27;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+
+    /* center it floating */
+    -fx-alignment: center;
+
+    /* modal effect */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 30, 0.4, 0, 8);
+}
+
+/* table background */
+.popup-overlay .table-view {
+    -fx-background-color: #ffffff;
+}
+
+/* export button (green) */
+.btn-export {
+    -fx-background-color: #3cb371;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 6 16;
+    -fx-background-radius: 6;
+}
+.btn-export:hover {
+    -fx-background-color: #2e8b57;
+}
+
+/* cancel button (gray) */
+.btn-cancel {
+    -fx-background-color: #cccccc;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-padding: 6 16;
+    -fx-background-radius: 6;
+}
+.btn-cancel:hover {
+    -fx-background-color: #b3b3b3;
+}
+
+.preview-card { 
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 24, 0.3, 0, 8);
+    -fx-border-radius: 14;
+}
+
+
+
+/*********** LOGIN SCREEN ***********/
+
+/* Root with image background (StackPane) */
+.login-root {
+    -fx-background-color: #000; /* fallback */
+}
+
+/* dark overlay over the ImageView (a Pane above it) */
+.login-overlay {
+    -fx-background-color: rgba(15, 23, 42, 0.45); /* #0f172a @ 45% */
+}
+
+/* Center/right login card */
+.login-card {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-background-radius: 24;
+    -fx-padding: 26 32 26 32;
+    -fx-max-width: 394;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,200,0.25), 20, 0.35, 0, 8);
+}
+
+/* Title + subtitle */
+.login-title {
+    -fx-text-fill: #0D1B2A;
+    -fx-font-size: 25px;
+    -fx-font-weight: 800;
+}
+.login-subtitle {
+    -fx-text-fill: #4B5563;
+    -fx-font-size: 17px;
+    -fx-font-style: italic;
+}
+
+/* Labels (Username, Password) */
+.login-label {
+    -fx-text-fill: #374151;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+/* TextFields & PasswordFields */
+.login-field {
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-text-fill: #111827;
+    -fx-prompt-text-fill: #9CA3AF;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #D0E2FF;
+    -fx-border-width: 1;
+    -fx-padding: 6 10 6 10;
+}
+.login-field:focused {
+    -fx-border-color: #0078C8;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,200,0.30), 10, 0.4, 0, 0);
+}
+
+/* small error message under password */
+.login-error {
+    -fx-text-fill: #C0392B;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-font-style: italic;
+}
+
+/* “Forgot password?” link */
+.login-link {
+    -fx-text-fill: #0078C8;
+    -fx-font-size: 12px;
+}
+.login-link:hover {
+    -fx-underline: true;
+}
+
+/* Sign in button */
+.btn-primary-login {
+    -fx-background-color: #0078C8;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 18;
+    -fx-padding: 8 0 8 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,70,110,0.45), 7, 0.4, 0, 2);
+}
+.btn-primary-login:hover {
+    -fx-background-color: #0066AA;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,200,0.35), 12, 0.5, 0, 2);
+}
+.btn-primary-login:default {
+    -fx-background-color: #0078C8;
+}
+
+
+
+
+

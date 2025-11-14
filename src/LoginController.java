@@ -70,6 +70,10 @@ public class LoginController implements Initializable {
     private static final String SQL_USERNAME_EXISTS = "SELECT COUNT(*) FROM users WHERE username=? AND user_id<>?";
     private static final String SQL_UPDATE_USER     = "UPDATE users SET username=?, password=? WHERE user_id=?";
     private static final String SQL_INSERT_USER     = "INSERT INTO users(username, password) VALUES(?,?)";
+    @FXML
+    private StackPane root;
+    @FXML
+    private ImageView bgImage;
 
     
 

@@ -166,7 +166,7 @@
                            <graphic>
                               <ImageView fitHeight="21.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@image/inventory.png" />
+                                    <Image url="@image/INVENTORY.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -903,7 +903,7 @@
                                                 <Insets top="10.0" />
                                              </VBox.margin>
                                           </Button>
-                                          <Button mnemonicParsing="false" onAction="#exportLandings" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: BLACK; -fx-border-radius: 5px;" text="Export">
+                                          <Button mnemonicParsing="false" onAction="#exportLandings" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: BLACK; -fx-border-radius: 5px;" text="Export List">
                                              <font>
                                                 <Font name="System Bold" size="15.0" />
                                              </font>
@@ -1498,7 +1498,7 @@
                               </Label>
                               <VBox layoutX="35.0" layoutY="43.0" prefHeight="457.0" prefWidth="176.0">
                                  <children>
-                                    <Button mnemonicParsing="false" onAction="#transaction_generateReport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: black; -fx-border-radius: 5px;" text="Export">
+                                    <Button mnemonicParsing="false" onAction="#transaction_generateReport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: black; -fx-border-radius: 5px;" text="Export List">
                                        <font>
                                           <Font name="System Bold" size="15.0" />
                                        </font>
@@ -1865,7 +1865,7 @@
                               </Label>
                               <VBox layoutX="35.0" layoutY="43.0" prefHeight="457.0" prefWidth="176.0">
                                  <children>
-                                    <Button mnemonicParsing="false" onAction="#dockLog_generateReport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: black; -fx-border-radius: 5px;" text="Export">
+                                    <Button mnemonicParsing="false" onAction="#dockLog_generateReport" prefHeight="29.0" prefWidth="173.0" style="-fx-background-color: transparent; -fx-border-color: black; -fx-border-radius: 5px;" text="Export List">
                                        <font>
                                           <Font name="System Bold" size="15.0" />
                                        </font>
@@ -2720,7 +2720,7 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <ScrollPane fx:id="dataInformation_pane" layoutX="225.0" layoutY="122.0" prefHeight="530.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll">
+            <ScrollPane fx:id="dataInformation_pane" layoutX="225.0" layoutY="122.0" prefHeight="530.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="516.0" prefWidth="1035.0" styleClass="glass-panel">
                      <children>
@@ -3055,6 +3055,56 @@
                      </bottom>
                   </BorderPane>
                </children>
+            </StackPane>
+            <StackPane fx:id="exportPreviewOverlay" layoutX="233.0" layoutY="92.0" styleClass="popup-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane fx:id="exportPreviewPane" prefHeight="500.0" prefWidth="950.0" styleClass="preview-card" stylesheets="@popup.css">
+                     <top>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label fx:id="exportPreviewTitle" text="Preview Export">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="16.0" right="16.0" top="10.0" />
+                           </padding>
+                        </HBox>
+                     </top>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="23.0" prefWidth="945.0" spacing="10.0" style="-fx-padding: 10;" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#cancelExportPreview" styleClass="btn-cancel" text="Cancel" />
+                              <Button mnemonicParsing="false" onAction="#confirmExportPreview" styleClass="btn-export" text="Export" />
+                           </children>
+                           <padding>
+                              <Insets bottom="12.0" left="16.0" right="16.0" top="10.0" />
+                           </padding>
+                        </HBox>
+                     </bottom>
+                     <center>
+                        <TabPane fx:id="exportPreviewTabs" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                          <tabs>
+                            <Tab text="Untitled Tab 1">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                              </content>
+                            </Tab>
+                            <Tab text="Untitled Tab 2">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                              </content>
+                            </Tab>
+                          </tabs>
+                        </TabPane>
+                     </center>
+                  </BorderPane>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
             </StackPane>
             <ScrollPane fx:id="inventory_pane" layoutX="225.0" layoutY="120.0" prefHeight="552.0" prefWidth="1047.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>

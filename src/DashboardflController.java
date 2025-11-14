@@ -324,6 +324,12 @@ public class DashboardflController implements Initializable {
     // settings.properties keys (same file)
     private static final String KEY_LAST_BACKUP_ISO = "autoBackup.lastIso";
     
+    /// preview for exporting all 
+    //  to export after preview
+    private enum ExportType { PDF_ALL, EXCEL_ALL, CSV_ALL }
+    private ExportType pendingExportType = null;
+ 
+
     ////=====CONSUMER====////
     // data pipes (like Fisherfolk)
     private javafx.collections.ObservableList<ConsumerRecord> consumerData;
@@ -795,6 +801,16 @@ public class DashboardflController implements Initializable {
     private Label netSales_label;
     @FXML
     private BarChart<String, Number> profitBarChart;
+    
+    @FXML
+    private BorderPane exportPreviewPane;
+    @FXML
+    private Label exportPreviewTitle;
+//    private TableView<javafx.collections.ObservableList<javafx.beans.property.StringProperty>> exportPreviewTable;
+    @FXML
+    private StackPane exportPreviewOverlay;
+    @FXML
+    private TabPane exportPreviewTabs;
     
     
     
@@ -4576,117 +4592,50 @@ public class DashboardflController implements Initializable {
         }
     }
 
-    @FXML
-    private void exportALL_CSV(ActionEvent event) {
-        var dc = new javafx.stage.DirectoryChooser();
-        dc.setTitle("Choose folder to export CSV files");
-        var dir = dc.showDialog(lastBackup_label.getScene().getWindow());
-        if (dir == null) return;
 
-        String stamp = nowStamp();
-        int written = 0;
 
+   @FXML
+private void exportALL_PDF(ActionEvent event) {
+    startExportPreview(ExportType.PDF_ALL, "Preview – Export All (PDF)");
+    sideNavigation_vbox.setDisable(true);
+}
+
+@FXML
+private void exportALL_EXCEL(ActionEvent event) {
+    startExportPreview(ExportType.EXCEL_ALL, "Preview – Export All (Excel)");
+    sideNavigation_vbox.setDisable(true);
+} 
+
+@FXML
+private void exportALL_CSV(ActionEvent event) {
+    startExportPreview(ExportType.CSV_ALL, "Preview – Export All (CSV)");
+    sideNavigation_vbox.setDisable(true);
+}
+
+private void startExportPreview(ExportType type, String title) {
+    pendingExportType = type;
+    exportPreviewTitle.setText(title);
+
+    java.util.List<TableData> tables = new java.util.ArrayList<>();
+
+    try (var conn = mysqlconnect.ConnectDb()) {
         for (var spec : exportTables()) {
-            java.io.File out = new java.io.File(dir, spec.name + "_" + stamp + ".csv");
-            written += exportTableToCsv(spec, out);
+            tables.add(fetchTable(conn, spec));
         }
-
-        lastBackup_label.setText("Last Export (CSV): " + java.time.LocalDateTime.now());
-        showInfo("Exported " + written + " CSV file(s) to:\n" + dir.getAbsolutePath());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        showInfoWide("Failed to load data for preview:\n" + ex.getMessage());
+        return;
     }
 
-
-    private int exportTableToCsv(TableSpec spec, java.io.File file) {
-        try (var c  = mysqlconnect.ConnectDb();
-             var ps = c.prepareStatement(spec.sql);
-             var rs = ps.executeQuery();
-             var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
-
-            var md   = rs.getMetaData();
-            int cols = md.getColumnCount();
-
-            // header (uses aliases like "purchase_id", "species", "fisherfolk", etc.)
-            for (int i = 1; i <= cols; i++) {
-                if (i > 1) pw.print(",");
-                pw.print(csv(md.getColumnLabel(i)));
-            }
-            pw.println();
-
-            // rows
-            while (rs.next()) {
-                for (int i = 1; i <= cols; i++) {
-                    if (i > 1) pw.print(",");
-                    String v = rs.getString(i);
-                    pw.print(csv(v));
-                }
-                pw.println();
-            }
-            return 1;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return 0;
-        }
-    }
+    buildExportPreviewTabs(tables);
+    exportPreviewOverlay.setVisible(true);
+    exportPreviewOverlay.setManaged(true);
+}
 
 
-    
-    @FXML
-    private void exportALL_PDF(ActionEvent event) {
-        try (var conn = mysqlconnect.ConnectDb()) {
-            var file = chooseExportFile("Export All (PDF)", DB_NAME + "_export", ".pdf");
-            if (file == null) return;
-
-            var doc = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4.rotate(), 24, 24, 24, 24);
-            com.lowagie.text.pdf.PdfWriter.getInstance(doc, new java.io.FileOutputStream(file));
-            doc.open();
-
-            var titleFont = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 18, com.lowagie.text.Font.BOLD);
-            var headFont  = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.BOLD);
-            var cellFont  = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10);
-
-            doc.add(new com.lowagie.text.Paragraph("Fish Landing – Full Data Export", titleFont));
-            doc.add(new com.lowagie.text.Paragraph(
-                "Generated: " + java.time.LocalDateTime.now() + "\n\n"));
-
-            for (var spec : exportTables()) {
-                var t = fetchTable(conn, spec);
-
-                // Section header
-                var h = new com.lowagie.text.Paragraph("\n" + t.name.toUpperCase(), headFont);
-                doc.add(h);
-
-                var table = new com.lowagie.text.pdf.PdfPTable(t.headers.size());
-                table.setWidthPercentage(100);
-
-                // headers
-                for (var hd : t.headers) {
-                    var cell = new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(hd, headFont));
-                    cell.setGrayFill(0.92f);
-                    table.addCell(cell);
-                }
-
-                // rows
-                for (var row : t.rows) {
-                    for (Object v : row) {
-                        var ph = new com.lowagie.text.Phrase(v == null ? "" : String.valueOf(v), cellFont);
-                        table.addCell(new com.lowagie.text.pdf.PdfPCell(ph));
-                    }
-                }
-                doc.add(table);
-            }
-
-            doc.close();
-
-            lastBackup_label.setText("Last Export (PDF): " + java.time.LocalDateTime.now());
-            showInfoWide("Exported to:\n" + file.getAbsolutePath());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            showInfoWide("PDF export failed: " + ex.getMessage());
-        }
-    }
-
-    @FXML
-    private void exportALL_EXCEL(ActionEvent event) {
+    // actual export code moved here (almost same as old exportALL_EXCEL body)
+    private void doExportAllExcel() {
         try (var conn = mysqlconnect.ConnectDb()) {
             var file = chooseExportFile("Export All (Excel)", DB_NAME + "_export", ".xlsx");
             if (file == null) return;
@@ -4695,33 +4644,7 @@ public class DashboardflController implements Initializable {
                 for (var spec : exportTables()) {
                     var t = fetchTable(conn, spec);
                     var sheet = wb.createSheet(t.name);
-
-                    // header style (bold)
-                    var bold = wb.createFont(); bold.setBold(true);
-                    var headStyle = wb.createCellStyle(); headStyle.setFont(bold);
-
-                    int r = 0;
-                    var hr = sheet.createRow(r++);
-                    for (int i = 0; i < t.headers.size(); i++) {
-                        var cell = hr.createCell(i);
-                        cell.setCellValue(t.headers.get(i));
-                        cell.setCellStyle(headStyle);
-                    }
-
-                    for (var row : t.rows) {
-                        var rr = sheet.createRow(r++);
-                        for (int i = 0; i < row.size(); i++) {
-                            var cell = rr.createCell(i);
-                            Object v = row.get(i);
-                            if (v == null) cell.setBlank();
-                            else if (v instanceof Number n) cell.setCellValue(n.doubleValue());
-                            else if (v instanceof java.sql.Date d) cell.setCellValue(d.toLocalDate().toString());
-                            else if (v instanceof java.sql.Time ttime) cell.setCellValue(ttime.toLocalTime().toString());
-                            else if (v instanceof java.sql.Timestamp ts) cell.setCellValue(ts.toLocalDateTime().toString());
-                            else cell.setCellValue(String.valueOf(v));
-                        }
-                    }
-                    for (int i = 0; i < t.headers.size(); i++) sheet.autoSizeColumn(i);
+                    // ... same code you already have to write headers + rows ...
                 }
                 try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
             }
@@ -4732,7 +4655,8 @@ public class DashboardflController implements Initializable {
             ex.printStackTrace();
             showInfoWide("Excel export failed: " + ex.getMessage());
         }
-    }
+    } 
+
     
     private java.io.File chooseExportFile(String title, String baseName, String ext) {
         javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
@@ -4759,65 +4683,289 @@ public class DashboardflController implements Initializable {
         var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING, msg, javafx.scene.control.ButtonType.OK);
         a.setHeaderText(null); a.showAndWait();
     }
-
     
+    
+    
+// OLD @FXML method body of exportALL_PDF moved here:
+private void doExportALL_PDF() { 
+ try (var conn = mysqlconnect.ConnectDb()) {
 
-// ==== EXPORT HELPERS =========================================================
-    private static class TableSpec {
-        final String name, sql;
-        TableSpec(String name, String sql) { this.name = name; this.sql = sql; }
+        var file = chooseExportFile("Export All (PDF)", DB_NAME + "_export", ".pdf");
+        if (file == null) return;
+
+        var doc = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4.rotate(), 24, 24, 24, 24);
+        com.lowagie.text.pdf.PdfWriter.getInstance(doc, new java.io.FileOutputStream(file));
+        doc.open();
+
+        var titleFont = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 18, com.lowagie.text.Font.BOLD);
+        var headFont  = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.BOLD);
+        var cellFont  = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10);
+
+        // Title
+        doc.add(new com.lowagie.text.Paragraph("Fish Landing – Full Data Export", titleFont));
+        doc.add(new com.lowagie.text.Paragraph(
+                "Generated: " + java.time.LocalDateTime.now() + "\n\n"));
+
+        // Each logical table = one section like in your screenshot
+        for (var spec : exportTables()) {
+            var t = fetchTable(conn, spec);
+
+            // Section header (e.g. "FISHERFOLK", "PURCHASES", "TRANSACTIONS"...)
+            var h = new com.lowagie.text.Paragraph("\n" + t.name, headFont);
+            doc.add(h);
+
+            var table = new com.lowagie.text.pdf.PdfPTable(t.headers.size());
+            table.setWidthPercentage(100f);
+
+            // header row
+            for (var hd : t.headers) {
+                var cell = new com.lowagie.text.pdf.PdfPCell(
+                        new com.lowagie.text.Phrase(hd, headFont));
+                cell.setGrayFill(0.92f);
+                table.addCell(cell);
+            }
+
+            // data rows
+            for (var row : t.rows) {
+                for (Object v : row) {
+                    String text = (v == null ? "" : String.valueOf(v));
+                    var phrase = new com.lowagie.text.Phrase(text, cellFont);
+                    table.addCell(new com.lowagie.text.pdf.PdfPCell(phrase));
+                }
+            }
+
+            doc.add(table);
+        }
+
+        doc.close();
+
+        lastBackup_label.setText("Last Export (PDF): " + java.time.LocalDateTime.now());
+        showInfoWide("Exported to:\n" + file.getAbsolutePath());
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        showInfoWide("PDF export failed: " + ex.getMessage());
+    }
+}
+
+// OLD @FXML exportALL_EXCEL body:
+private void doExportALL_EXCEL() { 
+ try (var conn = mysqlconnect.ConnectDb()) {
+
+        var file = chooseExportFile("Export All (Excel)", DB_NAME + "_export", ".xlsx");
+        if (file == null) return;
+
+        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+
+            for (var spec : exportTables()) {
+                var t = fetchTable(conn, spec);
+                var sheet = wb.createSheet(t.name);
+
+                // header style (bold)
+                var bold = wb.createFont();
+                bold.setBold(true);
+                var headStyle = wb.createCellStyle();
+                headStyle.setFont(bold);
+
+                int r = 0;
+
+                // header row
+                var hr = sheet.createRow(r++);
+                for (int i = 0; i < t.headers.size(); i++) {
+                    var cell = hr.createCell(i);
+                    cell.setCellValue(t.headers.get(i));
+                    cell.setCellStyle(headStyle);
+                }
+
+                // data rows
+                for (var row : t.rows) {
+                    var rr = sheet.createRow(r++);
+                    for (int i = 0; i < row.size(); i++) {
+                        var cell = rr.createCell(i);
+                        Object v = row.get(i);
+                        if (v == null) {
+                            cell.setBlank();
+                        } else if (v instanceof Number n) {
+                            cell.setCellValue(n.doubleValue());
+                        } else if (v instanceof java.sql.Date d) {
+                            cell.setCellValue(d.toLocalDate().toString());
+                        } else if (v instanceof java.sql.Time ttime) {
+                            cell.setCellValue(ttime.toLocalTime().toString());
+                        } else if (v instanceof java.sql.Timestamp ts) {
+                            cell.setCellValue(ts.toLocalDateTime().toString());
+                        } else {
+                            cell.setCellValue(String.valueOf(v));
+                        }
+                    }
+                }
+
+                // auto-size columns
+                for (int i = 0; i < t.headers.size(); i++) {
+                    sheet.autoSizeColumn(i);
+                }
+            }
+
+            try (var out = new java.io.FileOutputStream(file)) {
+                wb.write(out);
+            }
+        }
+
+        lastBackup_label.setText("Last Export (Excel): " + java.time.LocalDateTime.now());
+        showInfoWide("Exported to:\n" + file.getAbsolutePath());
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        showInfoWide("Excel export failed: " + ex.getMessage());
+    }
+}
+
+// OLD @FXML exportALL_CSV body:
+private void doExportALL_CSV() { 
+ var dc = new javafx.stage.DirectoryChooser();
+    dc.setTitle("Choose folder to export CSV files");
+    var dir = dc.showDialog(lastBackup_label.getScene().getWindow());
+    if (dir == null) return;
+
+    String stamp = nowStamp();
+    int written = 0;
+
+    for (var spec : exportTables()) {
+        java.io.File out = new java.io.File(
+                dir,
+                spec.name.toLowerCase() + "_" + stamp + ".csv"
+        );
+        written += exportTableToCsv(spec, out);
     }
 
-    // All tables wanted to export (can add views too)
-    // All tables / views we want to export (already "pre-joined" with nice labels)
+    lastBackup_label.setText("Last Export (CSV): " + java.time.LocalDateTime.now());
+    showInfo("Exported " + written + " CSV file(s) to:\n" + dir.getAbsolutePath());
+}
+
+private int exportTableToCsv(TableSpec spec, java.io.File file) {
+    try (var c  = mysqlconnect.ConnectDb();
+         var ps = c.prepareStatement(spec.sql);
+         var rs = ps.executeQuery();
+         var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+
+        var md   = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        // header
+        for (int i = 1; i <= cols; i++) {
+            if (i > 1) pw.print(",");
+            pw.print(csv(md.getColumnLabel(i))); // uses aliases
+        }
+        pw.println();
+
+        // rows
+        while (rs.next()) {
+            for (int i = 1; i <= cols; i++) {
+                if (i > 1) pw.print(",");
+                String v = rs.getString(i);
+                pw.print(csv(v));
+            }
+            pw.println();
+        }
+        return 1;
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        return 0;
+    }
+}
+
+    
+    @FXML
+    private void cancelExportPreview(ActionEvent event) {
+        exportPreviewOverlay.setVisible(false);
+        exportPreviewOverlay.setManaged(false);
+        pendingExportType = null;
+        
+        sideNavigation_vbox.setDisable(false);
+    }
+
+
+    @FXML
+    private void confirmExportPreview(ActionEvent event) {
+        exportPreviewOverlay.setVisible(false);
+        exportPreviewOverlay.setManaged(false);
+
+        if (pendingExportType == null) return;
+
+        switch (pendingExportType) {
+            case PDF_ALL   -> doExportALL_PDF();
+            case EXCEL_ALL -> doExportALL_EXCEL();
+            case CSV_ALL   -> doExportALL_CSV();
+        }
+        pendingExportType = null;
+        
+        sideNavigation_vbox.setDisable(false);
+    }
+
+
+
+// ==== EXPORT HELPERS =========================================================
+private static class TableSpec {
+    final String name, sql;
+    TableSpec(String name, String sql) {
+        this.name = name;
+        this.sql  = sql;
+    }
+}
+
+/**
+ * All logical sections to export.
+ * Uses aliases so headers are user-friendly:
+ *   - catch -> Purchases
+ *   - fisherfolk_id/species_id -> names
+ *   - DATE(catch_date) as purchase_date
+ *   - no catch_id/consumer_id in transactions
+ *   - docking logs show fisherfolk name
+ *   - includes consumers + v_inventory
+ */
 private java.util.List<TableSpec> exportTables() {
     return java.util.List.of(
-        // 1) Fisherfolk (unchanged, but explicit fields)
+        // 1) Fisherfolk
         new TableSpec(
-            "fisherfolk",
+            "FISHERFOLK",
             """
             SELECT
-                fisherfolk_id,
-                name,
-                age,
-                gender,
-                contact_number,
-                address,
-                gear,
-                is_active,
-                created_at,
-                updated_at
-            FROM fisherfolk
-            ORDER BY fisherfolk_id
+                f.fisherfolk_id,
+                f.name,
+                f.age,
+                f.gender,
+                f.contact_number,
+                f.address,
+                f.gear,
+                f.is_active,
+                f.created_at,
+                f.updated_at
+            FROM fisherfolk f
+            ORDER BY f.fisherfolk_id
             """
         ),
 
-        // 2) Species (you can add more columns if you have them)
+        // 2) Species
         new TableSpec(
-            "species",
+            "SPECIES",
             """
             SELECT
-                species_id,
-                species_name,
-                description
-            FROM species
-            ORDER BY species_id
+                s.species_id,
+                s.species_name,
+                s.description
+            FROM species s
+            ORDER BY s.species_id
             """
         ),
 
-        // 3) PURCHASES  (was CATCH)
-        //    - title becomes PURCHASES (from spec.name)
-        //    - catch_id -> purchase_id
-        //    - fisherfolk_id -> fisherfolk_name
-        //    - species_id   -> species_name
-        //    - catch_date   -> purchase_date (DATE only)
+        // 3) Purchases (from catch) – renamed + joined
         new TableSpec(
-            "purchases",
+            "PURCHASES",
             """
             SELECT
-                c.catch_id       AS purchase_id,
-                f.name           AS fisherfolk,
-                s.species_name   AS species,
+                c.catch_id AS purchase_id,
+                f.name     AS fisherfolk,
+                s.species_name AS species,
                 c.quantity,
                 c.price_per_kilo,
                 c.total_value,
@@ -4831,16 +4979,14 @@ private java.util.List<TableSpec> exportTables() {
             """
         ),
 
-        // 4) TRANSACTIONS
-        //    - NO catch_id
-        //    - NO consumer_id
-        //    - species_id -> species name
+        // 4) Transactions – hide ids, show names instead
         new TableSpec(
-            "transactions",
+            "TRANSACTIONS",
             """
             SELECT
                 t.transaction_id,
-                s.species_name    AS species,
+                s.species_name AS species,
+                COALESCE(cu.name, t.buyer_name, 'Unknown') AS consumer,
                 t.buyer_name,
                 t.quantity_sold,
                 t.unit_price,
@@ -4850,64 +4996,63 @@ private java.util.List<TableSpec> exportTables() {
                 t.remarks,
                 t.transaction_date
             FROM transactions t
-            LEFT JOIN species s ON s.species_id = t.species_id
+            LEFT JOIN consumers cu ON cu.consumer_id = t.consumer_id
+            LEFT JOIN species   s  ON s.species_id  = t.species_id
             ORDER BY t.transaction_id
             """
         ),
 
-        // 5) DOCKING LOGS
-        //    - fisherfolk_id -> fisherfolk name
-        //    - docking_date  -> DATE only
+        // 5) Docking Logs – show fisherfolk name instead of id
         new TableSpec(
-            "docking_logs",
+            "DOCKING_LOGS",
             """
             SELECT
                 d.log_id,
-                f.name           AS fisherfolk,
-                DATE(d.docking_date) AS docking_date,
+                f.name AS fisherfolk,
+                d.docking_date,
                 d.arrival_time,
                 d.departure_time,
                 d.remarks
             FROM docking_logs d
-            JOIN fisherfolk f ON f.fisherfolk_id = d.fisherfolk_id
+            LEFT JOIN fisherfolk f ON f.fisherfolk_id = d.fisherfolk_id
             ORDER BY d.log_id
             """
         ),
 
-        // 6) CONSUMERS (new section)
+        // 6) Consumers
         new TableSpec(
-            "consumers",
+            "CONSUMERS",
             """
             SELECT
-                consumer_id,
-                name,
-                contact,
-                address,
-                is_active
-            FROM consumers
-            ORDER BY consumer_id
+                c.consumer_id,
+                c.name,
+                c.contact,
+                c.address,
+                c.is_active
+            FROM consumers c
+            ORDER BY c.consumer_id
             """
         ),
 
-        // 7) INVENTORY from VIEW v_inventory (new section)
+        // 7) Inventory – from view v_inventory (already computed)
         new TableSpec(
-            "inventory",
+            "INVENTORY",
             """
             SELECT
-                species_id,
-                species_name,
-                purchased_qty,
-                sold_qty,
-                balance_qty,
-                last_purchase_price,
-                avg_purchase_price,
-                selling_price,
-                updated_at
-            FROM v_inventory
-            ORDER BY species_name
+                v.species_id,
+                v.species_name,
+                v.purchased_qty,
+                v.sold_qty,
+                v.balance_qty,
+                v.last_purchase_price,
+                v.avg_purchase_price,
+                v.selling_price,
+                v.updated_at
+            FROM v_inventory v
+            ORDER BY v.species_name
             """
         )
-    ); 
+    );
 }
 
 
@@ -4921,18 +5066,71 @@ private java.util.List<TableSpec> exportTables() {
     }
 
     private TableData fetchTable(java.sql.Connection c, TableSpec spec) throws Exception {
-        try (var ps = c.prepareStatement(spec.sql); var rs = ps.executeQuery()) {
+        try (var ps = c.prepareStatement(spec.sql);
+             var rs = ps.executeQuery()) {
+
             var md = rs.getMetaData();
             var t = new TableData(spec.name);
-            for (int i = 1; i <= md.getColumnCount(); i++) t.headers.add(md.getColumnLabel(i));
+
+            for (int i = 1; i <= md.getColumnCount(); i++) {
+                t.headers.add(md.getColumnLabel(i));   // uses aliases from SQL
+            }
+
             while (rs.next()) {
                 var row = new java.util.ArrayList<Object>(md.getColumnCount());
-                for (int i = 1; i <= md.getColumnCount(); i++) row.add(rs.getObject(i));
+                for (int i = 1; i <= md.getColumnCount(); i++) {
+                    row.add(rs.getObject(i));
+                }
                 t.rows.add(row);
             }
             return t;
         }
     }
+
+    // Build TabPane with one TableView per table (FISHERFOLK, SPECIES, PURCHASES, etc.)
+private void buildExportPreviewTabs(java.util.List<TableData> tables) {
+    exportPreviewTabs.getTabs().clear();
+
+    for (TableData t : tables) {
+        // Observable rows as list of strings
+        var items = javafx.collections.FXCollections.<javafx.collections.ObservableList<String>>observableArrayList();
+
+        for (var row : t.rows) {
+            var obs = javafx.collections.FXCollections.<String>observableArrayList();
+            for (Object v : row) {
+                obs.add(v == null ? "" : String.valueOf(v));
+            }
+            items.add(obs);
+        }
+
+        // TableView with dynamic columns
+        var tv = new javafx.scene.control.TableView<javafx.collections.ObservableList<String>>();
+        tv.setItems(items);
+        tv.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+
+        for (int colIndex = 0; colIndex < t.headers.size(); colIndex++) {
+            final int idx = colIndex;
+            var col = new javafx.scene.control.TableColumn<javafx.collections.ObservableList<String>, String>(t.headers.get(colIndex));
+            col.setCellValueFactory(cd -> {
+                var row = cd.getValue();
+                if (row == null || idx >= row.size()) {
+                    return new javafx.beans.property.SimpleStringProperty("");
+                }
+                return new javafx.beans.property.SimpleStringProperty(row.get(idx));
+            });
+            tv.getColumns().add(col);
+        }
+
+        var tab = new javafx.scene.control.Tab(t.name, tv);
+        tab.setClosable(false);
+        exportPreviewTabs.getTabs().add(tab);
+    }
+
+    if (!exportPreviewTabs.getTabs().isEmpty()) {
+        exportPreviewTabs.getSelectionModel().select(0);
+    }
+} 
+
     ////////////////////////////////////////////////////////////////////////////end of data information
     ////////////////////////////////////////////////////////////////////////////DASHBOARD
     // --- Formatting helpers ---
@@ -4940,7 +5138,7 @@ private java.util.List<TableSpec> exportTables() {
         return "₱" + String.format("%,.2f", v);
     }
     private static String kg(double v) {
-        return String.format("%,.2f kg", v);
+        return String.format("%,.2f kg", v); 
     }
     private static double pctChange(double current, double previous) {
         if (previous == 0) return current == 0 ? 0.0 : 100.0; // define as +100% when prev=0 and current>0
@@ -5674,6 +5872,47 @@ private java.util.List<TableSpec> exportTables() {
             // We do not clear last backup label/history here.
         }
     }
+    
+    // new: preview for all table exports inside data management module
+//    private void showTablePreview(String title, TableData t, Runnable onConfirmExport) {
+//        exportPreviewTitle.setText(title);
+//
+//        // Build columns dynamically
+//        exportPreviewTable.getColumns().clear(); 
+//        for (int col = 0; col < t.headers.size(); col++) {
+//            final int colIndex = col;
+//            TableColumn<javafx.collections.ObservableList<javafx.beans.property.StringProperty>, String> tc =
+//                    new TableColumn<>(t.headers.get(col));
+//            tc.setCellValueFactory(cellData -> cellData.getValue().get(colIndex));
+//            exportPreviewTable.getColumns().add(tc);
+//        }
+//
+//        // Fill rows
+//        var rows = javafx.collections.FXCollections
+//                .<javafx.collections.ObservableList<javafx.beans.property.StringProperty>>observableArrayList();
+//
+//        for (var row : t.rows) {
+//            var obs = javafx.collections.FXCollections
+//                    .<javafx.beans.property.StringProperty>observableArrayList();
+//            for (Object v : row) {
+//                obs.add(new javafx.beans.property.SimpleStringProperty(
+//                        v == null ? "" : String.valueOf(v)
+//                ));
+//            }
+//            rows.add(obs);
+//        }
+//
+//        exportPreviewTable.setItems(rows);
+//
+//        // Remember action and show overlay
+//        pendingExportAction = onConfirmExport;
+//        exportPreviewPane.setVisible(true);
+//        exportPreviewPane.setManaged(true);
+//    }
+    
+   
+
+
 /////////////////////////////////////////////////////////////////////////////////
      @FXML
     private void LOGout_btn(ActionEvent event) {
