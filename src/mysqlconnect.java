@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -692,81 +693,87 @@ public static ObservableList<Catch> getCatch() {
     public static javafx.util.Pair<String, javafx.scene.chart.XYChart.Series<String, Number>>
     loadFisherfolkContrib(java.time.LocalDate start, java.time.LocalDate end, boolean paidOnly) {
 
-        var series = new javafx.scene.chart.XYChart.Series<String, Number>();
-        String label = "";
+            var series = new javafx.scene.chart.XYChart.Series<String, Number>();
+            String label = "";
 
-        // Build the common JOIN skeleton once
-        String joinCore = """
-            FROM fisherfolk f
-            LEFT JOIN catch c
-                   ON c.fisherfolk_id = f.fisherfolk_id
-            LEFT JOIN transactions t
-                   ON t.catch_id = c.catch_id
-            """;
+            // Core join: transactions + consumers
+            String joinCore = """
+                FROM transactions t
+                LEFT JOIN consumers c
+                       ON c.consumer_id = t.consumer_id
+                """;
 
-        // Build dynamic filters (these go into the ON/WHERE context for t.* safely)
-        StringBuilder filters = new StringBuilder(" WHERE 1=1 ");
-        if (paidOnly) {
-            filters.append(" AND t.payment_status = 'Paid' ");
-        }
-        boolean hasStart = (start != null);
-        boolean hasEnd   = (end   != null);
-        if (hasStart) filters.append(" AND t.transaction_date >= ? ");
-        if (hasEnd)   filters.append(" AND t.transaction_date <  ? "); // next-day exclusive
+            // Dynamic filters (status + date range) applied on t.*
+            StringBuilder filters = new StringBuilder(" WHERE 1=1 ");
+            if (paidOnly) {
+                filters.append(" AND t.payment_status = 'Paid' ");
+            }
+            boolean hasStart = (start != null);
+            boolean hasEnd   = (end   != null);
+            if (hasStart) filters.append(" AND t.transaction_date >= ? ");
+            if (hasEnd)   filters.append(" AND t.transaction_date <  ? "); // next-day exclusive
 
-        // 1) Label query: show MIN/MAX range of t.transaction_date with same filters
-        String labelSql = """
-            SELECT
-              DATE_FORMAT(MIN(t.transaction_date),'%M %Y') AS s,
-              DATE_FORMAT(MAX(t.transaction_date),'%M %Y') AS e
-            """ + joinCore + filters.toString();
+            // 1) Label query: MIN/MAX over the filtered transaction_date range
+            String labelSql = """
+                SELECT
+                  DATE_FORMAT(MIN(t.transaction_date),'%M %Y') AS s,
+                  DATE_FORMAT(MAX(t.transaction_date),'%M %Y') AS e
+                """ + joinCore + filters.toString();
 
-        // 2) Data query: sum total_price per fisherfolk with same filters
-        String dataSql = """
-            SELECT
-              f.fisherfolk_id,
-              f.name,
-              COALESCE(SUM(t.total_price), 0) AS total_sales
-            """ + joinCore + filters.toString() + """
-            GROUP BY f.fisherfolk_id, f.name
-            ORDER BY total_sales DESC
-            """;
+            // 2) Data query: sum total_price per consumer (or buyer_name if no consumer record)
+            String dataSql = """
+                SELECT
+                  COALESCE(c.consumer_id, 0) AS consumer_key,
+                  COALESCE(c.name, t.buyer_name, 'Unknown') AS buyer_label,
+                  COALESCE(SUM(t.total_price), 0) AS total_sales
+                """ + joinCore + filters.toString() + """
+                GROUP BY
+                  COALESCE(c.consumer_id, 0),
+                  COALESCE(c.name, t.buyer_name, 'Unknown')
+                ORDER BY total_sales DESC
+                LIMIT 5
+                """;
 
-        try (var conn = ConnectDb()) {
-            // --- label
-            try (var ps = conn.prepareStatement(labelSql)) {
-                int idx = 1;
-                if (hasStart) ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(start.atStartOfDay()));
-                if (hasEnd)   ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay())); // exclusive
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        String s = rs.getString("s");
-                        String e = rs.getString("e");
-                        label = (s != null && e != null && !s.equals(e)) ? (s + " — " + e)
-                               : (s != null ? s : "");
+            try (var conn = ConnectDb()) {
+                // --- label
+                try (var ps = conn.prepareStatement(labelSql)) {
+                    int idx = 1;
+                    if (hasStart) ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                    if (hasEnd)   ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay()));
+                    try (var rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            String s = rs.getString("s");
+                            String e = rs.getString("e");
+                            label = (s != null && e != null && !s.equals(e))
+                                    ? (s + " — " + e)
+                                    : (s != null ? s : "");
+                        }
                     }
                 }
-            }
 
-            // --- data
-            try (var ps = conn.prepareStatement(dataSql)) {
-                int idx = 1;
-                if (hasStart) ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(start.atStartOfDay()));
-                if (hasEnd)   ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay())); // exclusive
-                try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        String fisherName = rs.getString("name");
-                        double totalSales = rs.getDouble("total_sales");
-                        series.getData().add(new javafx.scene.chart.XYChart.Data<>(fisherName, totalSales));
+                // --- data
+                try (var ps = conn.prepareStatement(dataSql)) {
+                    int idx = 1;
+                    if (hasStart) ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+                    if (hasEnd)   ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(end.plusDays(1).atStartOfDay()));
+                    try (var rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            String buyerLabel = rs.getString("buyer_label");
+                            double totalSales = rs.getDouble("total_sales");
+                            series.getData().add(
+                                new javafx.scene.chart.XYChart.Data<>(buyerLabel, totalSales)
+                            );
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
-        series.setName(paidOnly ? "Top Fisherfolk (Paid sales)" : "Top Fisherfolk (All sales)");
-        return new javafx.util.Pair<>(label, series);
+            series.setName(paidOnly ? "Top Consumers (Paid sales)" : "Top Consumers (All sales)");
+            return new javafx.util.Pair<>(label, series);
+
+
     }
 
 
@@ -778,20 +785,29 @@ public static ObservableList<Catch> getCatch() {
         var data = javafx.collections.FXCollections.<javafx.scene.chart.PieChart.Data>observableArrayList();
         String label = "";
 
+        // ---- Species Sales Distribution (from TRANSACTIONS) ----
         String labelSql = """
-            SELECT DATE_FORMAT(MIN(c.catch_date),'%M %Y') AS s,
-                   DATE_FORMAT(MAX(c.catch_date),'%M %Y') AS e
-            FROM catch c
-            WHERE c.catch_date BETWEEN ? AND ?
+            SELECT
+              DATE_FORMAT(MIN(t.transaction_date),'%M %Y') AS s,
+              DATE_FORMAT(MAX(t.transaction_date),'%M %Y') AS e
+            FROM transactions t
+            JOIN species s ON s.species_id = t.species_id
+            WHERE t.transaction_date BETWEEN ? AND ?
+              AND t.payment_status = 'Paid'
         """;
+
         String dataSql = """
-            SELECT s.species_name, SUM(c.quantity) AS total_qty
-            FROM catch c
-            JOIN species s ON s.species_id = c.species_id
-            WHERE c.catch_date BETWEEN ? AND ?
+            SELECT
+              s.species_name,
+              SUM(t.quantity_sold) AS total_qty
+            FROM transactions t
+            JOIN species s ON s.species_id = t.species_id
+            WHERE t.transaction_date BETWEEN ? AND ?
+              AND t.payment_status = 'Paid'
             GROUP BY s.species_id, s.species_name
             ORDER BY total_qty DESC
         """;
+
 
         try (var conn = ConnectDb()) {
             try (var ps = conn.prepareStatement(labelSql)) {
@@ -828,23 +844,27 @@ public static ObservableList<Catch> getCatch() {
         var map = new java.util.LinkedHashMap<String, java.util.List<javafx.scene.chart.XYChart.Data<String, Number>>>();
         String label = "";
 
+        // ---- Purchase Volumes (STACKED by species, grouped by month) ----
         String labelSql = """
-            SELECT DATE_FORMAT(MIN(c.catch_date),'%M %Y') AS s,
-                   DATE_FORMAT(MAX(c.catch_date),'%M %Y') AS e
+            SELECT
+              DATE_FORMAT(MIN(c.catch_date),'%M %Y') AS s,
+              DATE_FORMAT(MAX(c.catch_date),'%M %Y') AS e
             FROM catch c
             WHERE c.catch_date BETWEEN ? AND ?
         """;
 
         String dataSql = """
-            SELECT DATE_FORMAT(c.catch_date,'%Y-%m') ym,
-                   s.species_name,
-                   SUM(c.quantity) total_qty
+            SELECT
+              DATE_FORMAT(c.catch_date,'%Y-%m') AS ym,
+              s.species_name,
+              SUM(c.quantity) AS total_qty
             FROM catch c
             JOIN species s ON s.species_id = c.species_id
             WHERE c.catch_date BETWEEN ? AND ?
             GROUP BY ym, s.species_name
             ORDER BY ym, s.species_name
         """;
+
 
         try (var conn = ConnectDb()) {
             try (var ps = conn.prepareStatement(labelSql)) {
@@ -1295,6 +1315,121 @@ public static ObservableList<Catch> getCatch() {
             return false;
         }
     }
+
+    // additional profit tab on reports & analytics module
+    public static ProfitSummary loadProfitSummary(LocalDate start, LocalDate end) {
+    if (start == null || end == null) {
+        throw new IllegalArgumentException("start/end cannot be null");
+    }
+    LocalDate endExclusive = end.plusDays(1);
+
+    double grossSales = 0.0;
+    double purchaseCost = 0.0;
+
+    // For chart
+    var monthMap = new java.util.LinkedHashMap<String, double[]>(); 
+    // key = "YYYY-MM", value[0] = gross, value[1] = cost
+
+    String grossSqlTotal = """
+        SELECT COALESCE(SUM(total_price),0)
+        FROM transactions
+        WHERE payment_status='Paid'
+          AND transaction_date >= ?
+          AND transaction_date <  ?
+    """;
+
+    String costSqlTotal = """
+        SELECT COALESCE(SUM(quantity * price_per_kilo),0)
+        FROM catch
+        WHERE catch_date >= ?
+          AND catch_date <  ?
+    """;
+
+    String grossPerMonthSql = """
+        SELECT DATE_FORMAT(transaction_date,'%Y-%m') ym,
+               COALESCE(SUM(total_price),0) total_gross
+        FROM transactions
+        WHERE payment_status='Paid'
+          AND transaction_date >= ?
+          AND transaction_date <  ?
+        GROUP BY ym
+        ORDER BY ym
+    """;
+
+    String costPerMonthSql = """
+        SELECT DATE_FORMAT(catch_date,'%Y-%m') ym,
+               COALESCE(SUM(quantity * price_per_kilo),0) total_cost
+        FROM catch
+        WHERE catch_date >= ?
+          AND catch_date <  ?
+        GROUP BY ym
+        ORDER BY ym
+    """;
+
+    try (var conn = ConnectDb()) {
+        // ---- totals ----
+        try (var ps = conn.prepareStatement(grossSqlTotal)) {
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(endExclusive.atStartOfDay()));
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) grossSales = rs.getDouble(1);
+            }
+        }
+
+        try (var ps = conn.prepareStatement(costSqlTotal)) {
+            ps.setDate(1, java.sql.Date.valueOf(start));
+            ps.setDate(2, java.sql.Date.valueOf(endExclusive));
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) purchaseCost = rs.getDouble(1);
+            }
+        }
+
+        // ---- per month: gross ----
+        try (var ps = conn.prepareStatement(grossPerMonthSql)) {
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(start.atStartOfDay()));
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(endExclusive.atStartOfDay()));
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String ym = rs.getString("ym");
+                    double val = rs.getDouble("total_gross");
+                    monthMap.computeIfAbsent(ym, k -> new double[2])[0] = val;
+                }
+            }
+        }
+
+        // ---- per month: cost ----
+        try (var ps = conn.prepareStatement(costPerMonthSql)) {
+            ps.setDate(1, java.sql.Date.valueOf(start));
+            ps.setDate(2, java.sql.Date.valueOf(endExclusive));
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String ym = rs.getString("ym");
+                    double val = rs.getDouble("total_cost");
+                    monthMap.computeIfAbsent(ym, k -> new double[2])[1] = val;
+                }
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    // Build chart series
+    var grossSeries = new javafx.scene.chart.XYChart.Series<String, Number>();
+    grossSeries.setName("Gross Sales");
+
+    var costSeries = new javafx.scene.chart.XYChart.Series<String, Number>();
+    costSeries.setName("Purchase Cost");
+
+    for (var entry : monthMap.entrySet()) {
+        String ym = entry.getKey();         // "2025-01"
+        double[] vals = entry.getValue();   // [gross, cost]
+        grossSeries.getData().add(new javafx.scene.chart.XYChart.Data<>(ym, vals[0]));
+        costSeries.getData().add(new javafx.scene.chart.XYChart.Data<>(ym, vals[1]));
+    }
+
+    return new ProfitSummary(grossSales, purchaseCost, grossSeries, costSeries);
+}
 
 
 

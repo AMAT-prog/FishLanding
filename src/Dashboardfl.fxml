@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
@@ -292,14 +293,19 @@
             </VBox>
             <Pane layoutX="223.0" prefHeight="114.0" prefWidth="1039.0" styleClass="TOP_header" stylesheets="@fishlanding-theme.css">
                <children>
-                  <Label alignment="CENTER" layoutX="52.0" layoutY="24.0" prefHeight="73.0" prefWidth="941.0" styleClass="TOP_header-label" text="ALABAT COMMUNITY FISH LANDING CENTER DMS" textFill="WHITE">
+                  <Label alignment="CENTER" layoutX="24.0" layoutY="9.0" prefHeight="97.0" prefWidth="942.0" styleClass="TOP_header-label" text="ALABAT COMMUNITY FISH LANDING CENTER DMS" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="27.0" />
+                        <Font name="System Bold" size="46.0" />
                      </font>
                   </Label>
+                  <ImageView fitHeight="76.0" fitWidth="70.0" layoutX="911.0" layoutY="27.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@image/FL%20LOGO.jpeg" />
+                     </image>
+                  </ImageView>
                </children>
             </Pane>
-            <ScrollPane fx:id="dashboard_pane" layoutX="224.0" layoutY="118.0" prefHeight="542.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" stylesheets="@fishlanding-theme.css" visible="false">
+            <ScrollPane fx:id="dashboard_pane" layoutX="224.0" layoutY="118.0" prefHeight="542.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" stylesheets="@fishlanding-theme.css">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="877.0" prefWidth="1035.0" style="-fx-background-color: transparent;">
                      <children>
@@ -451,7 +457,7 @@
                                       <columns>
                                         <TableColumn fx:id="dashboardFisherman_col" prefWidth="126.00000381469727" text="FISHERMAN" />
                                         <TableColumn fx:id="dashboardFishType_col" prefWidth="107.99998474121094" text="FISH TYPE" />
-                                          <TableColumn fx:id="dashboardQuantityKg_col" prefWidth="100.00003051757812" text="QUANTITY (KG)" />
+                                          <TableColumn fx:id="dashboardQuantityKg_col" prefWidth="100.00003051757812" text="QTY (KG)" />
                                           <TableColumn fx:id="dashboardValuePHP_col" prefWidth="99.333251953125" text="VALUE (PHP)" />
                                       </columns>
                                     </TableView>
@@ -918,114 +924,137 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <BorderPane fx:id="addNewLanding_popup" layoutX="290.0" layoutY="96.0" prefHeight="513.0" prefWidth="851.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
-               <top>
-                  <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Purchase" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets bottom="12" left="20" right="20" top="16" />
-                     </padding>
-                  </HBox>
-               </top>
-               <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="421.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10" left="20" right="20" top="10" />
-                     </padding>
-                     <columnConstraints>
-                        <ColumnConstraints percentWidth="50" />
-                        <ColumnConstraints percentWidth="50" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Fisherfolk" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <ComboBox fx:id="cbFisherfolk2" promptText="Select fisherfolk" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                        <Label fx:id="errFisherfolk2" styleClass="error" text="Please select a fisherfolk" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Species" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                        <ComboBox fx:id="cbSpecies2" promptText="Select species" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label fx:id="errSpecies2" styleClass="error" text="Please select a species" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Quantity (kg)" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                        <TextField fx:id="tfQuantity2" promptText="e.g., 25.50" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                        <Label fx:id="errQuantity2" styleClass="error" text="Enter a quantity &gt; 0" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="5">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Purchase Price per kilo (₱)" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <TextField fx:id="tfPurchasePricePerKilo2" prefHeight="25.0" prefWidth="290.0" promptText="e.g., 150.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Label fx:id="errPrice2" styleClass="error" text="Enter a price &gt; 0" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Purchase Date" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                        <DatePicker fx:id="dpCatchDate2" GridPane.columnIndex="0" GridPane.rowIndex="7" />
-                        <Label text="Docking Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <TextField fx:id="tfDockingTime2" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                        <Label fx:id="errDockingTime2" styleClass="error" text="Use 24h format, e.g., 06:45" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="8">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Remarks" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-                        <TextArea fx:id="taRemarks2" prefRowCount="3" promptText="Optional notes..." wrapText="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="10" />
-                        <HBox alignment="CENTER_RIGHT" spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="11">
+            <StackPane fx:id="addNewLanding_popup" layoutX="297.0" layoutY="83.0" prefHeight="521.0" prefWidth="851.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="534.0" prefWidth="851.0" styleClass="popup-pane">
+                     <top>
+                        <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="popup-header" BorderPane.alignment="CENTER">
                            <children>
-                              <Label styleClass="totalLabel" text="Total Value:" />
-                              <Label fx:id="lblTotalValue2" styleClass="totalValue" text="₱ 0.00" />
+                              <Label prefHeight="49.0" prefWidth="1257.0" styleClass="popup-title" text="➕ Add/Update Purchase" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
                            </children>
+                           <padding>
+                              <Insets bottom="12" left="20" right="20" top="16" />
+                           </padding>
                         </HBox>
-                        <Label fx:id="errDate2" prefHeight="17.0" prefWidth="154.0" text="Choose a date" textFill="#ff7e7e" GridPane.rowIndex="8">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                     </rowConstraints>
-                  </GridPane>
-               </center>
-               <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="15.0" prefWidth="849.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button onAction="#btnCancel_onAddLanding" text="Cancel" />
-                        <Button onAction="#btnClear_onAddLanding" text="Clear" />
-                        <Button defaultButton="true" onAction="#btnSave_onAddLanding" styleClass="primary" text="Save" />
-                     </children>
-                     <padding>
-                        <Insets bottom="16" left="20" right="20" top="12" />
-                     </padding>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
-                  </HBox>
-               </bottom>
-            </BorderPane>
+                     </top>
+                     <center>
+                        <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="421.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="10" left="20" right="20" top="10" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints percentWidth="50" />
+                              <ColumnConstraints percentWidth="50" />
+                           </columnConstraints>
+                           <children>
+                              <Label styleClass="form-hint" text="Fisherfolk" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                              <ComboBox fx:id="cbFisherfolk2" promptText="Select fisherfolk" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                              <Label fx:id="errFisherfolk2" styleClass="form-error" text="Please select a fisherfolk" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Species" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                              <ComboBox fx:id="cbSpecies2" promptText="Select species" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label fx:id="errSpecies2" styleClass="form-error" text="Please select a species" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Quantity (kg)" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                              <TextField fx:id="tfQuantity2" promptText="e.g., 25.50" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                              <Label fx:id="errQuantity2" styleClass="form-error" text="Enter a quantity &gt; 0" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Purchase Price per kilo (₱)" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <TextField fx:id="tfPurchasePricePerKilo2" prefHeight="25.0" prefWidth="290.0" promptText="e.g., 150.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <Label fx:id="errPrice2" styleClass="form-error" text="Enter a price &gt; 0" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Purchase Date" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                              <DatePicker fx:id="dpCatchDate2" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                              <Label styleClass="form-hint" text="Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <TextField fx:id="tfDockingTime2" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <Label fx:id="errDockingTime2" styleClass="form-error" text="Use 24h format, e.g., 06:45" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Remarks" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                              <TextArea fx:id="taRemarks2" prefRowCount="3" promptText="Optional notes..." wrapText="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="10" />
+                              <HBox alignment="CENTER_RIGHT" spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="11">
+                                 <children>
+                                    <Label styleClass="totalLabel" text="Total Value:" />
+                                    <Label fx:id="lblTotalValue2" styleClass="totalValue" text="₱ 0.00">
+                                       <font>
+                                          <Font name="System Bold" size="18.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <Label fx:id="errDate2" prefHeight="17.0" prefWidth="154.0" styleClass="form-error" text="Choose a date" textFill="#ff7e7e" GridPane.rowIndex="8">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                           </rowConstraints>
+                        </GridPane>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="53.0" prefWidth="782.0" spacing="10" styleClass="popup-footer" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button onAction="#btnCancel_onAddLanding" text="Cancel">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-ghost" />
+                                 </styleClass>
+                              </Button>
+                              <Button onAction="#btnClear_onAddLanding" text="Clear">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-neutral" />
+                                 </styleClass>
+                              </Button>
+                              <Button defaultButton="true" onAction="#btnSave_onAddLanding" text="Save">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="16" left="20" right="20" top="12" />
+                           </padding>
+                           <BorderPane.margin>
+                              <Insets />
+                           </BorderPane.margin>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
             <AnchorPane fx:id="fishermen_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="532.0" prefWidth="1035.0" visible="false">
                <children>
                   <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
@@ -1146,137 +1175,164 @@
                   </HBox>
                </children>
             </AnchorPane>
-            <BorderPane fx:id="viewFisherHistory_popup" layoutX="202.0" layoutY="96.0" prefHeight="501.0" prefWidth="923.0" visible="false">
-               <center>
-                  <TabPane fx:id="history_tabpane">
-                     <tabs>
-                        <Tab closable="false" text="Transactions">
-                           <content>
-                              <TableView fx:id="catch_tv1">
-                                 <columns>
-                                    <TableColumn fx:id="catchDate_col" prefWidth="160.6667022705078" text="Date" />
-                                    <TableColumn fx:id="species_col" prefWidth="161.33322143554688" text="Species" />
-                                    <TableColumn fx:id="quantity_col1" prefWidth="87.3333740234375" text="Quantity" />
-                                    <TableColumn fx:id="price_col1" prefWidth="96.6666259765625" text="Price/kg" />
-                                    <TableColumn fx:id="total_col1" prefWidth="56.0" text="Total" />
-                                 </columns>
-                              </TableView>
-                           </content>
-                        </Tab>
-                        <Tab closable="false" text="Dock Logs">
-                           <content>
-                              <TableView fx:id="dock_tv">
-                                 <columns>
-                                    <TableColumn fx:id="dockDate_col1" prefWidth="140.0000762939453" text="Date" />
-                                    <TableColumn fx:id="arrival_col" prefWidth="121.33322143554688" text="Arrival" />
-                                    <TableColumn fx:id="departure_col" prefWidth="101.33334350585938" text="Departure" />
-                                    <TableColumn fx:id="remarks_col1" prefWidth="276.0" text="Remarks" />
-                                 </columns>
-                              </TableView>
-                           </content>
-                        </Tab>
-                     </tabs>
-                  </TabPane>
-               </center>
-               <top>
-                  <HBox prefHeight="17.0" prefWidth="939.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button mnemonicParsing="false" onAction="#EXIT_fisherHistory" style="-fx-background-color: transparent;" text="X" textFill="RED">
-                           <HBox.margin>
-                              <Insets left="900.0" />
-                           </HBox.margin>
-                           <font>
-                              <Font name="System Bold" size="13.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </HBox>
-               </top>
-            </BorderPane>
-            <BorderPane fx:id="addNewFisherfolk_popup" layoutX="300.0" layoutY="106.0" prefHeight="484.0" prefWidth="735.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
-               <top>
-                  <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Fisherfolk" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets bottom="12" left="20" right="20" top="16" />
-                     </padding>
-                  </HBox>
-               </top>
-               <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="376.0" prefWidth="580.0" vgap="12" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10" left="20" right="20" top="10" />
-                     </padding>
-                     <columnConstraints>
-                        <ColumnConstraints percentWidth="50" />
-                        <ColumnConstraints percentWidth="50" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Fisherfolk" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <TextField fx:id="fisherfolk_tf" prefHeight="25.0" prefWidth="392.0" GridPane.rowIndex="1" />
-                        <Label fx:id="Fisherfolk_err" styleClass="error" text="Enter name of fisherfolk" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Gender" textFill="WHITE" GridPane.columnIndex="1" />
-                        <ComboBox fx:id="gender_cb" prefHeight="25.0" prefWidth="275.0" promptText="Select gender" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <TextField fx:id="address_tf" GridPane.rowIndex="4" />
-                        <TextField fx:id="age_tf" minWidth="-Infinity" prefHeight="25.0" prefWidth="264.0" promptText="e.g., 40" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                           <GridPane.margin>
-                              <Insets right="250.0" />
-                           </GridPane.margin>
-                        </TextField>
-                        <TextField fx:id="contact_tf" GridPane.rowIndex="7" />
-                        <TextField fx:id="Gear_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="11" />
-                        <Label fx:id="gender_err" styleClass="error" text="Please select gender" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Age" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label text="Address" textFill="WHITE" GridPane.rowIndex="3" />
-                        <Label text="Contact Number" textFill="WHITE" GridPane.rowIndex="6" />
-                        <Label text="Gear" textFill="WHITE" GridPane.rowIndex="9" />
-                     </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                     </rowConstraints>
-                  </GridPane>
-               </center>
-               <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="706.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button onAction="#btnCancel_onAddFisherfolk" text="Cancel" />
-                        <Button onAction="#btnClear_onAddFisherfolk" text="Clear" />
-                        <Button defaultButton="true" onAction="#btnSave_onAddFisherfolk" styleClass="primary" text="Save" />
-                     </children>
-                     <padding>
-                        <Insets bottom="16" left="20" right="20" top="12" />
-                     </padding>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
-                  </HBox>
-               </bottom>
-            </BorderPane>
+            <StackPane fx:id="viewFisherHistory_popup" layoutX="202.0" layoutY="96.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="501.0" prefWidth="923.0" styleClass="popup-pane">
+                     <center>
+                        <TabPane fx:id="history_tabpane">
+                           <tabs>
+                              <Tab closable="false" text="Transactions">
+                                 <content>
+                                    <TableView fx:id="catch_tv1">
+                                       <columns>
+                                          <TableColumn fx:id="catchDate_col" prefWidth="160.6667022705078" text="Date" />
+                                          <TableColumn fx:id="species_col" prefWidth="161.33322143554688" text="Species" />
+                                          <TableColumn fx:id="quantity_col1" prefWidth="87.3333740234375" text="Quantity" />
+                                          <TableColumn fx:id="price_col1" prefWidth="96.6666259765625" text="Price/kg" />
+                                          <TableColumn fx:id="total_col1" prefWidth="56.0" text="Total" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                              <Tab closable="false" text="Dock Logs">
+                                 <content>
+                                    <TableView fx:id="dock_tv">
+                                       <columns>
+                                          <TableColumn fx:id="dockDate_col1" prefWidth="140.0000762939453" text="Date" />
+                                          <TableColumn fx:id="arrival_col" prefWidth="121.33322143554688" text="Arrival" />
+                                          <TableColumn fx:id="departure_col" prefWidth="101.33334350585938" text="Departure" />
+                                          <TableColumn fx:id="remarks_col1" prefWidth="276.0" text="Remarks" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </center>
+                     <top>
+                        <HBox prefHeight="17.0" prefWidth="939.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#EXIT_fisherHistory" text="X" textFill="RED">
+                                 <HBox.margin>
+                                    <Insets left="900.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </top>
+                  </BorderPane>
+               </children>
+            </StackPane>
+            <StackPane fx:id="addNewFisherfolk_popup" layoutX="300.0" layoutY="106.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="484.0" prefWidth="735.0" styleClass="popup-pane">
+                     <top>
+                        <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="popup-header" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label prefHeight="49.0" prefWidth="1257.0" styleClass="popup-title" text="➕ Add/Update Fisherfolk" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets bottom="12" left="20" right="20" top="16" />
+                           </padding>
+                        </HBox>
+                     </top>
+                     <center>
+                        <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="376.0" prefWidth="580.0" vgap="12" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="10" left="20" right="20" top="10" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints percentWidth="50" />
+                              <ColumnConstraints percentWidth="50" />
+                           </columnConstraints>
+                           <children>
+                              <Label styleClass="form-hint" text="Fisherfolk" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                              <TextField fx:id="fisherfolk_tf" prefHeight="25.0" prefWidth="392.0" GridPane.rowIndex="1" />
+                              <Label fx:id="Fisherfolk_err" styleClass="form-error" text="Enter name of fisherfolk" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Gender" textFill="WHITE" GridPane.columnIndex="1" />
+                              <ComboBox fx:id="gender_cb" prefHeight="25.0" prefWidth="275.0" promptText="Select gender" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="address_tf" GridPane.rowIndex="4" />
+                              <TextField fx:id="age_tf" minWidth="-Infinity" prefHeight="25.0" prefWidth="264.0" promptText="e.g., 40" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                 <GridPane.margin>
+                                    <Insets right="250.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="contact_tf" GridPane.rowIndex="7" />
+                              <TextField fx:id="Gear_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="11" />
+                              <Label fx:id="gender_err" styleClass="form-error" text="Please select gender" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Age" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label styleClass="form-hint" text="Address" textFill="WHITE" GridPane.rowIndex="3" />
+                              <Label styleClass="form-hint" text="Contact Number" textFill="WHITE" GridPane.rowIndex="6" />
+                              <Label styleClass="form-hint" text="Gear" textFill="WHITE" GridPane.rowIndex="9" />
+                           </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                           </rowConstraints>
+                        </GridPane>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="706.0" spacing="10" styleClass="popup-footer" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button onAction="#btnCancel_onAddFisherfolk" text="Cancel">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-ghost" />
+                                 </styleClass>
+                              </Button>
+                              <Button onAction="#btnClear_onAddFisherfolk" text="Clear">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-neutral" />
+                                 </styleClass>
+                              </Button>
+                              <Button defaultButton="true" onAction="#btnSave_onAddFisherfolk" text="Save">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="16" left="20" right="20" top="12" />
+                           </padding>
+                           <BorderPane.margin>
+                              <Insets />
+                           </BorderPane.margin>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
             <ScrollPane fx:id="transactionANDsales_pane" layoutX="224.0" layoutY="121.0" prefHeight="542.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0">
@@ -1398,8 +1454,8 @@
                                           <TableColumn fx:id="transacPricePerUnit_col" prefWidth="65.77777099609375" text="PRICE/KG" />
                                           <TableColumn fx:id="transacTotalValue_col" prefWidth="90.66677856445312" text="TOTAL VALUE" />
                                           <TableColumn fx:id="transacPaymentMethod_col" prefWidth="137.33343505859375" text="PAYMENT METHOD" />
-                                          <TableColumn fx:id="transacStatus_col" prefWidth="68.4444580078125" text="STATUS" />
-                                          <TableColumn fx:id="transacDate_col" prefWidth="110.22216796875" text="DATE" />
+                                          <TableColumn fx:id="transacStatus_col" prefWidth="52.6666259765625" text="STATUS" />
+                                          <TableColumn fx:id="transacDate_col" prefWidth="128.0" text="DATE" />
                                        </columns>
                                     </TableView>
                                     <HBox layoutX="449.0" layoutY="28.0" prefHeight="27.0" prefWidth="277.0">
@@ -1533,150 +1589,168 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <BorderPane fx:id="addNewTransaction_popup" layoutX="310.0" layoutY="77.0" prefHeight="523.0" prefWidth="851.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
-               <top>
-                  <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Transaction" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets bottom="12" left="20" right="20" top="16" />
-                     </padding>
-                  </HBox>
-               </top>
-               <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="465.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10" left="20" right="20" top="10" />
-                     </padding>
-                     <columnConstraints>
-                        <ColumnConstraints percentWidth="50.0" />
-                        <ColumnConstraints percentWidth="50.0" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Buyer Name" textFill="WHITE" />
-                        <ComboBox fx:id="transacConsumer_cb" prefHeight="25.0" prefWidth="372.0" promptText="Select buyer" GridPane.rowIndex="1" />
-                        <Label fx:id="Buyer_err" styleClass="error" text="Please select buyer or add new buyer if name don't exist on list" textFill="#ff7e7e" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Fish Catch Entry" textFill="WHITE" GridPane.rowIndex="3" />
-                        <ComboBox fx:id="transacFishType_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Fish Type" GridPane.rowIndex="4" />
-                        <Label fx:id="FishType_err" styleClass="error" text="Please select fish type" textFill="#ff7e7e" GridPane.rowIndex="5">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+            <StackPane fx:id="addNewTransaction_popup" layoutX="310.0" layoutY="44.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="539.0" prefWidth="851.0" styleClass="popup-pane">
+                     <top>
+                        <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="popup-header" BorderPane.alignment="CENTER">
                            <children>
-                              <Label prefHeight="17.0" prefWidth="95.0" text="Quantity" textFill="WHITE" />
-                              <Label prefHeight="17.0" prefWidth="115.0" text="Remaining Quantity" textFill="WHITE">
-                                 <HBox.margin>
-                                    <Insets left="74.0" />
-                                 </HBox.margin>
+                              <Label prefHeight="49.0" prefWidth="1257.0" styleClass="popup-title" text="➕ Add/Update Transaction" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets bottom="12" left="20" right="20" top="16" />
+                           </padding>
+                        </HBox>
+                     </top>
+                     <center>
+                        <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="465.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="10" left="20" right="20" top="10" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints percentWidth="50.0" />
+                              <ColumnConstraints percentWidth="50.0" />
+                           </columnConstraints>
+                           <children>
+                              <Label styleClass="form-hint" text="Buyer Name" textFill="WHITE" />
+                              <ComboBox fx:id="transacConsumer_cb" prefHeight="25.0" prefWidth="372.0" promptText="Select buyer" GridPane.rowIndex="1" />
+                              <Label fx:id="Buyer_err" styleClass="form-error" text="Please select buyer or add new buyer if name don't exist on list" textFill="#ff7e7e" GridPane.rowIndex="2">
                                  <font>
                                     <Font name="System Italic" size="12.0" />
                                  </font>
                               </Label>
-                           </children>
-                        </HBox>
-                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
-                           <children>
-                              <TextField fx:id="transacQuantity_tf" prefHeight="25.0" prefWidth="131.0" />
-                              <Label fx:id="transacRemainingQuantity_label" alignment="CENTER" prefHeight="25.0" prefWidth="106.0" style="-fx-background-color: white;" text="Label">
-                                 <HBox.margin>
-                                    <Insets left="35.0" />
-                                 </HBox.margin>
+                              <Label styleClass="form-hint" text="Fish Catch Entry" textFill="WHITE" GridPane.rowIndex="3" />
+                              <ComboBox fx:id="transacFishType_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Fish Type" GridPane.rowIndex="4" />
+                              <Label fx:id="FishType_err" styleClass="form-error" text="Please select fish type" textFill="#ff7e7e" GridPane.rowIndex="5">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
                               </Label>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+                                 <children>
+                                    <Label prefHeight="17.0" prefWidth="95.0" styleClass="form-hint" text="Quantity" textFill="WHITE" />
+                                    <Label prefHeight="17.0" prefWidth="115.0" styleClass="form-hint" text="Remaining Quantity" textFill="WHITE" visible="false">
+                                       <HBox.margin>
+                                          <Insets left="74.0" />
+                                       </HBox.margin>
+                                       <font>
+                                          <Font name="System Italic" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
+                                 <children>
+                                    <TextField fx:id="transacQuantity_tf" prefHeight="25.0" prefWidth="181.0" />
+                                    <Label fx:id="transacRemainingQuantity_label" alignment="CENTER" prefHeight="25.0" prefWidth="106.0" style="-fx-background-color: white;" text="Label" visible="false">
+                                       <HBox.margin>
+                                          <Insets left="35.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <Label fx:id="Quantity_err" styleClass="form-error" text="Please enter quantity" textFill="#ff7e7e" GridPane.rowIndex="8">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Unit Price" textFill="WHITE" GridPane.rowIndex="10" />
+                              <Label styleClass="form-hint" text="Remarks" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                              <TextField fx:id="transacUnitPrice_tf" prefHeight="36.0" prefWidth="364.0" GridPane.rowIndex="13" />
+                              <Label styleClass="form-hint" text="Payment Method" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label styleClass="form-hint" text="Payment Status" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <Label text="Total Amount" GridPane.rowIndex="16" />
+                              <ComboBox fx:id="transacPaymentMethod_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Payment Method" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="transacPaymentStatus_cb" prefHeight="25.0" prefWidth="394.0" promptText="Select Payment Status" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <TextArea fx:id="transacRemarks_ta" prefHeight="60.0" prefWidth="363.0" GridPane.columnIndex="1" GridPane.rowIndex="11" GridPane.rowSpan="5" />
+                              <Label fx:id="PMethod_err" styleClass="form-error" text="Please select payment method" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="PStatus_err" styleClass="form-error" text="Please select payment status" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="transacTotalAmount_label" alignment="CENTER" prefHeight="31.0" prefWidth="361.0" style="-fx-background-color: white;" text="300" GridPane.rowIndex="17">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="price_err" prefHeight="17.0" prefWidth="204.0" styleClass="form-error" text="Please enter a valid price" textFill="#ff7e7e" GridPane.rowIndex="15">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Hyperlink alignment="CENTER" contentDisplay="CENTER" onAction="#addNewBuyer_onTransact" prefHeight="24.0" prefWidth="101.0" text="Add new buyer" textFill="#0f74c7" underline="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Hyperlink>
                            </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                              <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                              <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                              <RowConstraints maxHeight="80.0" minHeight="40.0" prefHeight="64.888916015625" />
+                              <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" />
+                           </rowConstraints>
+                        </GridPane>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="783.0" spacing="10" styleClass="popup-footer" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button onAction="#btnCancel_onAddTransaction" text="Cancel">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-ghost" />
+                                 </styleClass>
+                              </Button>
+                              <Button onAction="#btnClear_onAddTransaction" text="Clear">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-neutral" />
+                                 </styleClass>
+                              </Button>
+                              <Button defaultButton="true" onAction="#btnSave_onAddTransaction" text="Save">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="16" left="20" right="20" top="12" />
+                           </padding>
+                           <BorderPane.margin>
+                              <Insets right="30.0" />
+                           </BorderPane.margin>
                         </HBox>
-                        <Label fx:id="Quantity_err" styleClass="error" text="Please enter quantity" textFill="#ff7e7e" GridPane.rowIndex="8">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Unit Price" textFill="WHITE" GridPane.rowIndex="10" />
-                        <Label text="Remarks" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                        <TextField fx:id="transacUnitPrice_tf" prefHeight="25.0" prefWidth="290.0" GridPane.rowIndex="13" />
-                        <Label text="Payment Method" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label text="Payment Status" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <Label text="Total Amount" textFill="WHITE" GridPane.rowIndex="16" />
-                        <ComboBox fx:id="transacPaymentMethod_cb" prefHeight="25.0" prefWidth="405.0" promptText="Select Payment Method" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <ComboBox fx:id="transacPaymentStatus_cb" prefHeight="25.0" prefWidth="394.0" promptText="Select Payment Status" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                        <TextArea fx:id="transacRemarks_ta" prefHeight="60.0" prefWidth="363.0" GridPane.columnIndex="1" GridPane.rowIndex="11" GridPane.rowSpan="5" />
-                        <Label fx:id="PMethod_err" styleClass="error" text="Please select payment method" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="PStatus_err" styleClass="error" text="Please select payment status" textFill="#ff7e7e" GridPane.columnIndex="1" GridPane.rowIndex="8">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="transacTotalAmount_label" alignment="CENTER" prefHeight="31.0" prefWidth="361.0" style="-fx-background-color: white;" text="300" GridPane.rowIndex="17">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="price_err" prefHeight="17.0" prefWidth="204.0" text="Please enter a valid price" textFill="#ff7e7e" GridPane.rowIndex="15">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Hyperlink alignment="CENTER" contentDisplay="CENTER" onAction="#addNewBuyer_onTransact" prefHeight="24.0" prefWidth="101.0" text="Add new buyer" textFill="#0f74c7" underline="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Hyperlink>
-                     </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-                        <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
-                        <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
-                        <RowConstraints maxHeight="80.0" minHeight="40.0" prefHeight="64.888916015625" />
-                        <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" />
-                     </rowConstraints>
-                  </GridPane>
-               </center>
-               <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button onAction="#btnCancel_onAddTransaction" text="Cancel">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                        <Button onAction="#btnClear_onAddTransaction" text="Clear" />
-                        <Button defaultButton="true" onAction="#btnSave_onAddTransaction" styleClass="primary" text="Save" />
-                     </children>
-                     <padding>
-                        <Insets bottom="16" left="20" right="20" top="12" />
-                     </padding>
-                     <BorderPane.margin>
-                        <Insets right="30.0" />
-                     </BorderPane.margin>
-                  </HBox>
-               </bottom>
-            </BorderPane>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
             <ScrollPane fx:id="dockingLogs_pane" layoutX="224.0" layoutY="120.0" prefHeight="542.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0">
@@ -1882,110 +1956,128 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <BorderPane fx:id="addNewDockLog_popup" layoutX="272.0" layoutY="78.0" prefHeight="537.0" prefWidth="859.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
-               <top>
-                  <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Dock Log" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets bottom="12" left="20" right="20" top="16" />
-                     </padding>
-                  </HBox>
-               </top>
-               <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="394.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10" left="20" right="20" top="10" />
-                     </padding>
-                     <columnConstraints>
-                        <ColumnConstraints percentWidth="50.0" />
-                        <ColumnConstraints percentWidth="50.0" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Fisherfolk" textFill="WHITE" />
-                        <ComboBox fx:id="dockLogFisherfolk_cb" prefHeight="25.0" prefWidth="373.0" promptText="Select Fisherfolk" GridPane.rowIndex="1" />
-                        <Label fx:id="dockLogFisherfolk_err" styleClass="error" text="Please select fisherfolk" textFill="#ff7e7e" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Docking Date" textFill="WHITE" GridPane.rowIndex="3" />
-                        <Label fx:id="dockLogDockDate_err" styleClass="error" text="Please select date" textFill="#ff7e7e" GridPane.rowIndex="5">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+            <StackPane fx:id="addNewDockLog_popup" layoutX="272.0" layoutY="78.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="537.0" prefWidth="859.0" styleClass="popup-pane">
+                     <top>
+                        <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="popup-header" BorderPane.alignment="CENTER">
                            <children>
-                              <Label prefHeight="17.0" prefWidth="95.0" text="Arrival Time" textFill="WHITE" />
+                              <Label prefHeight="49.0" prefWidth="1257.0" styleClass="popup-title" text="➕ Add/Update Dock Log" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
                            </children>
-                        </HBox>
-                        <Label fx:id="dockLogArrivalTime_err" styleClass="error" text="Please enter arrival time (eg., 06:19)" textFill="#ff7e7e" GridPane.rowIndex="8">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label text="Remarks" textFill="WHITE" GridPane.rowIndex="10" />
-                        <Label text="Departure Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <Label text="Gear" textFill="WHITE" GridPane.columnIndex="1" />
-                        <Label fx:id="dockLogGear_label" prefHeight="47.0" prefWidth="377.0" style="-fx-background-color: white;" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                           <GridPane.margin>
-                              <Insets />
-                           </GridPane.margin>
                            <padding>
-                              <Insets left="5.0" />
+                              <Insets bottom="12" left="20" right="20" top="16" />
                            </padding>
-                        </Label>
-                        <DatePicker fx:id="dockLogDate_dp" prefHeight="25.0" prefWidth="373.0" GridPane.rowIndex="4" />
-                        <TextField fx:id="dockLogArrivalTime_tf" promptText="HH:mm" GridPane.rowIndex="7" />
-                        <TextField fx:id="dockLogDepartureTime_tf" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                        <TextArea fx:id="dockLogRemarks_ta" prefHeight="74.0" prefWidth="364.0" GridPane.rowIndex="11" />
-                     </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" />
-                        <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-                        <RowConstraints />
-                        <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
-                        <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" />
-                     </rowConstraints>
-                  </GridPane>
-               </center>
-               <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button onAction="#btnCancel_onAddDockLog" text="Cancel">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                        <Button onAction="#btnClear_onAddDockLog" text="Clear" />
-                        <Button defaultButton="true" onAction="#btnSave_onAddDockLog" styleClass="primary" text="Save" />
-                     </children>
-                     <padding>
-                        <Insets bottom="16" left="20" right="20" top="12" />
-                     </padding>
-                     <BorderPane.margin>
-                        <Insets right="30.0" />
-                     </BorderPane.margin>
-                  </HBox>
-               </bottom>
-            </BorderPane>
+                        </HBox>
+                     </top>
+                     <center>
+                        <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="394.0" prefWidth="781.0" vgap="12" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="10" left="20" right="20" top="10" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints percentWidth="50.0" />
+                              <ColumnConstraints percentWidth="50.0" />
+                           </columnConstraints>
+                           <children>
+                              <Label styleClass="form-hint" text="Fisherfolk" textFill="WHITE" />
+                              <ComboBox fx:id="dockLogFisherfolk_cb" prefHeight="25.0" prefWidth="373.0" promptText="Select Fisherfolk" GridPane.rowIndex="1" />
+                              <Label fx:id="dockLogFisherfolk_err" styleClass="error" text="Please select fisherfolk" textFill="#ff7e7e" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Docking Date" textFill="WHITE" GridPane.rowIndex="3" />
+                              <Label fx:id="dockLogDockDate_err" styleClass="error" text="Please select date" textFill="#ff7e7e" GridPane.rowIndex="5">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+                                 <children>
+                                    <Label prefHeight="17.0" prefWidth="95.0" styleClass="form-hint" text="Arrival Time" textFill="WHITE" />
+                                 </children>
+                              </HBox>
+                              <Label fx:id="dockLogArrivalTime_err" styleClass="form-error" text="Please enter arrival time (eg., 06:19)" textFill="#ff7e7e" GridPane.rowIndex="8">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label styleClass="form-hint" text="Remarks" textFill="WHITE" GridPane.rowIndex="10" />
+                              <Label styleClass="form-hint" text="Departure Time" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <Label styleClass="form-hint" text="Gear" textFill="WHITE" GridPane.columnIndex="1" />
+                              <Label fx:id="dockLogGear_label" prefHeight="47.0" prefWidth="377.0" style="-fx-background-color: white;" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets />
+                                 </GridPane.margin>
+                                 <padding>
+                                    <Insets left="5.0" />
+                                 </padding>
+                              </Label>
+                              <DatePicker fx:id="dockLogDate_dp" prefHeight="25.0" prefWidth="373.0" GridPane.rowIndex="4" />
+                              <TextField fx:id="dockLogArrivalTime_tf" promptText="HH:mm" GridPane.rowIndex="7" />
+                              <TextField fx:id="dockLogDepartureTime_tf" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <TextArea fx:id="dockLogRemarks_ta" prefHeight="74.0" prefWidth="364.0" GridPane.rowIndex="11" />
+                           </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" />
+                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                              <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" />
+                           </rowConstraints>
+                        </GridPane>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="popup-footer" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button onAction="#btnCancel_onAddDockLog" text="Cancel">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-ghost" />
+                                 </styleClass>
+                              </Button>
+                              <Button onAction="#btnClear_onAddDockLog" text="Clear">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-neutral" />
+                                 </styleClass>
+                              </Button>
+                              <Button defaultButton="true" onAction="#btnSave_onAddDockLog" text="Save">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="16" left="20" right="20" top="12" />
+                           </padding>
+                           <BorderPane.margin>
+                              <Insets right="30.0" />
+                           </BorderPane.margin>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
             <ScrollPane fx:id="reportsANDanalytics_pane" layoutX="224.0" layoutY="120.0" prefHeight="542.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0">
@@ -2050,34 +2142,56 @@
                                           <content>
                                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                    <children>
-                                                      <PieChart fx:id="speciesPieChart" layoutX="59.0" layoutY="31.0" prefHeight="363.0" prefWidth="665.0" stylesheets="@reports-analytics.css" />
-                                                      <Label fx:id="speciesDateLabel" layoutX="26.0" layoutY="6.0" prefHeight="26.0" prefWidth="130.0" text="Label" />
+                                                      <PieChart fx:id="speciesPieChart" layoutX="59.0" layoutY="31.0" prefHeight="363.0" prefWidth="665.0" stylesheets="@reports-analytics.css" title="Species Sales Distribution" />
+                                                      <HBox prefHeight="27.0" prefWidth="317.0" stylesheets="@reports-analytics.css">
+                                                         <children>
+                                                            <Label prefHeight="27.0" prefWidth="38.0" stylesheets="@reports-analytics.css" text="From:" />
+                                                            <DatePicker fx:id="dpStart_speciesDistrib" prefHeight="25.0" prefWidth="115.0" styleClass="reports-date-picker" stylesheets="@reports-analytics.css" />
+                                                            <Label prefHeight="27.0" prefWidth="29.0" text="To:">
+                                                               <HBox.margin>
+                                                                  <Insets left="10.0" />
+                                                               </HBox.margin>
+                                                            </Label>
+                                                            <DatePicker fx:id="dpEnd_speciesDistrib" prefHeight="28.0" prefWidth="123.0" styleClass="reports-date-picker" stylesheets="@reports-analytics.css" />
+                                                         </children>
+                                                      </HBox>
                                                    </children>
                                                 </AnchorPane>
                                           </content>
                                         </Tab>
-                                          <Tab fx:id="contribTab" text="Fisherfolk Contributions">
+                                          <Tab fx:id="contribTab" text="Consumers Contribution">
                                             <content>
                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                    <children>
-                                                      <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="367.0" prefWidth="749.0" stylesheets="@reports-analytics.css">
+                                                      <BarChart fx:id="contribBarChart" layoutX="14.0" layoutY="32.0" prefHeight="367.0" prefWidth="749.0" stylesheets="@reports-analytics.css" title="Top Consumers by Paid Sales">
                                                         <xAxis>
                                                           <CategoryAxis side="BOTTOM" />
                                                         </xAxis>
                                                         <yAxis>
-                                                          <NumberAxis side="LEFT" />
+                                                          <NumberAxis label="Total Amount Purchase" side="LEFT" />
                                                         </yAxis>
                                                       </BarChart>
-                                                      <Label fx:id="fisherfolkDateLabel" layoutX="54.0" layoutY="20.0" prefWidth="116.0" text="Label" />
+                                                      <HBox prefHeight="27.0" prefWidth="317.0" stylesheets="@reports-analytics.css">
+                                                         <children>
+                                                            <Label prefHeight="27.0" prefWidth="38.0" stylesheets="@reports-analytics.css" text="From:" />
+                                                            <DatePicker fx:id="dpStart_consumersContrib" prefHeight="25.0" prefWidth="115.0" styleClass="reports-date-picker" stylesheets="@reports-analytics.css" />
+                                                            <Label prefHeight="27.0" prefWidth="29.0" text="To:">
+                                                               <HBox.margin>
+                                                                  <Insets left="10.0" />
+                                                               </HBox.margin>
+                                                            </Label>
+                                                            <DatePicker fx:id="dpEnd_consumersContrib" prefHeight="28.0" prefWidth="123.0" styleClass="reports-date-picker" stylesheets="@reports-analytics.css" />
+                                                         </children>
+                                                      </HBox>
                                                    </children>
                                                 </AnchorPane>
                                             </content>
                                           </Tab>
-                                          <Tab fx:id="volumesTab" text="Catch Volumes">
+                                          <Tab fx:id="volumesTab" text="Purchase Volumes">
                                             <content>
                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                    <children>
-                                                      <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="363.0" prefWidth="758.0" stylesheets="@reports-analytics.css">
+                                                      <StackedBarChart fx:id="catchStackedBarChart" layoutX="8.0" layoutY="32.0" prefHeight="363.0" prefWidth="758.0" stylesheets="@reports-analytics.css" title="Purchase Volume by Species (kg)">
                                                         <xAxis>
                                                           <CategoryAxis side="BOTTOM" />
                                                         </xAxis>
@@ -2085,10 +2199,100 @@
                                                           <NumberAxis side="LEFT" />
                                                         </yAxis>
                                                       </StackedBarChart>
-                                                      <Label fx:id="catchVolumeDateLabel" layoutX="93.0" layoutY="5.0" prefWidth="111.0" text="Label" />
+                                                      <HBox prefHeight="27.0" prefWidth="317.0" stylesheets="@reports-analytics.css">
+                                                         <children>
+                                                            <Label prefHeight="27.0" prefWidth="38.0" stylesheets="@reports-analytics.css" text="From:" />
+                                                            <DatePicker fx:id="dpStart_purchaseVol" prefHeight="25.0" prefWidth="115.0" styleClass="reports-date-picker" stylesheets="@reports-analytics.css" />
+                                                            <Label prefHeight="27.0" prefWidth="29.0" text="To:">
+                                                               <HBox.margin>
+                                                                  <Insets left="10.0" />
+                                                               </HBox.margin>
+                                                            </Label>
+                                                            <DatePicker fx:id="dpEnd_purchaseVol" prefHeight="28.0" prefWidth="123.0" styleClass="reports-date-picker" stylesheets="@reports-analytics.css" />
+                                                         </children>
+                                                      </HBox>
                                                    </children>
                                                 </AnchorPane>
                                             </content>
+                                          </Tab>
+                                          <Tab fx:id="profit_tab" text="Profitability Summary">
+                                             <content>
+                                                <BorderPane fx:id="profit_root" prefHeight="200.0" prefWidth="200.0">
+                                                   <top>
+                                                      <HBox alignment="CENTER_LEFT" prefHeight="48.0" prefWidth="786.0" spacing="10.0" BorderPane.alignment="CENTER">
+                                                         <padding>
+                                                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                                                         </padding>
+                                                         <children>
+                                                            <Label text="From:" />
+                                                            <DatePicker fx:id="dpStart_profit" styleClass="reports-date-picker" />
+                                                            <Label text="To:" />
+                                                            <DatePicker fx:id="dpEnd_profit" styleClass="reports-date-picker" />
+                                                         </children>
+                                                      </HBox>
+                                                   </top>
+                                                   <center>
+                                                      <HBox alignment="CENTER" prefHeight="134.0" prefWidth="786.0" spacing="15.0" BorderPane.alignment="CENTER">
+                                                         <padding>
+                                                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                                                         </padding>
+                                                         <children>
+                                                            <StackPane prefHeight="150.0" prefWidth="200.0" styleClass="kpi-card">
+                                                               <children>
+                                                                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                                                                     <children>
+                                                                        <Label styleClass="kpi-title" text="Gross Sales" />
+                                                                        <Label fx:id="grossSales_label" styleClass="kpi-value" text="₱0.00" />
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </StackPane>
+                                                            <StackPane prefHeight="150.0" prefWidth="200.0" styleClass="kpi-card">
+                                                               <children>
+                                                                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                                                                     <children>
+                                                                        <Label styleClass="kpi-title" text="Purchase Cost" />
+                                                                        <Label fx:id="purchaseCost_label" styleClass="kpi-value" text="₱0.00" />
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </StackPane>
+                                                            <StackPane prefHeight="150.0" prefWidth="200.0" styleClass="kpi-card">
+                                                               <children>
+                                                                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                                                                     <children>
+                                                                        <Label styleClass="kpi-title" text="Net Sales" />
+                                                                        <Label fx:id="netSales_label" styleClass="kpi-value" text="₱0.00" />
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </StackPane>
+                                                         </children>
+                                                      </HBox>
+                                                   </center>
+                                                   <bottom>
+                                                      <VBox prefHeight="279.0" prefWidth="786.0" spacing="5.0" BorderPane.alignment="CENTER">
+                                                         <padding>
+                                                            <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
+                                                         </padding>
+                                                         <children>
+                                                            <Label text="Income vs Purchase Cost">
+                                                               <font>
+                                                                  <Font name="System Bold" size="14.0" />
+                                                               </font>
+                                                            </Label>
+                                                            <BarChart fx:id="profitBarChart" animated="false">
+                                                              <xAxis>
+                                                                <CategoryAxis label="Month" side="BOTTOM" />
+                                                              </xAxis>
+                                                              <yAxis>
+                                                                <NumberAxis label="Amount (₱)" side="LEFT" />
+                                                              </yAxis>
+                                                            </BarChart>
+                                                         </children>
+                                                      </VBox>
+                                                   </bottom></BorderPane>
+                                             </content>
                                           </Tab>
                                       </tabs>
                                     </TabPane>
@@ -2224,85 +2428,103 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <BorderPane fx:id="addSpecies_popup" layoutX="282.0" layoutY="130.0" prefHeight="407.0" prefWidth="829.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
-               <top>
-                  <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Edit Species" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets bottom="12" left="20" right="20" top="16" />
-                     </padding>
-                  </HBox>
-               </top>
-               <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="284.0" prefWidth="665.0" vgap="12" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10" left="20" right="20" top="10" />
-                     </padding>
-                     <columnConstraints>
-                        <ColumnConstraints percentWidth="100.0" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Species Name" textFill="WHITE" />
-                        <Label fx:id="speciesName_err" styleClass="error" text="Please enter species name" textFill="#ff7e7e" GridPane.rowIndex="3">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
+            <StackPane fx:id="addSpecies_popup" layoutX="282.0" layoutY="130.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="407.0" prefWidth="829.0" styleClass="popup-pane">
+                     <top>
+                        <HBox prefHeight="0.0" prefWidth="849.0" spacing="12" styleClass="popup-header" BorderPane.alignment="CENTER">
                            <children>
-                              <Label prefHeight="17.0" prefWidth="95.0" text="Description" textFill="WHITE" />
+                              <Label prefHeight="49.0" prefWidth="1257.0" styleClass="popup-title" text="➕ Add/Edit Species" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
                            </children>
+                           <padding>
+                              <Insets bottom="12" left="20" right="20" top="16" />
+                           </padding>
                         </HBox>
-                        <TextField fx:id="speciesName_tf" prefHeight="25.0" prefWidth="406.0" GridPane.rowIndex="1" />
-                        <TextArea fx:id="speciesDescription_tf" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="72.0" prefWidth="625.0" GridPane.rowIndex="8" />
-                     </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-                        <RowConstraints maxHeight="18.0" minHeight="17.333333333333343" prefHeight="18.0" />
-                        <RowConstraints maxHeight="50.0" minHeight="70.0" prefHeight="50.0" />
-                        <RowConstraints maxHeight="2.66668701171875" minHeight="0.0" prefHeight="2.66668701171875" />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-                        <RowConstraints />
-                        <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
-                        <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" />
-                     </rowConstraints>
-                  </GridPane>
-               </center>
-               <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button onAction="#btnCancel_onAddSpecies" text="Cancel">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                        <Button onAction="#btnClear_onAddSpecies" text="Clear" />
-                        <Button defaultButton="true" onAction="#btnSave_onAddSpecies" styleClass="primary" text="Save" />
-                     </children>
-                     <padding>
-                        <Insets bottom="16" left="20" right="20" top="12" />
-                     </padding>
-                     <BorderPane.margin>
-                        <Insets right="30.0" />
-                     </BorderPane.margin>
-                  </HBox>
-               </bottom>
-            </BorderPane>
+                     </top>
+                     <center>
+                        <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="284.0" prefWidth="665.0" vgap="12" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="10" left="20" right="20" top="10" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints percentWidth="100.0" />
+                           </columnConstraints>
+                           <children>
+                              <Label styleClass="form-hint" text="Species Name" textFill="WHITE" />
+                              <Label fx:id="speciesName_err" styleClass="form-error" text="Please enter species name" textFill="#ff7e7e" GridPane.rowIndex="3">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
+                                 <children>
+                                    <Label prefHeight="17.0" prefWidth="95.0" styleClass="form-hint" text="Description" textFill="WHITE" />
+                                 </children>
+                              </HBox>
+                              <TextField fx:id="speciesName_tf" prefHeight="43.0" prefWidth="625.0" GridPane.rowIndex="1" />
+                              <TextArea fx:id="speciesDescription_tf" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="72.0" prefWidth="625.0" GridPane.rowIndex="8" />
+                           </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                              <RowConstraints maxHeight="18.0" minHeight="17.333333333333343" prefHeight="18.0" />
+                              <RowConstraints maxHeight="50.0" minHeight="70.0" prefHeight="50.0" />
+                              <RowConstraints maxHeight="2.66668701171875" minHeight="0.0" prefHeight="2.66668701171875" />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="15.111083984375" />
+                              <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" />
+                           </rowConstraints>
+                        </GridPane>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="819.0" spacing="10" styleClass="popup-footer" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button onAction="#btnCancel_onAddSpecies" text="Cancel">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-ghost" />
+                                 </styleClass>
+                              </Button>
+                              <Button onAction="#btnClear_onAddSpecies" text="Clear">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-neutral" />
+                                 </styleClass>
+                              </Button>
+                              <Button defaultButton="true" onAction="#btnSave_onAddSpecies" text="Save">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="16" left="20" right="20" top="12" />
+                           </padding>
+                           <BorderPane.margin>
+                              <Insets right="30.0" />
+                           </BorderPane.margin>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
             <ScrollPane fx:id="accountProfile_pane" layoutX="225.0" layoutY="122.0" prefHeight="542.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0">
@@ -2498,7 +2720,7 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <ScrollPane fx:id="dataInformation_pane" layoutX="225.0" layoutY="122.0" prefHeight="530.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll" visible="false">
+            <ScrollPane fx:id="dataInformation_pane" layoutX="225.0" layoutY="122.0" prefHeight="530.0" prefWidth="1038.0" styleClass="DASHBOARD_scroll">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="516.0" prefWidth="1035.0" styleClass="glass-panel">
                      <children>
@@ -2638,7 +2860,7 @@
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </padding>
             </ScrollPane>
-            <AnchorPane fx:id="consumer_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="542.0" prefWidth="1045.0">
+            <AnchorPane fx:id="consumer_pane" layoutX="224.0" layoutY="120.0" minHeight="0.0" minWidth="0.0" prefHeight="542.0" prefWidth="1045.0" visible="false">
                <children>
                   <HBox layoutY="-1.0" prefHeight="542.0" prefWidth="1035.0">
                      <children>
@@ -2747,74 +2969,93 @@
                   </HBox>
                </children>
             </AnchorPane>
-            <BorderPane fx:id="addNewConsumer_popup" layoutX="324.0" layoutY="148.0" prefHeight="384.0" prefWidth="604.0" style="-fx-background-color: #1E2128; -fx-border-color: white;" visible="false">
-               <top>
-                  <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="header" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label prefHeight="49.0" prefWidth="1257.0" styleClass="title" text="➕ Add/Update Buyer" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets bottom="12" left="20" right="20" top="16" />
-                     </padding>
-                  </HBox>
-               </top>
-               <center>
-                  <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="286.0" prefWidth="430.0" vgap="12" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10" left="20" right="20" top="10" />
-                     </padding>
-                     <columnConstraints>
-                        <ColumnConstraints />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Buyer Name" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <TextField fx:id="consumerName_tf" prefHeight="25.0" prefWidth="392.0" GridPane.rowIndex="1" />
-                        <Label fx:id="Consumer_err" styleClass="error" text="Enter name of buyer/consumer" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                           <font>
-                              <Font name="System Italic" size="12.0" />
-                           </font>
-                        </Label>
-                        <TextField fx:id="consumerAddress_tf" GridPane.rowIndex="4" />
-                        <TextField fx:id="consumerContact" GridPane.rowIndex="7" />
-                        <Label text="Address" textFill="WHITE" GridPane.rowIndex="3" />
-                        <Label text="Contact Number" textFill="WHITE" GridPane.rowIndex="6" />
-                     </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                     </rowConstraints>
-                  </GridPane>
-               </center>
-               <bottom>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="706.0" spacing="10" styleClass="footer" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button onAction="#btnCancel_onAddConsumer" text="Cancel" />
-                        <Button onAction="#btnClear_onAddConsumer" text="Clear" />
-                        <Button defaultButton="true" onAction="#btnSave_onAddConsumer" styleClass="primary" text="Save" />
-                     </children>
-                     <padding>
-                        <Insets bottom="16" left="20" right="20" top="12" />
-                     </padding>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
-                  </HBox>
-               </bottom>
-            </BorderPane>
+            <StackPane fx:id="addNewConsumer_popup" layoutX="324.0" layoutY="148.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="384.0" prefWidth="604.0" styleClass="popup-pane">
+                     <top>
+                        <HBox prefHeight="0.0" prefWidth="919.0" spacing="12" styleClass="popup-header" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label prefHeight="49.0" prefWidth="1257.0" styleClass="popup-title" text="➕ Add/Update Buyer" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets bottom="12" left="20" right="20" top="16" />
+                           </padding>
+                        </HBox>
+                     </top>
+                     <center>
+                        <GridPane hgap="14" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="286.0" prefWidth="430.0" vgap="12" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="10" left="20" right="20" top="10" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints />
+                           </columnConstraints>
+                           <children>
+                              <Label styleClass="form-hint" text="Buyer Name" textFill="WHITE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                              <TextField fx:id="consumerName_tf" prefHeight="25.0" prefWidth="392.0" GridPane.rowIndex="1" />
+                              <Label fx:id="Consumer_err" styleClass="form-error" text="Enter name of buyer/consumer" textFill="#ff7e7e" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="consumerAddress_tf" GridPane.rowIndex="4" />
+                              <TextField fx:id="consumerContact" GridPane.rowIndex="7" />
+                              <Label styleClass="form-hint" text="Address" textFill="WHITE" GridPane.rowIndex="3" />
+                              <Label styleClass="form-hint" text="Contact Number" textFill="WHITE" GridPane.rowIndex="6" />
+                           </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                           </rowConstraints>
+                        </GridPane>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="58.0" prefWidth="706.0" spacing="10" styleClass="popup-footer" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button onAction="#btnCancel_onAddConsumer" text="Cancel">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-ghost" />
+                                 </styleClass>
+                              </Button>
+                              <Button onAction="#btnClear_onAddConsumer" text="Clear">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-neutral" />
+                                 </styleClass>
+                              </Button>
+                              <Button defaultButton="true" onAction="#btnSave_onAddConsumer" text="Save">
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="16" left="20" right="20" top="12" />
+                           </padding>
+                           <BorderPane.margin>
+                              <Insets />
+                           </BorderPane.margin>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
             <ScrollPane fx:id="inventory_pane" layoutX="225.0" layoutY="120.0" prefHeight="552.0" prefWidth="1047.0" styleClass="DASHBOARD_scroll" visible="false">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="535.0" prefWidth="1035.0">
@@ -2915,44 +3156,52 @@
                   </AnchorPane>
                </content>
             </ScrollPane>
-            <BorderPane fx:id="viewConsumerHistory_popup" layoutX="203.0" layoutY="96.0" prefHeight="501.0" prefWidth="895.0" visible="false">
-               <center>
-                  <TabPane fx:id="consumerHistory_tabpane">
-                     <tabs>
-                        <Tab closable="false" text="Transactions">
-                           <content>
-                              <TableView fx:id="consumerHistory_tv">
-                                 <columns>
-                                    <TableColumn fx:id="consumerHistoryDate_col" prefWidth="103.99993896484375" text="Date" />
-                                    <TableColumn fx:id="consumerHistoryFish_col" prefWidth="124.6666259765625" text="Fish Type" />
-                                    <TableColumn fx:id="consumerHistoryQty_col" prefWidth="88.6666259765625" text="Quantity (kg)" />
-                                    <TableColumn fx:id="consumerHistoryUnitPrice_col" prefWidth="104.0" text="Unit Price" />
-                                    <TableColumn fx:id="consumerHistoryTotal_col" prefWidth="114.6666259765625" text="Total" />
-                                    <TableColumn fx:id="consumerHistoryPayMethod_col" prefWidth="123.333251953125" text="Payment Method" />
-                                    <TableColumn fx:id="consumerHistoryPayStatus_col" prefWidth="102.6666259765625" text="Payment Status" />
-                                    <TableColumn fx:id="consumerHistoryRemarks_col" prefWidth="167.3333740234375" text="Remarks" />
-                                 </columns>
-                              </TableView>
-                           </content>
-                        </Tab>
-                     </tabs>
-                  </TabPane>
-               </center>
-               <top>
-                  <HBox prefHeight="17.0" prefWidth="939.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button mnemonicParsing="false" onAction="#EXIT_consumerHistory" style="-fx-background-color: transparent;" text="X" textFill="RED">
-                           <HBox.margin>
-                              <Insets left="900.0" />
-                           </HBox.margin>
-                           <font>
-                              <Font name="System Bold" size="13.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </HBox>
-               </top>
-            </BorderPane>
+            <StackPane fx:id="viewConsumerHistory_popup" layoutX="244.0" layoutY="117.0" styleClass="modal-overlay" stylesheets="@popup.css" visible="false">
+               <children>
+                  <BorderPane prefHeight="501.0" prefWidth="895.0" styleClass="popup-pane">
+                     <center>
+                        <TabPane fx:id="consumerHistory_tabpane">
+                           <tabs>
+                              <Tab closable="false" text="Transactions">
+                                 <content>
+                                    <TableView fx:id="consumerHistory_tv">
+                                       <columns>
+                                          <TableColumn fx:id="consumerHistoryDate_col" prefWidth="103.99993896484375" text="Date" />
+                                          <TableColumn fx:id="consumerHistoryFish_col" prefWidth="124.6666259765625" text="Fish Type" />
+                                          <TableColumn fx:id="consumerHistoryQty_col" prefWidth="88.6666259765625" text="Quantity (kg)" />
+                                          <TableColumn fx:id="consumerHistoryUnitPrice_col" prefWidth="104.0" text="Unit Price" />
+                                          <TableColumn fx:id="consumerHistoryTotal_col" prefWidth="114.6666259765625" text="Total" />
+                                          <TableColumn fx:id="consumerHistoryPayMethod_col" prefWidth="123.333251953125" text="Payment Method" />
+                                          <TableColumn fx:id="consumerHistoryPayStatus_col" prefWidth="102.6666259765625" text="Payment Status" />
+                                          <TableColumn fx:id="consumerHistoryRemarks_col" prefWidth="167.3333740234375" text="Remarks" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </center>
+                     <top>
+                        <HBox prefHeight="17.0" prefWidth="939.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#EXIT_consumerHistory" text="X" textFill="RED">
+                                 <HBox.margin>
+                                    <Insets left="900.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                                 <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </top>
+                  </BorderPane>
+               </children>
+            </StackPane>
          </children>
       </AnchorPane>
    </children>

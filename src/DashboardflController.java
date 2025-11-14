@@ -72,7 +72,9 @@ import java.util.Optional;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.layout.StackPane; 
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -116,7 +118,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private DatePicker dpEndDate;
     @FXML
-    private BorderPane addNewLanding_popup;
+    private StackPane addNewLanding_popup;
     @FXML
     private ComboBox<FisherfolkItem> cbFisherfolk2;
     @FXML
@@ -145,7 +147,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private TextArea taRemarks2;
     @FXML
-    private Label lblTotalValue2;
+    private Label lblTotalValue2; 
     @FXML
     private ScrollPane dashboard_pane;
     @FXML
@@ -179,7 +181,7 @@ public class DashboardflController implements Initializable {
     private TableColumn<FisherfolkRecord, FisherfolkRecord> status_col; 
     
     @FXML
-    private BorderPane addNewFisherfolk_popup;
+    private StackPane addNewFisherfolk_popup;
     @FXML
     private Label Fisherfolk_err;
     @FXML
@@ -337,7 +339,7 @@ public class DashboardflController implements Initializable {
 
 
     @FXML
-    private BorderPane viewFisherHistory_popup;
+    private StackPane viewFisherHistory_popup;
     @FXML
     private TabPane history_tabpane;
     @FXML
@@ -419,7 +421,7 @@ public class DashboardflController implements Initializable {
     private DatePicker dpEndDate_transac;
     
     @FXML 
-    private BorderPane addNewTransaction_popup;
+    private StackPane addNewTransaction_popup;
 //    private ComboBox<FisherfolkItem> transacSeller_cb;
     @FXML 
     private ComboBox<InventoryOption> transacFishType_cb;
@@ -480,7 +482,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private DatePicker dpEndDate_dockLog;
     @FXML
-    private BorderPane addNewDockLog_popup;
+    private StackPane addNewDockLog_popup;
     @FXML
     private ComboBox<FisherfolkItem> dockLogFisherfolk_cb;
     @FXML
@@ -537,12 +539,9 @@ public class DashboardflController implements Initializable {
     private PieChart speciesPieChart;
     @FXML
     private StackedBarChart<String,Number> catchStackedBarChart;
-    @FXML
-    private Label speciesDateLabel;
-    @FXML
-    private Label fisherfolkDateLabel;
-    @FXML
-    private Label catchVolumeDateLabel;
+//    private Label speciesDateLabel;
+//    private Label fisherfolkDateLabel;
+//    private Label catchVolumeDateLabel;
     
     @FXML
     private ScrollPane species_pane;
@@ -555,7 +554,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private TextField filterField_species;
     @FXML
-    private BorderPane addSpecies_popup;
+    private StackPane addSpecies_popup;
     @FXML
     private Label speciesName_err;
     @FXML
@@ -707,7 +706,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private TableColumn<ConsumerRecord, ConsumerRecord> consumerStatus_col;
     @FXML
-    private BorderPane addNewConsumer_popup;
+    private StackPane addNewConsumer_popup;
     @FXML
     private TextField consumerName_tf;
     @FXML
@@ -746,7 +745,7 @@ public class DashboardflController implements Initializable {
     private TextField filterField_inventory;
     
     @FXML
-    private BorderPane viewConsumerHistory_popup;
+    private StackPane viewConsumerHistory_popup;
     @FXML
     private TabPane consumerHistory_tabpane;
     @FXML
@@ -767,6 +766,35 @@ public class DashboardflController implements Initializable {
     private TableColumn<TransactionViewRow, String> consumerHistoryPayStatus_col;
     @FXML
     private TableColumn<TransactionViewRow, String> consumerHistoryRemarks_col;
+    @FXML
+    private DatePicker dpStart_consumersContrib;
+    @FXML
+    private DatePicker dpEnd_consumersContrib;
+    @FXML
+    private DatePicker dpStart_speciesDistrib;
+    @FXML
+    private DatePicker dpEnd_speciesDistrib;
+    @FXML
+    private DatePicker dpStart_purchaseVol;
+    @FXML
+    private DatePicker dpEnd_purchaseVol;
+    
+    @FXML
+    private Tab profit_tab;
+    @FXML
+    private BorderPane profit_root;
+    @FXML
+    private DatePicker dpStart_profit;
+    @FXML
+    private DatePicker dpEnd_profit;
+    @FXML
+    private Label grossSales_label;
+    @FXML
+    private Label purchaseCost_label;
+    @FXML
+    private Label netSales_label;
+    @FXML
+    private BarChart<String, Number> profitBarChart;
     
     
     
@@ -872,6 +900,13 @@ public class DashboardflController implements Initializable {
         hideAllErrors();
         loadFisherfolkOptions();
         loadSpeciesOptions();
+        
+            // Recompute total whenever quantity OR price text changes
+        tfQuantity2.textProperty().addListener((obs, oldV, newV) -> updateTotalValue());
+        tfPurchasePricePerKilo2.textProperty().addListener((obs, oldV, newV) -> updateTotalValue());
+
+        // initial value
+        updateTotalValue();
         
         //FISHERMEN
         fisherData = mysqlconnect.loadFisherfolk();
@@ -1230,6 +1265,32 @@ public class DashboardflController implements Initializable {
         // Fisherfolk Contributions (BarChart)
         contribBarChart.setCategoryGap(18);   // space between categories
         contribBarChart.setBarGap(6);         // space between series within a category
+        
+        // Optional default: current month, like before -> new from fisherfolk contrib replaced with consumer contrib
+        dpStart_consumersContrib.setValue(startOfMonth());
+        dpEnd_consumersContrib.setValue(endOfMonth());
+
+        // --- new (consumers contribution) ---
+        dpStart_consumersContrib.valueProperty().addListener((o, oldV, newV) -> {  loadFisherfolkContribAuto();});
+        dpEnd_consumersContrib.valueProperty().addListener((o, oldV, newV) -> {loadFisherfolkContribAuto(); });
+
+        // --- REPORTS: Species Distribution ---
+        dpStart_speciesDistrib.valueProperty().addListener((o, ov, nv) -> loadSpeciesDistributionAuto());
+        dpEnd_speciesDistrib.valueProperty().addListener((o, ov, nv) -> loadSpeciesDistributionAuto());
+        
+        // --- REPORTS: Purchase Volumes ---
+        dpStart_purchaseVol.valueProperty().addListener((o, ov, nv) -> loadCatchVolumesAuto());
+        dpEnd_purchaseVol.valueProperty().addListener((o, ov, nv) -> loadCatchVolumesAuto());
+
+        // new tab 
+        // --- REPORTS: Profitability ---
+        dpStart_profit.valueProperty().addListener((o, ov, nv) -> loadProfitFromUiDates());
+        dpEnd_profit.valueProperty().addListener((o, ov, nv) -> loadProfitFromUiDates());
+
+        // initial values – current month
+        dpStart_profit.setValue(startOfMonth()); 
+        dpEnd_profit.setValue(endOfMonth());
+        loadProfitFromUiDates();
 
         // Stacked bar: usually one category per period, but spacing helps when many
         catchStackedBarChart.setCategoryGap(20);
@@ -1284,7 +1345,7 @@ public class DashboardflController implements Initializable {
         
 
         //DASHBOARD
-        refreshDashboardKPIs();
+        refreshDashboardKPIs();   
         //recent 3-5 landings in dashboard//
         // columns
         dashboardFisherman_col.setCellValueFactory(c ->
@@ -1500,6 +1561,28 @@ public class DashboardflController implements Initializable {
     ////////////////////////////////////////////////////////////////////////////end of initialization
     
     ////////////////////////////////////////////////////////////////////////////LANDINGS -> PURCHASES
+    private void updateTotalValue() {
+        double qty   = parseDoubleSafe(tfQuantity2.getText());
+        double price = parseDoubleSafe(tfPurchasePricePerKilo2.getText());
+
+        double total = qty * price; 
+
+        // just the amount
+        lblTotalValue2.setText(String.format("₱ %, .2f", total));
+
+        // or if the label already contains "Total Value: "
+        // lblTotalValue2.setText(String.format("Total Value:  ₱ %, .2f", total));
+    }
+
+    private double parseDoubleSafe(String text) {
+        if (text == null || text.trim().isEmpty()) return 0.0;
+        try {
+            return Double.parseDouble(text.trim());
+        } catch (NumberFormatException e) {
+            return 0.0;  // invalid input = treat as 0
+        }
+    }
+
     public  void LANDINGS_SEARCH(){ 
         catchId_col.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getCatchId()).asObject());
         fisherman_col.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFisherfolkName()));
@@ -3580,55 +3663,153 @@ public class DashboardflController implements Initializable {
     }
 
     private void loadSpeciesDistributionAuto() {
-        var res = mysqlconnect.loadSpeciesDistribution(startOfMonth(), endOfMonth());
-        speciesPieChart.setData(javafx.collections.FXCollections.observableArrayList(res.getValue()));
+        // 1) Read dates from the pickers
+        java.time.LocalDate start = dpStart_speciesDistrib.getValue();
+        java.time.LocalDate end   = dpEnd_speciesDistrib.getValue();
 
-        // add % to labels (optional)
-        double total = speciesPieChart.getData().stream().mapToDouble(javafx.scene.chart.PieChart.Data::getPieValue).sum();
-        speciesPieChart.getData().forEach(d -> {
-            double pct = total == 0 ? 0 : (d.getPieValue() / total) * 100;
-            d.setName(d.getName() + String.format(" (%.1f%%)", pct));
-        });
+        // 2) Fallbacks if user leaves one/both empty
+        if (start == null && end == null) {
+            // default: current month (or whatever you prefer)
+            start = startOfMonth();
+            end   = endOfMonth();
+        } else {
+            if (start == null) start = java.time.LocalDate.of(1970, 1, 1); // very old
+            if (end   == null) end   = java.time.LocalDate.now();          // today
+        }
 
-        speciesDateLabel.setText(res.getKey().isBlank() ? "All time" : res.getKey());
+        // Safety: if end < start, just clear chart
+        if (end.isBefore(start)) {
+            speciesPieChart.getData().clear();
+            return;
+        }
+
+        // 3) Load data from DB
+        var res  = mysqlconnect.loadSpeciesDistribution(start, end);
+        var data = javafx.collections.FXCollections
+                .observableArrayList(res.getValue()); // fresh copy
+
+        // 4) Add percentage to labels (optional)
+        double total = data.stream()
+                .mapToDouble(javafx.scene.chart.PieChart.Data::getPieValue)
+                .sum();
+
+        if (total > 0) {
+            for (var d : data) {
+                double pct = (d.getPieValue() / total) * 100.0;
+                d.setName(String.format("%s (%.1f%%)", d.getName(), pct));
+            }
+        }
+
+        // 5) Push to chart
+        speciesPieChart.setData(data);
     }
 
+
+    // Consumers Contribution (Top Consumers – Paid sales)
     private void loadFisherfolkContribAuto() {
-        var res = mysqlconnect.loadFisherfolkContrib(startOfMonth(), endOfMonth(), true); // paidOnly=true
+        // Get dates from the pickers
+        java.time.LocalDate start = dpStart_consumersContrib.getValue();
+        java.time.LocalDate end   = dpEnd_consumersContrib.getValue();
+
+        // If both dates are set but reversed, swap them (optional but user-friendly)
+        if (start != null && end != null && end.isBefore(start)) {
+            java.time.LocalDate tmp = start;
+            start = end;
+            end = tmp;
+            dpStart_consumersContrib.setValue(start);
+            dpEnd_consumersContrib.setValue(end);
+        }
+
+        // Call your existing DB helper (now using consumers instead of fisherfolk)
+        var res = mysqlconnect.loadFisherfolkContrib(start, end, true); // paidOnly = true
+
+        // Use only the chart series; ignore the label string since you removed the label
         contribBarChart.getData().setAll(res.getValue());
-        fisherfolkDateLabel.setText(res.getKey().isBlank() ? "All time" : res.getKey());
     }
+
 
     private void loadCatchVolumesAuto() {
-        var res = mysqlconnect.loadCatchVolumes(startOfMonth(), endOfMonth());
+        java.time.LocalDate start = dpStart_purchaseVol.getValue();
+        java.time.LocalDate end   = dpEnd_purchaseVol.getValue();
+
+        if (start == null && end == null) {
+            start = startOfMonth();
+            end   = endOfMonth();
+        } else {
+            if (start == null) start = java.time.LocalDate.of(1970, 1, 1);
+            if (end   == null) end   = java.time.LocalDate.now();
+        }
+
+        if (end.isBefore(start)) {
+            catchStackedBarChart.getData().clear();
+            return;
+        }
+
+        var res = mysqlconnect.loadCatchVolumes(start, end);
         catchStackedBarChart.getData().clear();
+
         res.getValue().forEach((species, list) -> {
-            var s = new javafx.scene.chart.XYChart.Series<String,Number>();
-            s.setName(species);
-            s.getData().addAll(list);
-            catchStackedBarChart.getData().add(s);
+            var series = new javafx.scene.chart.XYChart.Series<String, Number>();
+            series.setName(species);
+            series.getData().addAll(list);
+            catchStackedBarChart.getData().add(series);
         });
-        catchVolumeDateLabel.setText(res.getKey().isBlank() ? "All time" : res.getKey());
     }
     
-    private void reloadReports(java.time.LocalDate start, java.time.LocalDate end) {
-        var sp = mysqlconnect.loadSpeciesDistribution(start, end);
-        speciesPieChart.setData(javafx.collections.FXCollections.observableArrayList(sp.getValue()));
-        speciesDateLabel.setText(sp.getKey());
+    // new tab
+    private void loadProfitFromUiDates() {
+        LocalDate start = dpStart_profit.getValue();
+        LocalDate end   = dpEnd_profit.getValue();
 
-        var ff = mysqlconnect.loadFisherfolkContrib(start, end, true);
-        contribBarChart.getData().setAll(ff.getValue());
-        fisherfolkDateLabel.setText(ff.getKey());
+        // default: current month if both empty
+        if (start == null && end == null) {
+            start = startOfMonth();
+            end   = endOfMonth();
+        } else {
+            if (start == null) start = LocalDate.of(1970, 1, 1);
+            if (end   == null) end   = LocalDate.now();
+        }
 
-        var cv = mysqlconnect.loadCatchVolumes(start, end);
-        catchStackedBarChart.getData().clear();
-        cv.getValue().forEach((k,v) -> {
-            var s = new javafx.scene.chart.XYChart.Series<String,Number>();
-            s.setName(k); s.getData().addAll(v);
-            catchStackedBarChart.getData().add(s);
-        });
-        catchVolumeDateLabel.setText(cv.getKey());
+        if (end.isBefore(start)) {
+            // just clear UI
+            profitBarChart.getData().clear();
+            grossSales_label.setText("₱0.00");
+            purchaseCost_label.setText("₱0.00");
+            netSales_label.setText("₱0.00");
+            return;
+        }
+
+        var summary = mysqlconnect.loadProfitSummary(start, end);
+
+        // format amounts
+        grossSales_label.setText(PHP.format(summary.grossSales));
+        purchaseCost_label.setText(PHP.format(summary.purchaseCost));
+        netSales_label.setText(PHP.format(summary.netSales));
+
+        // chart
+        profitBarChart.getData().setAll(summary.grossSeries, summary.costSeries);
     }
+
+
+    
+//    private void reloadReports(java.time.LocalDate start, java.time.LocalDate end) {
+//        var sp = mysqlconnect.loadSpeciesDistribution(start, end);
+//        speciesPieChart.setData(javafx.collections.FXCollections.observableArrayList(sp.getValue()));
+//        speciesDateLabel.setText(sp.getKey());
+//
+//        var ff = mysqlconnect.loadFisherfolkContrib(start, end, true);
+//        contribBarChart.getData().setAll(ff.getValue());
+//        fisherfolkDateLabel.setText(ff.getKey());
+//
+//        var cv = mysqlconnect.loadCatchVolumes(start, end);
+//        catchStackedBarChart.getData().clear();
+//        cv.getValue().forEach((k,v) -> {
+//            var s = new javafx.scene.chart.XYChart.Series<String,Number>();
+//            s.setName(k); s.getData().addAll(v);
+//            catchStackedBarChart.getData().add(s);
+//        });
+//        catchVolumeDateLabel.setText(cv.getKey());
+//    }
 
     // ====== SNAPSHOT CHART TO PNG ======
     private boolean snapshotToPng(javafx.scene.Node node, java.io.File outFile) {
@@ -3655,21 +3836,137 @@ public class DashboardflController implements Initializable {
         }
     }
     
+    private void exportProfit() {
+
+    // =========================================
+    // 1) Export Excel (summary data)
+    // =========================================
+
+    var seriesList = profitBarChart.getData();
+    if (seriesList == null || seriesList.isEmpty()) {
+        showInfo("No data to export.");
+        return;
+    }
+
+    javafx.scene.chart.XYChart.Series<String, Number> grossSeries = null;
+    javafx.scene.chart.XYChart.Series<String, Number> costSeries  = null;
+
+    for (var s : seriesList) {
+        String name = (s.getName() == null) ? "" : s.getName().toLowerCase();
+        if (name.contains("gross"))      grossSeries = s;
+        else if (name.contains("cost"))  costSeries = s;
+    }
+
+    if (grossSeries == null) {
+        showInfo("Gross series not found.");
+        return;
+    }
+
+    var monthMap = new java.util.LinkedHashMap<String, double[]>(); // [gross, cost, net]
+
+    for (var dp : grossSeries.getData()) {
+        String m = String.valueOf(dp.getXValue());
+        double v = dp.getYValue() == null ? 0 : dp.getYValue().doubleValue();
+        monthMap.computeIfAbsent(m, k -> new double[3])[0] = v;
+    }
+
+    if (costSeries != null) {
+        for (var dp : costSeries.getData()) {
+            String m = String.valueOf(dp.getXValue());
+            double v = dp.getYValue() == null ? 0 : dp.getYValue().doubleValue();
+            monthMap.computeIfAbsent(m, k -> new double[3])[1] = v;
+        }
+    }
+
+    // compute net
+    for (var entry : monthMap.entrySet()) {
+        double[] arr = entry.getValue();
+        arr[2] = arr[0] - arr[1];
+    }
+
+    var chooser = new javafx.stage.FileChooser();
+    chooser.setTitle("Export Profit Summary");
+    chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel (*.xlsx)", "*.xlsx"));
+
+    String ts = java.time.LocalDateTime.now().toString().replace(':','-').substring(0,19);
+    chooser.setInitialFileName("profit_summary_" + ts + ".xlsx");
+
+    java.io.File excelFile = chooser.showSaveDialog(profit_root.getScene().getWindow());
+    if (excelFile == null) return;
+    if (!excelFile.getName().toLowerCase().endsWith(".xlsx")) {
+        excelFile = new java.io.File(excelFile.getParentFile(), excelFile.getName() + ".xlsx");
+    }
+
+    try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+        var sh = wb.createSheet("Profit Summary");
+
+        var bold = wb.createFont(); bold.setBold(true);
+        var head = wb.createCellStyle(); head.setFont(bold);
+
+        // header
+        var hr = sh.createRow(0);
+        String[] cols = { "Month", "GrossSalesPHP", "PurchaseCostPHP", "NetSalesPHP" };
+        for (int i = 0; i < cols.length; i++) {
+            var c = hr.createCell(i);
+            c.setCellValue(cols[i]);
+            c.setCellStyle(head);
+        }
+
+        int r = 1;
+        for (var entry : monthMap.entrySet()) {
+            var row = sh.createRow(r++);
+            double[] arr = entry.getValue();
+            int c = 0;
+            row.createCell(c++).setCellValue(entry.getKey());
+            row.createCell(c++).setCellValue(arr[0]);
+            row.createCell(c++).setCellValue(arr[1]);
+            row.createCell(c++).setCellValue(arr[2]);
+        }
+
+        for (int i = 0; i < cols.length; i++) sh.autoSizeColumn(i);
+
+        try (var fs = new java.io.FileOutputStream(excelFile)) {
+            wb.write(fs);
+        }
+    } catch (Exception ex) {
+        showInfo("Export failed: " + ex.getMessage());
+        return;
+    }
+
+    // =========================================
+    // 2) Export full PNG of PROFIT ROOT
+    // =========================================
+
+    java.io.File pngFile = new java.io.File(
+            excelFile.getParentFile(),
+            excelFile.getName().replace(".xlsx", ".png")
+    );
+
+    boolean ok = snapshotToPng(profit_root, pngFile);
+
+    showInfo("Export completed:\n" +
+            excelFile.getAbsolutePath() +
+            (ok ? "\n" + pngFile.getAbsolutePath() : ""));
+}
+
+
+    
     @FXML
     private void btnExport(ActionEvent event) {
-        // Determine which tab is active and delegate.
-        // Example ids: salesTab, speciesTab, contribTab, volumesTab
         var selectedTab = reportsTabPane.getSelectionModel().getSelectedItem();
         if (selectedTab == salesTab) {
             exportSales();
         } else if (selectedTab == speciesTab) {
             exportChartOnly(speciesPieChart, "species_distribution");
         } else if (selectedTab == contribTab) {
-            exportChartOnly(contribBarChart, "fisherfolk_contributions");
+            exportChartOnly(contribBarChart, "consumer_contributions"); // optional rename
         } else if (selectedTab == volumesTab) {
-            exportChartOnly(catchStackedBarChart, "catch_volumes");
+            exportChartOnly(catchStackedBarChart, "purchase_volumes");
+        } else if (selectedTab == profit_tab) {
+            exportProfit();   // new
         }
-    } 
+    }
+
     private void exportSales() {
         var chooser = new javafx.stage.FileChooser();
         chooser.setTitle("Export Sales Trend (Excel)");
@@ -3710,7 +4007,7 @@ public class DashboardflController implements Initializable {
 
             try (var out = new java.io.FileOutputStream(xlsx)) { wb.write(out); }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            ex.printStackTrace(); 
             showInfo("Export failed: " + ex.getMessage());
             return;
         }
@@ -3738,7 +4035,7 @@ public class DashboardflController implements Initializable {
 
     @FXML
     private void btnPrint(ActionEvent event) {
-         var selectedTab = reportsTabPane.getSelectionModel().getSelectedItem();
+        var selectedTab = reportsTabPane.getSelectionModel().getSelectedItem();
         if (selectedTab == salesTab) {
             printNode(salesChart);
         } else if (selectedTab == speciesTab) {
@@ -3747,8 +4044,13 @@ public class DashboardflController implements Initializable {
             printNode(contribBarChart);
         } else if (selectedTab == volumesTab) {
             printNode(catchStackedBarChart);
-        }
+        } else if (selectedTab == profit_tab) {
+            printNode(profit_root); // ️ new
+//             printNode(profitBarChart); // ️ new
+            // OR: printNode(profit_root); KPIs + chart together
+        } 
     }
+
     
     ////////////////////////////////////////////////////////////////////////////end of reports & analytics
     ////////////////////////////////////////////////////////////////////////////SPECIES
@@ -4218,6 +4520,9 @@ public class DashboardflController implements Initializable {
              
             initAutoBackupUI();        
             refreshLastBackupLabel();  
+            
+             refreshInventoryTable();   // 
+             reloadConsumerTable();   // 
 
         } else {
             showWarn("Restore failed. Ensure 'mysql' client is available and the SQL file is valid.");
@@ -4280,29 +4585,27 @@ public class DashboardflController implements Initializable {
 
         String stamp = nowStamp();
         int written = 0;
-        written += exportTableToCsv("fisherfolk",     new java.io.File(dir, "fisherfolk_" + stamp + ".csv"));
-        written += exportTableToCsv("species",        new java.io.File(dir, "species_" + stamp + ".csv"));
-        written += exportTableToCsv("catch",          new java.io.File(dir, "catch_" + stamp + ".csv"));
-        written += exportTableToCsv("transactions",   new java.io.File(dir, "transactions_" + stamp + ".csv"));
-        written += exportTableToCsv("docking_logs",   new java.io.File(dir, "docking_logs_" + stamp + ".csv"));
-//        written += exportTableToCsv("users",          new java.io.File(dir, "users_" + stamp + ".csv"));
+
+        for (var spec : exportTables()) {
+            java.io.File out = new java.io.File(dir, spec.name + "_" + stamp + ".csv");
+            written += exportTableToCsv(spec, out);
+        }
 
         lastBackup_label.setText("Last Export (CSV): " + java.time.LocalDateTime.now());
         showInfo("Exported " + written + " CSV file(s) to:\n" + dir.getAbsolutePath());
-        
-           }
+    }
 
-    private int exportTableToCsv(String table, java.io.File file) {
-        String sql = "SELECT * FROM " + table;
-        try (var c = mysqlconnect.ConnectDb();
-             var ps = c.prepareStatement(sql);
+
+    private int exportTableToCsv(TableSpec spec, java.io.File file) {
+        try (var c  = mysqlconnect.ConnectDb();
+             var ps = c.prepareStatement(spec.sql);
              var rs = ps.executeQuery();
              var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
 
-            var md = rs.getMetaData();
+            var md   = rs.getMetaData();
             int cols = md.getColumnCount();
 
-            // header
+            // header (uses aliases like "purchase_id", "species", "fisherfolk", etc.)
             for (int i = 1; i <= cols; i++) {
                 if (i > 1) pw.print(",");
                 pw.print(csv(md.getColumnLabel(i)));
@@ -4324,6 +4627,7 @@ public class DashboardflController implements Initializable {
             return 0;
         }
     }
+
 
     
     @FXML
@@ -4465,16 +4769,147 @@ public class DashboardflController implements Initializable {
     }
 
     // All tables wanted to export (can add views too)
-    private java.util.List<TableSpec> exportTables() {
-        return java.util.List.of(
-            new TableSpec("fisherfolk",     "SELECT * FROM fisherfolk ORDER BY fisherfolk_id"),
-            new TableSpec("species",        "SELECT * FROM species ORDER BY species_id"),
-            new TableSpec("catch",          "SELECT * FROM catch ORDER BY catch_id"),
-            new TableSpec("transactions",   "SELECT * FROM transactions ORDER BY transaction_id"),
-            new TableSpec("docking_logs",   "SELECT * FROM docking_logs ORDER BY log_id")
-            // new TableSpec("v_catch_available", "SELECT * FROM v_catch_available") // optional
-        );
-    }
+    // All tables / views we want to export (already "pre-joined" with nice labels)
+private java.util.List<TableSpec> exportTables() {
+    return java.util.List.of(
+        // 1) Fisherfolk (unchanged, but explicit fields)
+        new TableSpec(
+            "fisherfolk",
+            """
+            SELECT
+                fisherfolk_id,
+                name,
+                age,
+                gender,
+                contact_number,
+                address,
+                gear,
+                is_active,
+                created_at,
+                updated_at
+            FROM fisherfolk
+            ORDER BY fisherfolk_id
+            """
+        ),
+
+        // 2) Species (you can add more columns if you have them)
+        new TableSpec(
+            "species",
+            """
+            SELECT
+                species_id,
+                species_name,
+                description
+            FROM species
+            ORDER BY species_id
+            """
+        ),
+
+        // 3) PURCHASES  (was CATCH)
+        //    - title becomes PURCHASES (from spec.name)
+        //    - catch_id -> purchase_id
+        //    - fisherfolk_id -> fisherfolk_name
+        //    - species_id   -> species_name
+        //    - catch_date   -> purchase_date (DATE only)
+        new TableSpec(
+            "purchases",
+            """
+            SELECT
+                c.catch_id       AS purchase_id,
+                f.name           AS fisherfolk,
+                s.species_name   AS species,
+                c.quantity,
+                c.price_per_kilo,
+                c.total_value,
+                DATE(c.catch_date) AS purchase_date,
+                c.docking_time,
+                c.remarks
+            FROM catch c
+            JOIN fisherfolk f ON f.fisherfolk_id = c.fisherfolk_id
+            JOIN species    s ON s.species_id    = c.species_id
+            ORDER BY c.catch_id
+            """
+        ),
+
+        // 4) TRANSACTIONS
+        //    - NO catch_id
+        //    - NO consumer_id
+        //    - species_id -> species name
+        new TableSpec(
+            "transactions",
+            """
+            SELECT
+                t.transaction_id,
+                s.species_name    AS species,
+                t.buyer_name,
+                t.quantity_sold,
+                t.unit_price,
+                t.total_price,
+                t.payment_method,
+                t.payment_status,
+                t.remarks,
+                t.transaction_date
+            FROM transactions t
+            LEFT JOIN species s ON s.species_id = t.species_id
+            ORDER BY t.transaction_id
+            """
+        ),
+
+        // 5) DOCKING LOGS
+        //    - fisherfolk_id -> fisherfolk name
+        //    - docking_date  -> DATE only
+        new TableSpec(
+            "docking_logs",
+            """
+            SELECT
+                d.log_id,
+                f.name           AS fisherfolk,
+                DATE(d.docking_date) AS docking_date,
+                d.arrival_time,
+                d.departure_time,
+                d.remarks
+            FROM docking_logs d
+            JOIN fisherfolk f ON f.fisherfolk_id = d.fisherfolk_id
+            ORDER BY d.log_id
+            """
+        ),
+
+        // 6) CONSUMERS (new section)
+        new TableSpec(
+            "consumers",
+            """
+            SELECT
+                consumer_id,
+                name,
+                contact,
+                address,
+                is_active
+            FROM consumers
+            ORDER BY consumer_id
+            """
+        ),
+
+        // 7) INVENTORY from VIEW v_inventory (new section)
+        new TableSpec(
+            "inventory",
+            """
+            SELECT
+                species_id,
+                species_name,
+                purchased_qty,
+                sold_qty,
+                balance_qty,
+                last_purchase_price,
+                avg_purchase_price,
+                selling_price,
+                updated_at
+            FROM v_inventory
+            ORDER BY species_name
+            """
+        )
+    ); 
+}
+
 
 
     // Read a SQL query into an in-memory table (headers + rows)
@@ -4868,10 +5303,10 @@ public class DashboardflController implements Initializable {
     
     private void loadDashboardTopFishTypesPie(int topN) {
         final String sql = """
-            SELECT s.species_name, SUM(c.quantity) AS total_kg
-            FROM catch c
-            JOIN species s ON s.species_id = c.species_id
-            WHERE YEAR(c.catch_date) = YEAR(CURDATE())
+            SELECT s.species_name, SUM(t.quantity_sold) AS total_kg
+            FROM transactions t
+            JOIN species s ON s.species_id = t.species_id
+            WHERE YEAR(t.transaction_date) = YEAR(CURDATE())
             GROUP BY s.species_name
             ORDER BY total_kg DESC
             LIMIT ?
@@ -5081,7 +5516,7 @@ public class DashboardflController implements Initializable {
         chooser.setTitle("Choose folder for automatic SQL backups");
         var wnd = lastBackup_label.getScene().getWindow();
         var f = chooser.showDialog(wnd);
-        return (f == null) ? null : f.toPath();
+        return (f == null) ? null : f.toPath(); 
     }
     
     // ==========================================================
@@ -5239,7 +5674,7 @@ public class DashboardflController implements Initializable {
             // We do not clear last backup label/history here.
         }
     }
-
+/////////////////////////////////////////////////////////////////////////////////
      @FXML
     private void LOGout_btn(ActionEvent event) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);

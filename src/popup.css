@@ -1,0 +1,175 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 14 Nov 2025, 11:50:38
+    Author     : Anna Margarette
+*/
+
+
+/***************** POPUP MODALS (Glass + Blue Theme) *****************/
+
+/* Dim background overlay behind the popup */
+.modal-overlay {
+    -fx-background-color: rgba(15, 23, 42, 0.55); /* #0f172a @ 55% */
+    -fx-background-radius: 16;
+}
+
+/* Main popup container (apply to BorderPane) */
+.popup-pane {
+    -fx-background-color: rgba(255,255,255,0.95);
+    -fx-background-radius: 16;
+    -fx-padding: 18;
+    -fx-border-color: #D0E2FF;          /* soft blue border */
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,200,0.25), 18, 0.35, 0, 6);
+}
+
+/* Header bar */
+.popup-header {
+    -fx-padding: 0 0 8 0;
+    -fx-border-color: transparent transparent #E6EEF9 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.popup-title {
+    -fx-text-fill: #0D1B2A;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+
+/* Section dividers inside content (optional) */
+.popup-section-divider {
+    -fx-background-color: #E6EEF9;
+    -fx-min-height: 1;
+}
+
+/* Labels */
+.form-label {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.form-hint {
+    -fx-text-fill: #6B7280;
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-padding: 2 0 0 0;
+}
+.form-error {
+    -fx-text-fill: #C0392B; /* error red */
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* Inputs: TextField / TextArea / ComboBox / DatePicker */
+.text-field, .text-area, .combo-box-base, .date-picker {
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-text-fill: #111827;
+    -fx-prompt-text-fill: #9CA3AF;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #D0E2FF;
+    -fx-border-width: 1;
+    -fx-padding: 3 5 3 5;
+}
+
+/* TextArea tweak */
+.text-area .content {
+    -fx-background-color: transparent;
+}
+
+/* Focus ring in theme blue with a soft glow */
+.text-field:focused, .text-area:focused,
+.combo-box-base:focused, .date-picker:focused {
+    -fx-border-color: #0078C8;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,200,0.30), 10, 0.4, 0, 0);
+}
+
+/* Invalid state (add styleClass 'invalid' in code) */
+.invalid {
+    -fx-border-color: #C0392B !important;
+    -fx-effect: none;
+}
+
+/* Disabled fields */
+.text-field:disabled, .combo-box-base:disabled,
+.date-picker:disabled, .text-area:disabled {
+    -fx-opacity: 0.7;
+}
+
+/* ComboBox button + DatePicker arrow tint */
+.combo-box-base .arrow-button, .date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.combo-box-base .arrow, .date-picker .arrow-button .arrow {
+    -fx-background-color: #0078C8;
+}
+
+/* DatePicker popup (light, themed) */
+.date-picker-popup, .date-picker-popup > .month-year-pane,
+.date-picker-popup > * > .spinner {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #D0E2FF;
+}
+.date-picker-popup .button,
+.date-picker-popup .spinner .button {
+    -fx-background-color: #EEF4FF;
+    -fx-text-fill: #1F2933;
+}
+.date-picker-popup .month-year-pane .label { -fx-text-fill: #0F172A; }
+.date-picker-popup .calendar-grid        { -fx-background-color: #FFFFFF; }
+.date-picker-popup .day-cell             { -fx-background-color: transparent; -fx-text-fill: #1F2933; }
+.date-picker-popup .day-cell:hover       { -fx-background-color: #E5F2FF; }
+.date-picker-popup .day-cell:selected    { -fx-background-color: #0078C8; -fx-text-fill: white; }
+
+/* Footer buttons (right side) */
+.popup-footer {
+    -fx-padding: 14 0 0 0;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+/* Base button */
+.btn {
+    -fx-background-radius: 10;
+    -fx-padding: 7 16 7 16;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+/* Ghost (Cancel) */
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1F2933;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+.btn-ghost:hover { -fx-background-color: rgba(0,0,0,0.04); }
+
+/* Neutral (Clear) */
+.btn-neutral {
+    -fx-background-color: #EEF2F7;
+    -fx-text-fill: #1F2933;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+}
+.btn-neutral:hover { -fx-background-color: #E5ECF6; }
+
+/* Primary (Save) */
+.btn-primary {
+    -fx-background-color: #0078C8;
+    -fx-text-fill: white;
+}
+.btn-primary:hover { -fx-background-color: #0066AA; }
+.btn-primary:default { -fx-background-color: #0078C8; }
+
+/* Optional: total/value label at bottom-right inside pane */
+.popup-meta {
+    -fx-text-fill: rgba(15,23,42,0.65);
+    -fx-font-size: 12px;
+}
+
+
