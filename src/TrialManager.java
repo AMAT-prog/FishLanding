@@ -16,7 +16,7 @@ import java.util.Properties;
 public class TrialManager {
     private static final String FOLDER = System.getenv("ProgramData") + "\\FishLanding";
     private static final String FILE = FOLDER + "\\trial.properties";
-    private static final int TRIAL_DAYS = 30; // change to 4 weeks = 28 days if needed
+    private static final int TRIAL_DAYS = 60; // change to 4 weeks = 28 days if needed
 
     public static boolean isTrialExpired() {
         try {

@@ -312,7 +312,7 @@ private void recoveryEnter_btn(javafx.event.ActionEvent event) {
 
             Stage st = new Stage();
             st.setScene(scene);
-            st.setTitle("Fish Landing - Dashboard");
+            st.setTitle("Alabat Fish Landing");
             st.show();
 
             // close the login window

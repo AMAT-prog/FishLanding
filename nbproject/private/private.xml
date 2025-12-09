@@ -84,17 +84,16 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/DashboardflController.java</file>
+            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/Dashboardfl.fxml</file>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/InventoryOption.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/ProfitSummary.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/popup.css</file>
+            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/InventoryRow.java</file>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/CatchRecord.java</file>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/FishLanding.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/fishlanding-theme.css</file>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/LoginController.java</file>
+            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/fishlanding-theme.css</file>
+            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/FishLandingDesign.css</file>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/mysqlconnect.java</file>
             <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/TransactionViewRow.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/FishLanding/FishLanding/src/TrialManager.java</file>
         </group>
     </open-files>
 </project-private>

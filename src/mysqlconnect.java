@@ -133,14 +133,14 @@ public static ObservableList<Catch> getCatch() {
         } catch (Exception ex) { ex.printStackTrace(); return -1; }
     }
 
-    public static int countTransactionsByFisher(int id) {
-        String sql = "SELECT COUNT(*) FROM transactions WHERE fisherfolk_id=?";
-        try (var conn = mysqlconnect.ConnectDb();
-             var ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (var rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
-        } catch (Exception ex) { ex.printStackTrace(); return -1; }
-    }
+//    public static int countTransactionsByFisher(int id) {
+//        String sql = "SELECT COUNT(*) FROM catch WHERE fisherfolk_id=?";
+//        try (var conn = mysqlconnect.ConnectDb();
+//             var ps = conn.prepareStatement(sql)) {
+//            ps.setInt(1, id);
+//            try (var rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
+//        } catch (Exception ex) { ex.printStackTrace(); return -1; }
+//    }
 
     public static boolean deleteFisherById(int id) {
         String sql = "DELETE FROM fisherfolk WHERE fisherfolk_id=?";

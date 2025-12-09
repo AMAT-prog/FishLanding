@@ -69,11 +69,13 @@ import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Optional;
+import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane; 
 import javafx.scene.Scene;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -116,7 +118,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private DatePicker dpStartDate;
     @FXML
-    private DatePicker dpEndDate;
+    private DatePicker dpEndDate; 
     @FXML
     private StackPane addNewLanding_popup;
     @FXML
@@ -324,6 +326,24 @@ public class DashboardflController implements Initializable {
     // settings.properties keys (same file)
     private static final String KEY_LAST_BACKUP_ISO = "autoBackup.lastIso";
     
+    @FXML
+    private Button editPRICE;
+    @FXML
+    private TabPane inventoryTabPane;
+    @FXML
+    private Tab inventoryTab;
+    @FXML
+    private Tab pricingTab;
+    
+    @FXML
+    private Button btnSave_onAddConsumer;
+    @FXML
+    private Label ConsumerContactNumber_err; 
+
+    
+    @FXML
+    private Label FisherfolkContactNumber_err; 
+    
     /// preview for exporting all 
     //  to export after preview
     private enum ExportType { PDF_ALL, EXCEL_ALL, CSV_ALL }
@@ -342,6 +362,10 @@ public class DashboardflController implements Initializable {
     private javafx.collections.transformation.FilteredList<InventoryRow> invFiltered;
     private javafx.collections.transformation.SortedList<InventoryRow> invSorted;
 
+    ////=====PRICING STATE=====////
+    private javafx.collections.ObservableList<InventoryRow> priceData;
+    private javafx.collections.transformation.FilteredList<InventoryRow> priceFiltered;
+    private javafx.collections.transformation.SortedList<InventoryRow> priceSorted;
 
 
     @FXML
@@ -722,6 +746,7 @@ public class DashboardflController implements Initializable {
     @FXML
     private TextField consumerContact;
     
+   
     @FXML
     private ToggleButton consumer_toggle;
     @FXML
@@ -741,14 +766,25 @@ public class DashboardflController implements Initializable {
     private TableColumn<InventoryRow, Number> inventorySold_col;
     @FXML
     private TableColumn<InventoryRow, Number> inventoryBalance_col;
-    @FXML
-    private TableColumn<InventoryRow, Number> inventoryLastPurchasePrice_col;
-    @FXML
-    private TableColumn<InventoryRow, Number> inventorySellingPrice_col;
-    @FXML
-    private TableColumn<InventoryRow, java.time.LocalDateTime> inventoryLastUpdate_col;
+//    private TableColumn<InventoryRow, Number> inventoryLastPurchasePrice_col;
+//    private TableColumn<InventoryRow, Number> inventorySellingPrice_col;
+//    private TableColumn<InventoryRow, java.time.LocalDateTime> inventoryLastUpdate_col;
     @FXML
     private TextField filterField_inventory;
+    
+    @FXML
+    private TableView<InventoryRow> pricing_tv;
+    @FXML
+    private TableColumn<InventoryRow, String> priceFishType_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> priceLastPurchasePrice_col;
+    @FXML
+    private TableColumn<InventoryRow, Number> priceSellingPrice_col;
+    @FXML
+    private TableColumn<InventoryRow, java.time.LocalDateTime> priceLastUpdate_col;
+    @FXML
+    private TextField filterField_price;
+    
     
     @FXML
     private StackPane viewConsumerHistory_popup;
@@ -901,15 +937,6 @@ public class DashboardflController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         wireNav();
-//        dashboard_pane.setVisible(true);
-//        landings_pane.setVisible(false);
-//        fishermen_pane.setVisible(false);
-//        transactionANDsales_pane.setVisible(false);
-//        dockingLogs_pane.setVisible(false);
-//        reportsANDanalytics_pane.setVisible(false);
-//        species_pane.setVisible(false);
-//        accountProfile_pane.setVisible(false);
-//        dataInformation_pane.setVisible(false);
         // LANDINGS or CATCHES
         LANDINGS_SEARCH();
         refreshLandingsKPIs();
@@ -925,6 +952,7 @@ public class DashboardflController implements Initializable {
         updateTotalValue();
         
         //FISHERMEN
+        setupFisherContactField();
         fisherData = mysqlconnect.loadFisherfolk();
 
         // columns
@@ -1003,9 +1031,10 @@ public class DashboardflController implements Initializable {
 //                                });
 //                                allSellers = mysqlconnect.loadActiveFisherfolkItems();
 //                                transacSeller_cb.setItems(allSellers);
+
 //                                ///// UPDATE FISHERFOLK OPTIONS IN LANDINGS
-//                                loadFisherfolkOptions();
-//                                refreshDashboardKPIs();
+                                loadFisherfolkOptions();
+                                refreshDashboardKPIs();
                 });
             }
 
@@ -1462,6 +1491,9 @@ public class DashboardflController implements Initializable {
                         updateVisual(row.isActive(), true);
                         showInfoConsumers("Failed to update status.");
                     }
+                    // UPDATE consumer options in combo box
+                    allConsumers = mysqlconnect.loadActiveConsumers();
+                    transacConsumer_cb.setItems(allConsumers);
                 });
             }
 
@@ -1542,36 +1574,61 @@ public class DashboardflController implements Initializable {
         consumerHistory_tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         consumerHistory_tv.setPlaceholder(new Label("No transaction history")); 
 
+         setupConsumerContactField();
         
         //// INVENTORY
         inventoryFishType_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
         inventoryStock_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getPurchasedQty()));
         inventorySold_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getSoldQty()));
         inventoryBalance_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getBalanceQty()));
-        inventoryLastPurchasePrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getLastPurchasePrice()));
-        inventorySellingPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getSellingPrice()));
-        inventoryLastUpdate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getUpdatedAt()));
+        // new tab (PRICE)
+        priceFishType_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getSpeciesName()));
+        priceLastPurchasePrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getLastPurchasePrice()));
+        priceSellingPrice_col.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().getSellingPrice()));
+        priceLastUpdate_col.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getUpdatedAt()));
 
         setNumeric2dp(inventoryStock_col);
         setNumeric2dp(inventorySold_col);
         setNumeric2dp(inventoryBalance_col);
-        setCurrencyPeso(inventoryLastPurchasePrice_col);
-        setCurrencyPeso(inventorySellingPrice_col);
-        setDateTimeFormat(inventoryLastUpdate_col, "yyyy-MM-dd HH:mm");
+        // new tab (PRICE)
+        setCurrencyPeso(priceLastPurchasePrice_col);
+        setCurrencyPeso(priceSellingPrice_col);
+        setDateTimeFormat(priceLastUpdate_col, "yyyy-MM-dd HH:mm");
 
-        //load data
+        //load data (INVENTORY)
         invData = mysqlconnect.loadInventoryView();
+        // (PRICING)
+        priceData = mysqlconnect.loadInventoryView();
         
-        // filtered + sorted chain
+        // filtered + sorted chain (INVENTORY)
         invFiltered = new FilteredList<>(invData, r -> true);
         invSorted   = new SortedList<>(invFiltered);
         invSorted.comparatorProperty().bind(inventory_tv.comparatorProperty());
         inventory_tv.setItems(invSorted);
+        
+        // filtered + sorted chain (PRICING)
+        priceFiltered = new FilteredList<>(priceData, r -> true);
+        priceSorted   = new SortedList<>(priceFiltered);
+        priceSorted.comparatorProperty().bind(pricing_tv.comparatorProperty());
+        pricing_tv.setItems(priceSorted);
 
-        // search box
+        // search box (INVENTORY)
         filterField_inventory.textProperty().addListener((obs, oldV, newV) -> applyInventoryFilters());
+        
+        // search box (PRICING)
+        filterField_price.textProperty().addListener((obs, oldV, newV) -> applyPricingFilters());
 
+        // Default: first tab is INVENTORY -> button disabled
+        if (editPRICE != null) {
+            editPRICE.setDisable(true);
+        }
 
+        // Enable only when PRICING tab is selected
+        inventoryTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            if (editPRICE == null) return;
+            editPRICE.setDisable(newTab != pricingTab);
+        });
+        
     }
         
     ////////////////////////////////////////////////////////////////////////////end of initialization
@@ -1815,6 +1872,7 @@ public class DashboardflController implements Initializable {
           //top fish type
           loadDashboardTopFishTypesPie(4); // top-5
           refreshInventoryTable();
+          refreshPricingTable();
     }
 
     @FXML
@@ -2074,6 +2132,7 @@ public class DashboardflController implements Initializable {
         //top fish type
         loadDashboardTopFishTypesPie(4); // top-5
         refreshInventoryTable();
+        refreshPricingTable();
         
         
     }
@@ -2111,41 +2170,81 @@ public class DashboardflController implements Initializable {
     a.showAndWait();
 }
     
-    @FXML
-    private void exportLandings(ActionEvent event) {
-        // Ask where to save
-        var chooser = new javafx.stage.FileChooser();
-        chooser.setTitle("Export Purchased (Excel)");
-        chooser.getExtensionFilters().add(
-            new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
-        );
-        String base = "purchased_" + java.time.LocalDate.now();
-        chooser.setInitialFileName(base + ".xlsx");
+    @FXML 
+private void exportLandings(ActionEvent event) {
+    // Ask where to save
+    var chooser = new javafx.stage.FileChooser();
+    chooser.setTitle("Export Purchased (Excel)");
+    chooser.getExtensionFilters().add(
+        new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx")
+    );
 
-        var file = chooser.showSaveDialog(TotalLandingsTodayKG_label.getScene().getWindow());
-        if (file == null) return; // user cancelled
+    String base = "purchased_" + java.time.LocalDate.now();
+    chooser.setInitialFileName(base + ".xlsx");
 
-        // Query rows (join names so the sheet is readable)
-        final String sql = """
-            SELECT c.catch_id,
-                   f.name        AS fisherfolk,
-                   s.species_name AS species,
-                   c.quantity,
-                   c.price_per_kilo,
-                   c.total_value,
-                   c.catch_date,
-                   c.docking_time,
-                   c.remarks
-            FROM catch c
-            JOIN fisherfolk f ON f.fisherfolk_id = c.fisherfolk_id
-            JOIN species    s ON s.species_id     = c.species_id
-            ORDER BY c.catch_date DESC, c.catch_id DESC
-        """;
+    var file = chooser.showSaveDialog(TotalLandingsTodayKG_label.getScene().getWindow());
+    if (file == null) return; // user cancelled
 
-        try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
-             var c = mysqlconnect.ConnectDb();
-             var ps = c.prepareStatement(sql);
-             var rs = ps.executeQuery()) {
+    // ---- read filters from UI ----
+    java.time.LocalDate start = dpStartDate.getValue();
+    java.time.LocalDate end   = dpEndDate.getValue();
+    String filterText = filterField_fishLandings != null ? filterField_fishLandings.getText() : null;
+    boolean hasFilter = (filterText != null && !filterText.isBlank());
+    String like = hasFilter ? "%" + filterText.trim() + "%" : null;
+
+    // ---- build dynamic SQL ----
+    StringBuilder sb = new StringBuilder("""
+        SELECT 
+            c.catch_id,
+            f.name         AS fisherfolk,
+            s.species_name AS species,
+            c.quantity,
+            c.price_per_kilo,
+            c.total_value,
+            c.catch_date,
+            c.docking_time,
+            c.remarks
+        FROM catch c
+        JOIN fisherfolk f ON f.fisherfolk_id = c.fisherfolk_id
+        JOIN species    s ON s.species_id     = c.species_id
+        WHERE 1=1
+    """);
+
+    if (start != null) sb.append(" AND c.catch_date >= ? ");
+    if (end   != null) sb.append(" AND c.catch_date <= ? ");
+    if (hasFilter) {
+        sb.append("""
+            AND (
+                   f.name LIKE ?
+                OR s.species_name LIKE ?
+                OR c.remarks LIKE ?
+            )
+        """);
+    }
+
+    sb.append(" ORDER BY c.catch_date DESC, c.catch_id DESC ");
+
+    String sql = sb.toString();
+
+    try (var wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+         var conn = mysqlconnect.ConnectDb();
+         var ps = conn.prepareStatement(sql)) {
+
+        // ---- bind parameters in the same order we appended ----
+        int idx = 1;
+        if (start != null) {
+            ps.setDate(idx++, java.sql.Date.valueOf(start));
+        }
+        if (end != null) {
+            ps.setDate(idx++, java.sql.Date.valueOf(end));
+        }
+        if (hasFilter) {
+            ps.setString(idx++, like); // f.name
+            ps.setString(idx++, like); // s.species_name
+            ps.setString(idx++, like); // c.remarks
+        }
+
+        try (var rs = ps.executeQuery()) {
 
             var sh = wb.createSheet("Purchased");
 
@@ -2165,7 +2264,7 @@ public class DashboardflController implements Initializable {
                 cell.setCellStyle(head);
             }
 
-            // rows
+            // rows (only filtered ones)
             while (rs.next()) {
                 var row = sh.createRow(r++);
                 int cix = 0;
@@ -2175,25 +2274,30 @@ public class DashboardflController implements Initializable {
                 row.createCell(cix++).setCellValue(rs.getDouble("quantity"));
                 row.createCell(cix++).setCellValue(rs.getDouble("price_per_kilo"));
                 row.createCell(cix++).setCellValue(rs.getDouble("total_value"));
+
                 var cd = rs.getDate("catch_date");
                 row.createCell(cix++).setCellValue(cd == null ? "" : cd.toString());
+
                 var dt = rs.getTime("docking_time");
                 row.createCell(cix++).setCellValue(dt == null ? "" : dt.toString());
+
                 row.createCell(cix++).setCellValue(rs.getString("remarks"));
             }
 
             for (int i = 0; i < headers.length; i++) sh.autoSizeColumn(i);
 
-            try (var out = new java.io.FileOutputStream(file)) { wb.write(out); }
+            try (var out = new java.io.FileOutputStream(file)) {
+                wb.write(out);
+            }
 
-            // success message
             showInfoWide("Purchased exported to:\n" + file.getAbsolutePath());
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            showInfoWide("Export failed: " + ex.getMessage());
         }
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        showInfoWide("Export failed: " + ex.getMessage());
     }
+}
 
     
     //LANDINGS KPI'S
@@ -2326,6 +2430,7 @@ public class DashboardflController implements Initializable {
     private void hideFisherErrors() {
         Fisherfolk_err.setVisible(false);
         gender_err.setVisible(false);
+        FisherfolkContactNumber_err.setVisible(false);
     }
     
     private void clearFisherForm() {
@@ -2387,20 +2492,21 @@ public class DashboardflController implements Initializable {
 
         int id = sel.getFisherfolkId();
         int catchCnt = mysqlconnect.countCatchByFisher(id);
-        int txnCnt   = mysqlconnect.countTransactionsByFisher(id);
+//        int txnCnt   = mysqlconnect.countTransactionsByFisher(id);
 
-        if (catchCnt < 0 || txnCnt < 0) {
+        if (catchCnt < 0 ) {
             showInfoFISHERMEN("Unable to check dependencies. Try again.");
             return;
         }
 
-        if (catchCnt > 0 || txnCnt > 0) {
-            String where = (catchCnt > 0 ? catchCnt + " in Landings" : "") +
-                           ((catchCnt > 0 && txnCnt > 0) ? " and " : "") +
-                           (txnCnt > 0 ? txnCnt + " in Transactions" : "");
+        if (catchCnt > 0 ) {
+            String where = (catchCnt > 0 ? catchCnt + " in Purchases" : "") 
+//                          + ((catchCnt > 0 && txnCnt > 0) ? " and " : "") +
+//                           (txnCnt > 0 ? txnCnt + " in Transactions" : "")
+                    ;
             var alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING,
                 "Cannot delete. This fisherfolk still has linked records (" + where + ").\n\n" +
-                "Tip: Set status to Inactive instead, so they can no longer be used in new landings/transactions.",
+                "Tip: Set status to Inactive instead, so they can no longer be used in new purchases.",
                 javafx.scene.control.ButtonType.OK);
             alert.setHeaderText("Delete blocked");
             // make the dialog bigger
@@ -2484,6 +2590,48 @@ public class DashboardflController implements Initializable {
         exitFisherPopup();
     }
 
+    private void setupFisherContactField() {
+
+    // Only digits and max length 11
+    java.util.function.UnaryOperator<TextFormatter.Change> filter = change -> {
+        String newText = change.getControlNewText();
+
+        // allow empty (optional field)
+        if (newText.isEmpty()) {
+            return change;
+        }
+
+        // digits only
+        if (!newText.matches("\\d*")) {
+            return null; // reject
+        }
+
+        // max 11 digits
+        if (newText.length() > 11) {
+            return null; // reject extra characters
+        }
+
+        return change;
+    };
+
+    // TextFormatter<String> (no Integer converter!)
+    TextFormatter<String> tf = new TextFormatter<>(filter);
+    contact_tf.setTextFormatter(tf);
+
+    // Live error label: only show if not empty and < 11 digits
+    contact_tf.textProperty().addListener((obs, oldVal, newVal) -> {
+        if (newVal == null || newVal.isEmpty()) {
+            FisherfolkContactNumber_err.setVisible(false);  // optional, no error
+        } else if (newVal.length() < 11) {
+            FisherfolkContactNumber_err.setText("Contact number must be 11 digits.");
+            FisherfolkContactNumber_err.setVisible(true);
+        } else {
+            FisherfolkContactNumber_err.setVisible(false);  // exactly 11 digits
+        }
+    });
+}
+
+    
     @FXML
     private void btnSave_onAddFisherfolk(ActionEvent event) {
         hideFisherErrors();
@@ -2503,7 +2651,14 @@ public class DashboardflController implements Initializable {
         String gear = safeTrim(Gear_tf.getText());
 //        String boat = safeTrim(Boat_tf.getText());               // optional
 //        String license = safeTrim(LicenseNumber_tf.getText());   // optional
+        
+        if (contact != null && !contact.isEmpty() && contact.length() < 11) {
+            FisherfolkContactNumber_err.setText("Contact number must be exactly 11 digits.");
+            FisherfolkContactNumber_err.setVisible(true);
+            valid = false;
+        }
 
+        
         if (!valid) return;
 
         // --- SQL ---
@@ -2553,7 +2708,7 @@ public class DashboardflController implements Initializable {
                 if (gear != null) ps.setString(6, gear); else ps.setNull(6, java.sql.Types.VARCHAR);
 //                if (boat != null) ps.setString(6, boat); else ps.setNull(6, java.sql.Types.VARCHAR);
 //                if (license != null) ps.setString(7, license); else ps.setNull(7, java.sql.Types.VARCHAR);
-                ps.setInt(8, editingFisherId);
+                ps.setInt(7, editingFisherId);
 
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
@@ -2569,6 +2724,7 @@ public class DashboardflController implements Initializable {
             }
         } refreshDashboardKPIs(); //total no.of registered fishermen
           loadFisherfolkOptions(); // UPDATE FISHERFOLK OPTIONS IN LANDINGS
+          LANDINGS_SEARCH(); // refresh catch/purchase table
     }
     
     private String safeTrim(String t) {
@@ -2815,7 +2971,7 @@ public class DashboardflController implements Initializable {
     ////////////////////////////////////////////////////////////////////////////end of fishermen
     
     ////////////////////////////////////////////////////////////////////////////TRANSACTION AND SALES
-    @FXML
+    @FXML 
     private void transaction_generateReport(ActionEvent event) {
         final String statusFilter =
             paid_transacStatus.isSelected() ? "Paid" :
@@ -3007,6 +3163,7 @@ public class DashboardflController implements Initializable {
         loadFisherfolkContribAuto(); //REPORTS - FISHERFOLK CONTRIBS
         
         refreshInventoryTable();
+        refreshPricingTable();
     }
 
     @FXML
@@ -3305,6 +3462,7 @@ public class DashboardflController implements Initializable {
             loadFisherfolkContribAuto();//REPORTS - FISHERFOLK CONTRIBS
             
             refreshInventoryTable();
+            refreshPricingTable();
     }
     
     @FXML
@@ -4538,6 +4696,7 @@ public class DashboardflController implements Initializable {
             refreshLastBackupLabel();  
             
              refreshInventoryTable();   // 
+             refreshPricingTable();
              reloadConsumerTable();   // 
 
         } else {
@@ -4841,8 +5000,8 @@ private void doExportALL_CSV() {
     showInfo("Exported " + written + " CSV file(s) to:\n" + dir.getAbsolutePath());
 }
 
-private int exportTableToCsv(TableSpec spec, java.io.File file) {
-    try (var c  = mysqlconnect.ConnectDb();
+private int exportTableToCsv(TableSpec spec, java.io.File file) { 
+    try (var c  = mysqlconnect.ConnectDb(); 
          var ps = c.prepareStatement(spec.sql);
          var rs = ps.executeQuery();
          var pw = new java.io.PrintWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
@@ -5954,6 +6113,7 @@ private void buildExportPreviewTabs(java.util.List<TableData> tables) {
     // ---------- CONSUMERS (OUTSIDE initialize) ----------
     private void hideConsumerErrors() {
         Consumer_err.setVisible(false);
+        ConsumerContactNumber_err.setVisible(false);
     }
     private void clearConsumerForm() {
         consumerName_tf.clear();
@@ -6045,37 +6205,104 @@ private void buildExportPreviewTabs(java.util.List<TableData> tables) {
             }
         }
     }
+   
+   private void setupConsumerContactField() {
+
+    // Only digits and max length 11
+    java.util.function.UnaryOperator<TextFormatter.Change> filter = change -> {
+        String newText = change.getControlNewText();
+
+        // allow empty (field is optional)
+        if (newText.isEmpty()) {
+            return change;
+        }
+
+        // allow digits only
+        if (!newText.matches("\\d*")) {
+            return null; // reject this change
+        }
+
+        // limit to 11 digits
+        if (newText.length() > 11) {
+            return null; // reject extra characters
+        }
+
+        return change;
+    };
+
+    // NOTE: TextFormatter<String>, no converter
+    TextFormatter<String> tf = new TextFormatter<>(filter);
+    consumerContact.setTextFormatter(tf);
+
+    // Live error label: only show if not empty and less than 11 digits
+    consumerContact.textProperty().addListener((obs, oldVal, newVal) -> {
+        if (newVal == null || newVal.isEmpty()) {
+            ConsumerContactNumber_err.setVisible(false); // optional field, no error
+        } else if (newVal.length() < 11) {
+            ConsumerContactNumber_err.setText("Contact number must be 11 digits.");
+            ConsumerContactNumber_err.setVisible(true);
+        } else {
+            ConsumerContactNumber_err.setVisible(false); // exactly 11 digits
+        }
+    });
+}
+
 
     @FXML
-    private void btnSave_onAddConsumer(ActionEvent event) {
-        hideConsumerErrors();
-        String name    = safeTrim(consumerName_tf.getText());
-        String contact = safeTrim(consumerContact.getText());
-        String address = safeTrim(consumerAddress_tf.getText());
+private void btnSave_onAddConsumer(ActionEvent event) {
+    hideConsumerErrors();          // your existing helper
+    ConsumerContactNumber_err.setVisible(false);
 
-        boolean valid = true;
-        if (name == null) { Consumer_err.setVisible(true); valid = false; }
-        if (!valid) return;
+    String name    = safeTrim(consumerName_tf.getText());
+    String contact = safeTrim(consumerContact.getText());
+    String address = safeTrim(consumerAddress_tf.getText());
 
-        if (editingConsumerId == null) {
-            // INSERT
-            boolean ok = mysqlconnect.insertConsumer(name, contact, address);
-            if (ok) { showInfoConsumers("Consumer saved."); exitConsumerPopup(); reloadConsumerTable(); }
-            else    { showInfoConsumers("Error saving consumer."); }
-        } else {
-            // UPDATE
-            boolean ok = mysqlconnect.updateConsumer(editingConsumerId, name, contact, address);
-            if (ok) { showInfoConsumers("Consumer updated."); exitConsumerPopup(); reloadConsumerTable(); }
-            else    { showInfoConsumers("Error updating consumer."); }
-        }
-        
-                // after successfully saving new consumer:
-        allConsumers = mysqlconnect.loadActiveConsumers();
-        transacConsumer_cb.setItems(allConsumers);
-        // Optional: preselect the newly added name 
+    boolean valid = true;
 
+    if (name == null) {
+        Consumer_err.setVisible(true);
+        valid = false;
     }
 
+    // contact is OPTIONAL but if present it must be exactly 11 digits
+    if (contact != null && !contact.isEmpty() && contact.length() != 11) {
+        ConsumerContactNumber_err.setText("Contact number must be exactly 11 digits.");
+        ConsumerContactNumber_err.setVisible(true);
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    if (editingConsumerId == null) {
+        // INSERT
+        boolean ok = mysqlconnect.insertConsumer(name, contact, address);
+        if (ok) {
+            showInfoConsumers("Consumer saved.");
+            exitConsumerPopup();
+            reloadConsumerTable();
+        } else {
+            showInfoConsumers("Error saving consumer.");
+        }
+    } else {
+        // UPDATE
+        boolean ok = mysqlconnect.updateConsumer(editingConsumerId, name, contact, address);
+        if (ok) {
+            showInfoConsumers("Consumer updated.");
+            exitConsumerPopup();
+            reloadConsumerTable();
+        } else {
+            showInfoConsumers("Error updating consumer.");
+        }
+    }
+
+    // refresh consumer choices for transactions
+    allConsumers = mysqlconnect.loadActiveConsumers();
+    transacConsumer_cb.setItems(allConsumers);
+    refreshTransactionsTable();
+}
+
+
+    
     @FXML
     private void btnClear_onAddConsumer(ActionEvent event) {
         clearConsumerForm();
@@ -6190,10 +6417,23 @@ private void buildExportPreviewTabs(java.util.List<TableData> tables) {
             return species.contains(q);
         });
     }
+    
+    private void applyPricingFilters() {
+        final String q = filterField_price.getText() == null
+                ? "" : filterField_price.getText().trim().toLowerCase();
 
-    @FXML
-private void editInventory(ActionEvent event) {
-    var sel = inventory_tv.getSelectionModel().getSelectedItem();
+        priceFiltered.setPredicate(row -> {
+            if (row == null) return false;
+            if (q.isEmpty()) return true;
+
+            String species = row.getSpeciesName() == null ? "" : row.getSpeciesName().toLowerCase();
+            return species.contains(q);
+        });
+    }
+    
+@FXML
+    private void editPRICE_onAction(ActionEvent event) {
+        var sel = pricing_tv.getSelectionModel().getSelectedItem();
     if (sel == null) {
         showInfoWide("Select a species to edit selling price.");
         return;
@@ -6222,14 +6462,16 @@ private void editInventory(ActionEvent event) {
 
         if (ok) {
             showInfoWide("Selling price updated.");
-            refreshInventoryTable();
+//            refreshInventoryTable();
+            refreshPricingTable();
         } else {
             showInfoWide("Update failed.");
         }
     } catch (NumberFormatException nfe) {
         showInfoWide("Please enter a valid price.");
     }
-}
+    }
+
 
 
     private void refreshInventoryTable() {
@@ -6245,15 +6487,29 @@ private void editInventory(ActionEvent event) {
             invData.setAll(fresh);
         }
     }
-
-
-    @FXML private void addInventory(ActionEvent e) {
-        showInfoWide("Tip: Add inventory by recording a Purchase (not here). You can set selling price by editing a row.");
+    
+    private void refreshPricingTable() {
+        var fresh = mysqlconnect.loadInventoryView();
+        if (priceData == null) {
+            // safety fallback if called very early
+            priceData = fresh;
+            priceFiltered = new FilteredList<>(priceData, r -> true);
+            priceSorted = new SortedList<>(priceFiltered);
+            priceSorted.comparatorProperty().bind(pricing_tv.comparatorProperty());
+            pricing_tv.setItems(priceSorted);
+        } else {
+            priceData.setAll(fresh);
+        }
     }
 
-    @FXML private void deleteInventory(ActionEvent e) {
-        showInfoWide("Deleting inventory rows is disabled to keep totals consistent. Delete species only if necessary.");
-    }
+
+//    private void addInventory(ActionEvent e) {
+//        showInfoWide("Tip: Add inventory by recording a Purchase (not here). You can set selling price by editing a row.");
+//    }
+//
+//    private void deleteInventory(ActionEvent e) {
+//        showInfoWide("Deleting inventory rows is disabled to keep totals consistent. Delete species only if necessary.");
+//    }
 
     @FXML
     private void btnExport_INVENTORY(ActionEvent event) {
